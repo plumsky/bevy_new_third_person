@@ -21,7 +21,7 @@ pub fn plugin(app: &mut App) {
     ));
 
     app.configure_sets(PostUpdate, CameraSyncSet.after(PhysicsSet::Sync))
-        .add_systems(OnEnter(Screen::Gameplay), spawn)
+        .add_systems(OnEnter(Screen::Gameplay), spawn.after(scene::setup))
         .add_systems(
             Update,
             (movement, animating)
@@ -98,14 +98,18 @@ fn spawn(
             collider,
             JumpTimer(Timer::from_seconds(0.5, TimerMode::Repeating)),
             StepTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
-            #[cfg(feature = "dev_native")]
-            debug_collider_mesh,
-            #[cfg(feature = "dev_native")]
-            debug_collider_color,
         ))
         .with_children(|spawner| {
             spawner
                 .spawn((Transform::from_xyz(0.0, -1.0, 0.0), mesh))
+                .with_children(|spawner| {
+                    spawner.spawn((
+                        #[cfg(feature = "dev_native")]
+                        debug_collider_mesh,
+                        #[cfg(feature = "dev_native")]
+                        debug_collider_color,
+                    ));
+                })
                 .observe(prepare_animations);
         });
 

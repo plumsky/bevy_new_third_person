@@ -9,7 +9,8 @@ use bevy_tnua::{
     prelude::*,
 };
 
-const BASE_SPEED_SCALE: f32 = 0.2;
+const BASE_SPEED_SCALE: f32 = 0.0002;
+const IDLE_TO_RUN_TRESHOLD: f32 = 0.01;
 
 #[derive(Default, Clone)]
 pub enum AnimationState {
@@ -69,8 +70,8 @@ pub fn prepare_animations(
         dashing: graph.add_clip(gltf.named_animations["Roll"].clone(), 1.0, root_node),
         knockback: graph.add_clip(gltf.named_animations["Hit_Chest"].clone(), 1.0, root_node),
         running: graph.add_clip(
-            // gltf.named_animations["Jog_Fwd_Loop"].clone(),
-            gltf.named_animations["Walk_Loop"].clone(),
+            gltf.named_animations["Jog_Fwd_Loop"].clone(),
+            // gltf.named_animations["Walk_Loop"].clone(),
             1.0,
             root_node,
         ),
@@ -139,10 +140,9 @@ pub fn animating(
             let basis_speed = basis_state.running_velocity.length();
 
             // TODO: have transition from/to crouch
+            let speed = BASE_SPEED_SCALE * basis_speed * player.speed;
             match crouch_state {
-                TnuaBuiltinCrouchState::Maintaining => {
-                    AnimationState::CrouchWalk(BASE_SPEED_SCALE * basis_speed * player.speed)
-                }
+                TnuaBuiltinCrouchState::Maintaining => AnimationState::CrouchWalk(speed),
                 TnuaBuiltinCrouchState::Rising => AnimationState::CrouchIdle,
                 TnuaBuiltinCrouchState::Sinking => AnimationState::CrouchIdle,
             }
@@ -195,8 +195,10 @@ pub fn animating(
                 AnimationState::Fall
             } else {
                 let basis_speed = basis_state.running_velocity.length();
-                if basis_speed > 0.01 {
-                    AnimationState::Run(BASE_SPEED_SCALE * basis_speed * player.speed)
+                if basis_speed > IDLE_TO_RUN_TRESHOLD {
+                    // TODO: apply status player speed to animation, but it needs to be paired with control
+                    let speed = BASE_SPEED_SCALE * basis_speed * player.speed;
+                    AnimationState::Run(speed)
                 } else {
                     AnimationState::StandIdle
                 }
