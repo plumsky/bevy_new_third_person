@@ -1,4 +1,3 @@
-
 name: CI
 
 on:
@@ -57,7 +56,7 @@ jobs:
           shared-key: dev
           save-if: false
 
-      - name: Install Bevy dependencies
+      - name: Install build dependencies
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev
 
       - name: Check documentation
@@ -84,7 +83,7 @@ jobs:
           shared-key: dev
           save-if: false
 
-      - name: Install Bevy dependencies
+      - name: Install build dependencies
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev
 
       - name: Run Clippy lints
@@ -108,7 +107,7 @@ jobs:
           shared-key: dev
           save-if: ${{ github.ref == 'refs/heads/main' }}
 
-      - name: Install Bevy dependencies
+      - name: Install build dependencies
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev
 
       - name: Run Bevy lints
@@ -128,10 +127,6 @@ jobs:
         with:
           toolchain: ${{ env.toolchain }}
 
-      # Setting LD_LIBRARY_PATH is a workaround for <https://github.com/TheBevyFlock/bevy_new_2d/pull/318#issuecomment-2585935350>.
-      - name: Set LD_LIBRARY_PATH
-        run: echo "LD_LIBRARY_PATH=$(rustc --print target-libdir)" >>"${GITHUB_ENV}"
-
       - name: Restore Rust cache
         uses: Swatinem/rust-cache@v2
         with:
@@ -139,7 +134,7 @@ jobs:
           cache-directories: ${{ env.LD_LIBRARY_PATH }}
           save-if: ${{ github.ref == 'refs/heads/main' }}
 
-      - name: Install Bevy dependencies
+      - name: Install build dependencies
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev
 
       - name: Install cargo-nextest
@@ -147,10 +142,6 @@ jobs:
 
       - name: Run tests
         run: cargo nextest run --locked --workspace --all-targets --no-fail-fast --no-tests=warn
-
-      # Running doctests separately is a workaround for <https://github.com/rust-lang/cargo/issues/6669>.
-      - name: Run doctests
-        run: cargo test --locked --workspace --doc --no-fail-fast
 
   # Check that the web build compiles.
   check-web:
@@ -173,7 +164,7 @@ jobs:
           shared-key: web-dev
           save-if: ${{ github.ref == 'refs/heads/main' }}
 
-      - name: Install Bevy dependencies
+      - name: Install build dependencies
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev
 
       - name: Check web

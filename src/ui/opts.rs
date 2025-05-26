@@ -25,8 +25,6 @@ impl Opts {
             text_layout: TextLayout::new_with_justify(JustifyText::Center),
             font: TextFont::from_font_size(FONT_SIZE),
             node: Node {
-                // min_width,
-                // width: Percent(30.0),
                 align_items: AlignItems::Center,
                 align_content: AlignContent::Center,
                 justify_items: JustifyItems::Center,
@@ -46,31 +44,31 @@ impl Opts {
         self.text = text.into();
         self
     }
-    pub(crate) fn text_layout(mut self, layout: TextLayout) -> Self {
+    pub(crate) fn _text_layout(mut self, layout: TextLayout) -> Self {
         self.text_layout = layout;
         self
     }
-    pub(crate) fn font(mut self, font: TextFont) -> Self {
+    pub(crate) fn _font(mut self, font: TextFont) -> Self {
         self.font = font;
         self
     }
-    pub(crate) fn size(mut self, s: f32) -> Self {
+    pub(crate) fn _size(mut self, s: f32) -> Self {
         self.font.font_size = s;
         self
     }
-    pub(crate) fn color(mut self, color: Color) -> Self {
+    pub(crate) fn _color(mut self, color: Color) -> Self {
         self.color = color;
         self
     }
-    pub(crate) fn bg_color(mut self, bg_color: Color) -> Self {
+    pub(crate) fn _bg_color(mut self, bg_color: Color) -> Self {
         self.bg_color = bg_color;
         self
     }
-    pub(crate) fn border_color(mut self, color: Color) -> Self {
+    pub(crate) fn _border_color(mut self, color: Color) -> Self {
         self.border_color = color;
         self
     }
-    pub(crate) fn border_radius(mut self, radius: f32) -> Self {
+    pub(crate) fn _border_radius(mut self, radius: f32) -> Self {
         self.border_radius = radius;
         self
     }
@@ -95,24 +93,23 @@ impl Opts {
             justify_content,
             border,
             padding,
-            min_width: Px(MIN_WIDTH),
             ..new
         };
         self
     }
-    pub(crate) fn width(mut self, w: f32) -> Self {
+    pub(crate) fn _width(mut self, w: f32) -> Self {
         self.node.width = Px(w);
         self
     }
-    pub(crate) fn height(mut self, h: f32) -> Self {
+    pub(crate) fn _height(mut self, h: f32) -> Self {
         self.node.height = Px(h);
         self
     }
-    pub(crate) fn margin(mut self, m: UiRect) -> Self {
+    pub(crate) fn _margin(mut self, m: UiRect) -> Self {
         self.node.margin = m;
         self
     }
-    pub(crate) fn padding(mut self, p: UiRect) -> Self {
+    pub(crate) fn _padding(mut self, p: UiRect) -> Self {
         self.node.padding = p;
         self
     }

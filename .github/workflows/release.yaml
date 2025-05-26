@@ -101,6 +101,8 @@ jobs:
       - get-version
     env:
       version: ${{ needs.get-version.outputs.version }}
+      # Avoid rate-limiting. See: <https://github.com/cargo-bins/cargo-binstall/issues/2045>.
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       matrix:
         include:
@@ -184,9 +186,17 @@ jobs:
         if: ${{ env.is_platform_enabled == 'true' }}
         run: rm -rf tmp; mkdir -p tmp/binary '${{ env.app }}'
 
+      - name: Install cargo-binstall
+        if: ${{ env.is_platform_enabled == 'true' }}
+        uses: cargo-bins/cargo-binstall@main
+
       - name: Install Bevy CLI
         if: ${{ env.is_platform_enabled == 'true' }}
         run: cargo install --git=https://github.com/TheBevyFlock/bevy_cli --locked bevy_cli
+
+      - name: Install wasm-opt (Web)
+        if: ${{ env.is_platform_enabled == 'true' && matrix.platform == 'web' }}
+        run: cargo binstall --locked --no-confirm wasm-opt
 
       - name: Build web bundle and add it to app (Web)
         if: ${{ env.is_platform_enabled == 'true' && matrix.platform == 'web' }}

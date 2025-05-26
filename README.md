@@ -50,6 +50,33 @@ Feel free to move things around however you want, though.
 
 ## Run your game
 
+We recommend using the [Bevy CLI](https://github.com/TheBevyFlock/bevy_cli) to run your game.
+Running your game locally is very simple:
+
+- Use `bevy run` to run a native dev build.
+- Use `bevy run web` to run a web dev build.
+
+<details>
+    <summary><ins>Running release builds</ins></summary>
+
+    - Use `bevy run --release` to run a native release build.
+- Use `bevy run --release web` to run a web release build.
+</details>
+
+<details>
+    <summary><ins>Installing Linux dependencies</ins></summary>
+
+  If you're using Linux, make sure you've installed Bevy's [Linux dependencies].
+  Note that this template enables Wayland support, which requires additional dependencies as detailed in the link above.
+  Wayland is activated by using the `bevy/wayland` feature in the [`Cargo.toml`](./Cargo.toml).
+</details>
+
+<details>
+    <summary><ins>(Optional) Improving compile times</ins></summary>
+
+[`.cargo/config.toml`](./.cargo/config.toml) contains documentation on how to set up your environment to improve compile times.
+</details>
+
 WARNING: if you work in a private repository, please be aware that macOS and Windows runners cost more build minutes.
 **For public repositories the workflow runners are free!**
 
@@ -109,6 +136,7 @@ The [assets](./assets) in this repository are all 3rd-party. See the see [credit
 [BevyFlock]: https://github.com/TheBevyFlock/bevy_new_2d
 [cargo-generate]: https://github.com/cargo-generate/cargo-generate
 [leafwing-input-manager]: https://github.com/Leafwing-Studios/leafwing-input-manager
+[Linux dependencies]: https://github.com/bevyengine/bevy/blob/main/docs/linux_dependencies.md
 [trunk]: https://trunkrs.dev/
 [Universal Animation Library]: https://quaternius.itch.io/universal-animation-library
 [GitHub workflows]: https://docs.github.com/en/actions/using-workflows

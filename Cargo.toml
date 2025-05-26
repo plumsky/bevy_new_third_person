@@ -1,6 +1,6 @@
 [package]
 name = "bevy_new_third_person"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Oleks Pickle <22867443+olekspickle@users.noreply.github.com>"]
 edition = "2024"
 license = "MIT OR Apache-2.0 OR CC0"
@@ -79,13 +79,14 @@ avian3d = { version = "0.3", features = ["3d", "parallel", "collider-from-mesh"]
 
 # camera
 bevy_third_person_camera = "0.2"
+# bevy_third_person_camera = { path = "../../Documents/rust/bevy_third_person_camera" }
 
 # floating character control
 bevy-tnua = "0.24"
 bevy-tnua-avian3d = "0.5"
 
 # diagnostics overlay
-iyes_perf_ui = "0.5.0-rc.1"
+iyes_perf_ui = "0.5"
 
 # key bindings
 leafwing-input-manager = "0.17"
@@ -103,8 +104,7 @@ winit = { version = "0.30", default-features = false }
 bevy_fix_gltf_coordinate_system = "0.1.0"
 
 # TODO: delete after everyone migrates to 0.16
-[patch.crates-io]
-iyes_perf_ui = { git = "https://github.com/IyesGames/iyes_perf_ui", branch = "main" }
+# [patch.crates-io]
 # bevy_seedling = { git = "https://github.com/CorvusPrudens/bevy_seedling",  branch = "bevy-0.16" }
 
 [lints.clippy]
