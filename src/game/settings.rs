@@ -19,9 +19,11 @@ pub struct Settings {
 
     // game state things
     pub diagnostics: bool,
-    pub menu_open: bool,
+    pub menu_modal: bool,
+    pub settings_modal: bool,
     pub muted: bool,
     pub paused: bool,
+    pub scene_initialized: bool,
     pub sun_cycle: SunCycle,
     pub last_screen: Screen,
 }
@@ -32,12 +34,22 @@ impl Default for Settings {
             last_screen: Screen::Splash,
             sun_cycle: SunCycle::DayNight,
             sound: Sound::default(),
+            scene_initialized: false,
+            settings_modal: false,
             diagnostics: true,
-            menu_open: false,
+            menu_modal: false,
             paused: false,
             muted: false,
             fov: 45.0, // bevy default
         }
+    }
+}
+
+impl Settings {
+    pub fn reset(&mut self) {
+        self.diagnostics = true;
+        self.paused = false;
+        self.muted = false;
     }
 }
 
@@ -59,13 +71,14 @@ pub enum Action {
     Right,
     Jump,
     Dash,
+    Sprint,
     Crouch,
 
     // Miscellaneous
-    DevTools,
-    Menu,
-    Mute,
-    Pause,
+    ToggleDebugUi,
+    Back,
+    ToggleMute,
+    TogglePause,
     ToggleDiagnostics,
     Toot,
     ToggleSunCycle,
@@ -87,14 +100,15 @@ fn spawn_player_input_map(mut commands: Commands) {
 
     input_map.insert(Action::Jump, KeyCode::Space);
     input_map.insert(Action::Crouch, KeyCode::ControlLeft);
-    input_map.insert(Action::Dash, KeyCode::ShiftLeft);
+    input_map.insert(Action::Dash, KeyCode::AltLeft);
+    input_map.insert(Action::Sprint, KeyCode::ShiftLeft);
 
-    input_map.insert(Action::Pause, KeyCode::KeyP);
-    input_map.insert(Action::Mute, KeyCode::KeyM);
-    input_map.insert(Action::Menu, KeyCode::Escape);
+    input_map.insert(Action::Back, KeyCode::Escape);
+    input_map.insert(Action::TogglePause, KeyCode::KeyP);
+    input_map.insert(Action::ToggleMute, KeyCode::KeyM);
     input_map.insert(Action::ToggleDiagnostics, KeyCode::KeyF);
 
-    input_map.insert(Action::DevTools, KeyCode::Backquote);
+    input_map.insert(Action::ToggleDebugUi, KeyCode::Backquote);
     input_map.insert(Action::Toot, KeyCode::KeyC);
     input_map.insert(Action::ToggleSunCycle, KeyCode::KeyO);
     input_map.insert(Action::FovIncr, KeyCode::KeyV);

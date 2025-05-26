@@ -1,12 +1,8 @@
-use crate::prelude::*;
-use avian3d::prelude::*;
-use bevy::prelude::*;
+use super::*;
 use bevy_tnua::{
     builtins::{TnuaBuiltinCrouch, TnuaBuiltinDash},
     control_helpers::TnuaSimpleAirActionsCounter,
-    prelude::*,
 };
-use bevy_tnua_avian3d::*;
 use leafwing_input_manager::prelude::ActionState;
 
 #[derive(Component)]
@@ -29,22 +25,23 @@ pub fn movement(
             &mut Collider,
             &mut Transform,
         ),
-        (With<Player>, Without<SceneCamera>),
+        (With<Player>, Without<camera::SceneCamera>),
     >,
     mut air_counter: Query<&mut TnuaSimpleAirActionsCounter>,
-    camera: Query<&Transform, With<SceneCamera>>,
+    camera: Query<&Transform, With<camera::SceneCamera>>,
 ) -> Result {
-    let Ok((mut controller, mut avian_collider, mut collider, mut debug_capsule)) =
-        tnua.single_mut()
-    else {
-        return Ok(());
-    };
+    let (mut controller, mut avian_collider, mut collider, mut debug_capsule) =
+        tnua.single_mut()?;
     let mut direction = Vec3::ZERO;
     let mut speed = cfg.player.movement.speed * time.delta_secs();
 
     let (state, camera_transform) = (action.single()?, camera.single()?);
     let forward = camera_transform.forward().normalize();
     let forward_flat = Vec3::new(forward.x, 0.0, forward.z);
+
+    if state.pressed(&Action::Sprint) {
+        speed *= 2.0;
+    }
 
     if state.just_pressed(&Action::Crouch) {
         // TODO: play crouch sink animation

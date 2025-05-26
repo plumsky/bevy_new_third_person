@@ -12,18 +12,24 @@ pub fn plugin(app: &mut App) {
         .add_systems(OnEnter(Screen::Gameplay), setup);
 }
 
+// TODO: The idea is to create a boombox with spatial audio
+// <https://github.com/bevyengine/bevy/blob/main/examples/audio/spatial_audio_3d.rs>
+// #[derive(Component)]
+// pub struct Boombox;
+
 pub(crate) fn setup(
-    config: Res<Config>,
+    cfg: Res<Config>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let main_plane = config.geometry.main_plane;
+    let main_plane = cfg.geom.main_plane;
 
     // Plane
     let mesh = Mesh3d(meshes.add(Cuboid::new(main_plane, 0., main_plane)));
     let mat = MeshMaterial3d(materials.add(SAND_YELLOW));
     commands.spawn((
+        StateScoped(Screen::Gameplay),
         mat,
         mesh,
         Transform::default(),
@@ -32,7 +38,7 @@ pub(crate) fn setup(
     ));
 
     let size = main_plane / 2.0;
-    let geom = config.geometry.clone();
+    let geom = cfg.geom.clone();
     for i in 0..geom.quantity {
         let i = i as f32;
         let (low, upper) = (main_plane / 100.0, main_plane / 40.0);
@@ -62,6 +68,7 @@ pub(crate) fn setup(
         let mat = MeshMaterial3d(material.clone());
         let pos = Transform::from_xyz(x, y, z);
         commands.spawn((
+            StateScoped(Screen::Gameplay),
             mat,
             pos,
             mesh3d,
@@ -82,7 +89,7 @@ pub(crate) fn setup(
     // to see something when suns go away
     commands.insert_resource(AmbientLight {
         color: Color::WHITE,
-        brightness: 200.0,
+        brightness: 500.0,
         ..Default::default()
     });
 }

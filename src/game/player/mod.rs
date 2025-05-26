@@ -11,6 +11,8 @@ mod control;
 pub use animation::*;
 pub use control::*;
 
+use super::skybox;
+
 /// This plugin handles player related stuff like movement, shooting
 /// Player logic is only active during the State `Screen::Playing`
 pub fn plugin(app: &mut App) {
@@ -21,7 +23,10 @@ pub fn plugin(app: &mut App) {
     ));
 
     app.configure_sets(PostUpdate, CameraSyncSet.after(PhysicsSet::Sync))
-        .add_systems(OnEnter(Screen::Gameplay), spawn.after(scene::setup))
+        .add_systems(
+            OnEnter(Screen::Gameplay),
+            spawn_player.after(skybox::add_skybox_to_camera),
+        )
         .add_systems(
             Update,
             (movement, animating)
@@ -45,14 +50,14 @@ impl Default for Player {
     }
 }
 
-fn spawn(
+pub fn spawn_player(
     cfg: Res<Config>,
     models: Res<Models>,
     mut commands: Commands,
     gltf_assets: Res<Assets<Gltf>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
-    camera: Query<&Transform, With<SceneCamera>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    camera: Query<&Transform, With<camera::SceneCamera>>,
 ) -> Result {
     let Some(gltf) = gltf_assets.get(&models.player) else {
         return Ok(());
@@ -81,6 +86,7 @@ fn spawn(
 
     commands
         .spawn((
+            StateScoped(Screen::Gameplay),
             pos,
             player,
             ThirdPersonCameraTarget,
@@ -100,17 +106,21 @@ fn spawn(
             StepTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
         ))
         .with_children(|spawner| {
-            spawner
-                .spawn((Transform::from_xyz(0.0, -1.0, 0.0), mesh))
-                .with_children(|spawner| {
-                    spawner.spawn((
-                        #[cfg(feature = "dev_native")]
-                        debug_collider_mesh,
-                        #[cfg(feature = "dev_native")]
-                        debug_collider_color,
-                    ));
-                })
-                .observe(prepare_animations);
+            let mut e = spawner.spawn((
+                Transform::from_xyz(0.0, -1.0, 0.0),
+                mesh,
+                Visibility::default(),
+            ));
+            e.with_children(|spawner| {
+                #[cfg(feature = "dev_native")]
+                spawner.spawn((
+                    debug_collider_mesh,
+                    debug_collider_color,
+                    Transform::from_xyz(0.0, 0.9, 0.0),
+                ));
+            })
+            .observe(prepare_animations);
+            info!("degub entity: {}", e.id());
         });
 
     Ok(())

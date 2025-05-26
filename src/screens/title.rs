@@ -1,7 +1,7 @@
 use super::*;
 
-/// This plugin is responsible for the game menu (containing only one button...)
-/// The menu is only drawn during the State `GameState::Menu` and is removed when that state is exited
+/// This plugin is responsible for the game menu
+/// The menu is only drawn during the State [`Screen::Title`] and is removed when that state is exited
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Title), setup_menu);
 }
@@ -17,16 +17,18 @@ fn setup_menu(
         // https://github.com/bevyengine/bevy/issues/18953
         #[cfg(target_family = "wasm")]
         children![
-            btn("Play", to_gameplay_or_loading),
-            btn("Credits", to_credits),
-            btn("Settings", to_settings),
+            BackgroundColor(TRANSLUCENT),
+            btn_big("Play", to::gameplay_or_loading),
+            btn_big("Credits", to::credits),
+            btn_big("Settings", to::settings),
         ],
         #[cfg(not(target_family = "wasm"))]
         children![
-            btn("Play", to_gameplay_or_loading),
-            btn("Credits", to_credits),
-            btn("Settings", to_settings),
-            btn("Exit", exit_app)
+            BackgroundColor(TRANSLUCENT),
+            btn_big("Play", to::gameplay_or_loading),
+            btn_big("Credits", to::credits),
+            btn_big("Settings", to::settings),
+            btn_big("Exit", exit_app)
         ],
     ));
 }

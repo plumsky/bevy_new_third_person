@@ -1,12 +1,11 @@
-use crate::prelude::*;
-use bevy::{prelude::*, scene::SceneInstanceReady};
+use super::*;
+use bevy::scene::SceneInstanceReady;
 use bevy_tnua::{
     TnuaAnimatingState, TnuaAnimatingStateDirective,
     builtins::{
         TnuaBuiltinCrouch, TnuaBuiltinCrouchState, TnuaBuiltinDash, TnuaBuiltinJumpState,
         TnuaBuiltinKnockback, TnuaBuiltinKnockbackState,
     },
-    prelude::*,
 };
 
 const BASE_SPEED_SCALE: f32 = 0.0002;

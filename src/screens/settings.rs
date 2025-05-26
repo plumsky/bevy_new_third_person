@@ -15,32 +15,53 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 fn spawn_settings_screen(mut commands: Commands) {
-    commands.spawn((
-        StateScoped(Screen::Settings),
-        ui_root("Settings Screen"),
-        children![
-            header("Settings"),
-            settings_grid(),
-            // keybindings(),
-            btn("Back", back),
-        ],
-    ));
+    commands.spawn((StateScoped(Screen::Settings), ui()));
 }
 
-pub fn back(
-    _trigger: Trigger<OnPress>,
+pub fn ui() -> impl Bundle {
+    (
+        ui_root("Settings Screen"),
+        children![
+            BackgroundColor(TRANSLUCENT),
+            header("Settings"),
+            core_grid(),
+            // keybindings(),
+            (
+                Node {
+                    flex_direction: FlexDirection::Row,
+                    justify_content: JustifyContent::SpaceEvenly,
+                    width: Percent(50.0),
+                    ..default()
+                },
+                children![btn("Save", save_settings), btn("Back", toggle_settings),]
+            )
+        ],
+    )
+}
+
+pub fn toggle_settings(
+    _: Trigger<OnPress>,
+    mut cmds: Commands,
+    screen: Res<State<Screen>>,
     mut next_screen: ResMut<NextState<Screen>>,
-    settings: Res<Settings>,
 ) {
-    next_screen.set(settings.last_screen.clone());
+    if *screen.get() == Screen::Settings {
+        next_screen.set(Screen::Title);
+    } else {
+        cmds.trigger(OnSettingsToggle);
+    }
+}
+
+pub fn save_settings(_: Trigger<OnPress>) {
+    info!("TODO: serialize and save settings");
 }
 
 // TODO: implement keybinding
 // good example with serializeable keybindings:
 // <https://github.com/projectharmonia/bevy_enhanced_input/blob/master/examples/keybinding_menu.rs>
-fn keybindings() -> impl Bundle {}
+// fn keybindings() -> impl Bundle {}
 
-fn settings_grid() -> impl Bundle {
+fn core_grid() -> impl Bundle {
     (
         Name::new("Settings Grid"),
         Node {
@@ -52,11 +73,11 @@ fn settings_grid() -> impl Bundle {
         },
         children![
             (
-                label("Audio Volume"),
                 Node {
                     justify_self: JustifySelf::End,
                     ..default()
-                }
+                },
+                label("General Audio"),
             ),
             volume_widget(),
         ],
@@ -87,6 +108,10 @@ fn volume_widget() -> impl Bundle {
 const MIN_VOLUME: f32 = 0.0;
 const MAX_VOLUME: f32 = 3.0;
 
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+struct GeneralVolumeLabel;
+
 fn lower_general(
     _: Trigger<Pointer<Click>>,
     mut settings: ResMut<Settings>,
@@ -94,14 +119,10 @@ fn lower_general(
 ) {
     let new_volume = (settings.sound.general - 0.1).max(MIN_VOLUME);
     settings.sound.general = new_volume;
-    // update global volume
-    global_volume.volume = Volume::Linear(new_volume);
+    global_volume.volume = Volume::Linear(settings.sound.general);
     // TODO: update all playing music because updating global volume does not affect existing Playback
 }
 
-// fn mute(mut global_volume: Single<&mut VolumeNode, With<MainBus>>) {
-//     global_volume.volume = Volume::Linear(0.0);
-// }
 fn raise_general(
     _: Trigger<Pointer<Click>>,
     mut settings: ResMut<Settings>,
@@ -109,14 +130,9 @@ fn raise_general(
 ) {
     let new_volume = (settings.sound.general + 0.1).min(MAX_VOLUME);
     settings.sound.general = new_volume;
-    // update global volume
-    global_volume.volume = Volume::Linear(new_volume);
+    global_volume.volume = Volume::Linear(settings.sound.general);
     // TODO: update all playing music because updating global volume does not affect existing Playback
 }
-
-#[derive(Component, Reflect)]
-#[reflect(Component)]
-struct GeneralVolumeLabel;
 
 fn update_volume_label(
     mut label: Single<&mut Text, With<GeneralVolumeLabel>>,

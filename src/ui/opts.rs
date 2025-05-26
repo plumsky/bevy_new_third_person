@@ -15,8 +15,9 @@ pub struct Opts {
     pub node: Node,
 }
 
+#[allow(dead_code)]
 impl Opts {
-    pub(crate) fn new(s: impl Into<Cow<'static, str>>) -> Self {
+    pub fn new(s: impl Into<Cow<'static, str>>) -> Self {
         let text = s.into();
         // a bit of a hack IMO - it's weird that text node is not the width of the text by default
         // let min_width = Px(text.len() as f32 * FONT_SIZE / 1.2);
@@ -30,7 +31,7 @@ impl Opts {
                 justify_items: JustifyItems::Center,
                 justify_content: JustifyContent::Center,
                 border: UiRect::all(Px(2.0)),
-                padding: UiRect::horizontal(Px(10.0)),
+                padding: UiRect::horizontal(Vw(3.0)),
                 ..Default::default()
             },
             color: WHITEISH,
@@ -40,76 +41,39 @@ impl Opts {
         }
     }
 
-    pub(crate) fn text(mut self, text: impl Into<Cow<'static, str>>) -> Self {
+    pub fn text(mut self, text: impl Into<Cow<'static, str>>) -> Self {
         self.text = text.into();
         self
     }
-    pub(crate) fn _text_layout(mut self, layout: TextLayout) -> Self {
-        self.text_layout = layout;
-        self
-    }
-    pub(crate) fn _font(mut self, font: TextFont) -> Self {
+    pub fn font(mut self, font: TextFont) -> Self {
         self.font = font;
         self
     }
-    pub(crate) fn _size(mut self, s: f32) -> Self {
+    pub fn font_size(mut self, s: f32) -> Self {
         self.font.font_size = s;
         self
     }
-    pub(crate) fn _color(mut self, color: Color) -> Self {
-        self.color = color;
+    pub fn node(mut self, new: Node) -> Self {
+        self.node = new;
         self
     }
-    pub(crate) fn _bg_color(mut self, bg_color: Color) -> Self {
-        self.bg_color = bg_color;
+    pub fn width(mut self, w: Val) -> Self {
+        self.node.width = w;
         self
     }
-    pub(crate) fn _border_color(mut self, color: Color) -> Self {
-        self.border_color = color;
+    pub fn height(mut self, h: Val) -> Self {
+        self.node.height = h;
         self
     }
-    pub(crate) fn _border_radius(mut self, radius: f32) -> Self {
-        self.border_radius = radius;
+    pub fn row_gap(mut self, g: Val) -> Self {
+        self.node.row_gap = g;
         self
     }
-    pub(crate) fn node(mut self, new: Node) -> Self {
-        let Node {
-            width,
-            height,
-            align_items,
-            align_content,
-            justify_items,
-            justify_content,
-            border,
-            padding,
-            ..
-        } = self.node;
-        self.node = Node {
-            height,
-            width,
-            align_items,
-            align_content,
-            justify_items,
-            justify_content,
-            border,
-            padding,
-            ..new
-        };
-        self
-    }
-    pub(crate) fn _width(mut self, w: f32) -> Self {
-        self.node.width = Px(w);
-        self
-    }
-    pub(crate) fn _height(mut self, h: f32) -> Self {
-        self.node.height = Px(h);
-        self
-    }
-    pub(crate) fn _margin(mut self, m: UiRect) -> Self {
+    pub fn margin(mut self, m: UiRect) -> Self {
         self.node.margin = m;
         self
     }
-    pub(crate) fn _padding(mut self, p: UiRect) -> Self {
+    pub fn padding(mut self, p: UiRect) -> Self {
         self.node.padding = p;
         self
     }

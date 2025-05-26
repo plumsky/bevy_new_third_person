@@ -1,9 +1,13 @@
 (
+    devs: [
+    ( "olekspickle", "compiled different bevy crates to have a consistent template covering stuff average third person game need")
+    ],
     assets: [
         ("Bevy Logo", "All rights reserved by the Bevy Foundation, permission granted for splash screen use when unmodified" ),
         ("Background Music", "smnbl-time-for-fun gifted to rust community under CC0" ),
-    ],
-    devs: [
-        ( "olekspickle", "compiled different bevy crates to have a consistent template covering stuff average third person game need")
+        ("Background Mu", "smnbl-time-for-fun gifted to rust community under CC0" ),
+        ("BackgMusic", "smnbl-time-for-fun gifted to rust community under CC0" ),
+        ("BMusic", "smnbl-time-for-fun gifted to rust community under CC0" ),
+        ("BackMusic", "smnbl-time-for-fun gifted to rust community under CC0" ),
     ]
 )

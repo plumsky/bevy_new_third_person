@@ -6,7 +6,6 @@ use std::borrow::Cow;
 
 pub const BORDER_RADIUS: f32 = 15.0;
 pub const FONT_SIZE: f32 = 24.0;
-pub const MIN_WIDTH: f32 = 200.0;
 
 /// A root UI node that fills the window and centers its content.
 pub fn ui_root(name: impl Into<Cow<'static, str>>) -> impl Bundle {
@@ -19,7 +18,7 @@ pub fn ui_root(name: impl Into<Cow<'static, str>>) -> impl Bundle {
             flex_direction: FlexDirection::Column,
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
-            row_gap: Percent(2.0),
+            row_gap: Vh(5.0),
             ..default()
         },
         // Don't block picking events for other UI roots.
@@ -56,28 +55,31 @@ pub fn label(opts: impl Into<Opts>) -> impl Bundle {
 /// A simple header label. Bigger than [`label`].
 pub fn header(opts: impl Into<Opts>) -> impl Bundle {
     let mut opts = opts.into();
+    let s = opts.text.clone();
+    let short = if s.len() > 10 { &s[..8] } else { &s };
     opts.font.font_size = 40.0;
-    (Label, Name::new("Header"), text(opts))
+
+    (Label, Name::new(format!("Header {short}")), text(opts))
 }
 
 // A regular wide button with text and an action defined as an [`Observer`].
-pub fn btn<E, B, M, I>(opts: impl Into<Opts>, action: I) -> impl Bundle
+pub fn btn_big<E, B, M, I>(opts: impl Into<Opts>, action: I) -> impl Bundle
 where
     E: Event,
     B: Bundle,
     I: IntoObserverSystem<E, B, M>,
 {
-    let opts = opts.into().node(Node {
-        width: Px(30.0),
-        height: Px(30.0),
-        min_width: Px(MIN_WIDTH),
-        padding: UiRect::all(Px(50.0)),
+    let opts: Opts = opts.into();
+    let new_node = Node {
+        min_width: Vw(30.0),
+        padding: UiRect::axes(Vw(8.0), Vh(2.0)),
         align_items: AlignItems::Center,
         justify_content: JustifyContent::Center,
-        ..default()
-    });
+        ..opts.node.clone()
+    };
+    let opts = opts.node(new_node);
 
-    btn_base(opts, action)
+    btn(opts, action)
 }
 
 // A small square button with text and an action defined as an [`Observer`].
@@ -87,20 +89,22 @@ where
     B: Bundle,
     I: IntoObserverSystem<E, B, M>,
 {
-    let opts = opts.into().node(Node {
-        width: Px(30.0),
-        height: Px(30.0),
+    let opts: Opts = opts.into();
+    let new_node = Node {
+        padding: UiRect::ZERO,
         align_items: AlignItems::Center,
         justify_content: JustifyContent::Center,
-        ..default()
-    });
+        ..opts.node.clone()
+    };
+    let mut opts = opts.node(new_node);
+    opts.border_radius = 7.0;
 
-    btn_base(opts, action)
+    btn(opts, action)
 }
 
 /// A simple button with text and an action defined as an [`Observer`]. The button's layout is provided by `button_bundle`.
 /// Background color is set by [`InteractionPalette`]
-pub fn btn_base<E, B, M, I>(opts: impl Into<Opts>, action: I) -> impl Bundle
+pub fn btn<E, B, M, I>(opts: impl Into<Opts>, action: I) -> impl Bundle
 where
     E: Event,
     B: Bundle,

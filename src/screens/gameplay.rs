@@ -1,38 +1,40 @@
 //! The screen state for the main gameplay.
 
 use super::*;
+use crate::{
+    game::{scene, triggers::*},
+    screens::settings,
+};
 use bevy::ui::Val::*;
-use bevy_third_person_camera::ThirdPersonCamera;
 use leafwing_input_manager::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins(crate::game::plugin)
-        .add_event::<OnMenuToggle>()
-        .add_systems(OnEnter(Screen::Gameplay), spawn_gameplay_ui)
+        .add_systems(
+            OnEnter(Screen::Gameplay),
+            spawn_gameplay_ui.after(scene::setup),
+        )
         .add_systems(
             Update,
-            (toot, invoke_menu)
-                .run_if(resource_exists::<AudioSources>)
+            toot.run_if(resource_exists::<AudioSources>)
                 .run_if(in_state(Screen::Gameplay)),
         )
+        .add_observer(trigger_menu_toggle_on_esc)
+        .add_observer(toggle_settings)
         .add_observer(toggle_menu);
 }
 
 #[derive(Component)]
-pub struct DevTools;
+pub struct DevUi;
 #[derive(Component)]
 pub struct PauseLabel;
 #[derive(Component)]
 pub struct MuteLabel;
-// TODO: The idea is to create a boombox with spatial audio
-// <https://github.com/bevyengine/bevy/blob/main/examples/audio/spatial_audio_3d.rs>
-// #[derive(Component)]
-// pub struct Boombox;
 
 fn spawn_gameplay_ui(mut commands: Commands, settings: Res<Settings>) {
     commands.spawn((
         StateScoped(Screen::Gameplay),
-        DevTools,
+        DevUi,
         Node {
             flex_direction: FlexDirection::Row,
             ..Default::default()
@@ -50,6 +52,7 @@ fn spawn_gameplay_ui(mut commands: Commands, settings: Res<Settings>) {
                     (label("M - mute"), MuteLabel),
                     label("F - diagnostics"),
                     label("V - incr fov"),
+                    label("~ - toggle UI debug mode"),
                     (
                         label(format!("O - toggle sun cycle: {:?}", settings.sun_cycle)),
                         SunCycleLabel
@@ -76,84 +79,126 @@ fn toot(
     Ok(())
 }
 
-#[derive(Event)]
-pub struct OnMenuToggle;
 #[derive(Component)]
-pub struct Menu;
+pub struct MenuModal;
+#[derive(Component)]
+pub struct SettingsModal;
 
-fn invoke_menu(mut commands: Commands, action: Query<&ActionState<Action>>) -> Result {
-    let state = action.single()?;
-    if state.just_pressed(&Action::Menu) {
-        commands.trigger(OnMenuToggle);
-    }
+// TODO: maybe we don't need 3 separate functions to manage menu, but for now this is the way
 
-    Ok(())
+fn click_toggle_menu(_: Trigger<Pointer<Click>>, mut commands: Commands) {
+    commands.trigger(OnMenuToggle);
+}
+fn click_toggle_settings(_: Trigger<Pointer<Click>>, mut commands: Commands) {
+    commands.trigger(OnSettingsToggle);
+    commands.trigger(OnMenuToggle);
 }
 
-fn trigger_toggle_menu(_: Trigger<Pointer<Click>>, mut commands: Commands) {
+fn trigger_menu_toggle_on_esc(
+    _: Trigger<OnBack>,
+    mut commands: Commands,
+    screen: Res<State<Screen>>,
+    settings: ResMut<Settings>,
+) {
+    if *screen.get() != Screen::Gameplay {
+        return;
+    }
+    if settings.settings_modal {
+        commands.trigger(OnSettingsToggle);
+    }
     commands.trigger(OnMenuToggle);
 }
 
 fn toggle_menu(
     _: Trigger<OnMenuToggle>,
     mut commands: Commands,
+    screen: Res<State<Screen>>,
     mut settings: ResMut<Settings>,
-    menu_label: Query<Entity, With<Menu>>,
-    mut cam: Query<&mut ThirdPersonCamera>,
+    menu: Query<Entity, With<MenuModal>>,
 ) {
-    let Ok(mut cam) = cam.single_mut() else {
+    if *screen.get() != Screen::Gameplay {
         return;
-    };
-    cam.cursor_lock_active = !cam.cursor_lock_active;
-    settings.menu_open = !settings.menu_open;
+    }
 
-    if settings.menu_open {
+    if !settings.settings_modal {
+        commands.trigger(OnPauseToggle);
+        commands.trigger(OnCamCursorToggle);
+    }
+    settings.menu_modal = !settings.menu_modal;
+
+    if settings.menu_modal {
         commands.spawn(menu_modal());
-    } else if let Ok(menu) = menu_label.single() {
+    } else if let Ok(menu) = menu.single() {
         commands.entity(menu).despawn();
     }
 }
 
+fn toggle_settings(
+    _: Trigger<OnSettingsToggle>,
+    mut commands: Commands,
+    screen: Res<State<Screen>>,
+    mut settings: ResMut<Settings>,
+    settings_marker: Query<Entity, With<SettingsModal>>,
+) {
+    if Screen::Gameplay != *screen.get() {
+        return;
+    }
+
+    if !settings.menu_modal {
+        commands.trigger(OnPauseToggle);
+        commands.trigger(OnCamCursorToggle);
+    }
+    settings.settings_modal = !settings.settings_modal;
+
+    if settings.settings_modal {
+        commands.spawn(settings_modal());
+    } else if let Ok(settings) = settings_marker.single() {
+        commands.entity(settings).despawn();
+    }
+}
+
+fn settings_modal() -> impl Bundle {
+    (StateScoped(Screen::Gameplay), SettingsModal, settings::ui())
+}
+
 fn menu_modal() -> impl Bundle {
-    let opts = Opts::new("x");
+    let opts = Opts::new("Settings")
+        .width(Vw(15.0))
+        .padding(UiRect::axes(Vw(2.0), Vw(1.0)));
     (
-        Menu,
+        StateScoped(Screen::Gameplay),
+        MenuModal,
         ui_root("In game menu"),
         children![(
-            Node {
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::SpaceEvenly,
-                align_items: AlignItems::Center,
-                width: Percent(20.0),
-                height: Percent(30.0),
-                ..Default::default()
-            },
             BackgroundColor(TRANSLUCENT),
-            BorderRadius::all(Px(BORDER_RADIUS)),
+            Node {
+                padding: UiRect::all(Vw(10.0)),
+                ..default()
+            },
             children![
-                Node::default(),
-                btn_small(opts.clone(), trigger_toggle_menu),
-                btn(opts.clone().text("Settings"), gameplay_to_settings),
-                btn(opts.text("Main Menu"), gameplay_to_title)
+                (
+                    Node {
+                        position_type: PositionType::Absolute,
+                        top: Px(0.0),
+                        right: Px(0.0),
+                        ..Default::default()
+                    },
+                    children![btn_small(Opts::new("x").width(Vw(5.0)), click_toggle_menu)]
+                ),
+                (
+                    Node {
+                        row_gap: Percent(20.0),
+                        flex_direction: FlexDirection::Column,
+                        justify_content: JustifyContent::Center,
+                        align_content: AlignContent::Center,
+                        ..default()
+                    },
+                    children![
+                        btn(opts.clone(), click_toggle_settings),
+                        btn(opts.text("Main Menu"), to::title)
+                    ]
+                )
             ]
         )],
     )
-}
-
-pub fn gameplay_to_title(
-    _trigger: Trigger<OnPress>,
-    mut commands: Commands,
-    mut next_screen: ResMut<NextState<Screen>>,
-) {
-    commands.trigger(OnMenuToggle);
-    next_screen.set(Screen::Title);
-}
-
-pub fn gameplay_to_settings(
-    _trigger: Trigger<OnPress>,
-    mut commands: Commands,
-    mut next_screen: ResMut<NextState<Screen>>,
-) {
-    commands.trigger(OnMenuToggle);
-    next_screen.set(Screen::Settings);
 }

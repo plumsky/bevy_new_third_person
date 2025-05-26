@@ -1,22 +1,28 @@
 use crate::prelude::*;
 use bevy::{
     core_pipeline::{bloom::Bloom, tonemapping::Tonemapping},
-    pbr::{Atmosphere, AtmosphereSettings, light_consts::lux},
+    pbr::{Atmosphere, AtmosphereSettings, CascadeShadowConfigBuilder, light_consts::lux},
     prelude::*,
     render::camera::Exposure,
 };
 use leafwing_input_manager::prelude::*;
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Gameplay), add_skybox_to_camera)
-        .add_systems(
-            Update,
-            (toggle_sun_cycle, sun_cycle).run_if(in_state(Screen::Gameplay)),
-        );
+    app.add_systems(
+        OnEnter(Screen::Gameplay),
+        add_skybox_to_camera.after(camera::spawn_camera),
+    )
+    .add_systems(OnExit(Screen::Gameplay), rm_skybox_from_camera)
+    .add_systems(
+        Update,
+        (toggle_sun_cycle, sun_cycle).run_if(in_state(Screen::Gameplay)),
+    );
 }
 
 #[derive(Component)]
 pub struct Sun;
+#[derive(Component)]
+pub struct Moon;
 
 #[derive(Debug)]
 pub enum SunCycle {
@@ -26,22 +32,46 @@ pub enum SunCycle {
 
 /// Mainly this example:
 /// <https://bevyengine.org/examples/3d-rendering/atmosphere/>
-fn add_skybox_to_camera(
+pub fn add_skybox_to_camera(
     cfg: Res<Config>,
     mut commands: Commands,
-    mut camera: Query<Entity, With<SceneCamera>>,
+    mut camera: Query<Entity, With<Camera3d>>,
 ) -> Result {
     let camera = camera.single_mut()?;
 
-    // Light
+    let cascade_shadow_config = CascadeShadowConfigBuilder {
+        first_cascade_far_bound: 0.3,
+        maximum_distance: cfg.physics.shadow_distance,
+        ..default()
+    }
+    .build();
+
+    // Sun
     commands.spawn((
+        StateScoped(Screen::Gameplay),
         DirectionalLight {
             color: SUN,
             shadows_enabled: true,
-            illuminance: lux::RAW_SUNLIGHT,
+            illuminance: lux::FULL_DAYLIGHT,
             ..Default::default()
         },
         Sun,
+        Transform::from_translation(Vec3::new(0.0, 0.0, cfg.geom.main_plane)),
+        cascade_shadow_config.clone(),
+    ));
+
+    // Moon
+    commands.spawn((
+        StateScoped(Screen::Gameplay),
+        DirectionalLight {
+            color: MOON,
+            shadows_enabled: true,
+            illuminance: lux::FULL_MOON_NIGHT,
+            ..Default::default()
+        },
+        Moon,
+        Transform::from_translation(Vec3::new(0.0, 0.0, -cfg.geom.main_plane)),
+        cascade_shadow_config,
     ));
 
     commands.entity(camera).insert((
@@ -55,14 +85,31 @@ fn add_skybox_to_camera(
             scene_units_to_m: 1e+4,
             ..Default::default()
         },
-        Exposure::SUNLIGHT,
         Tonemapping::BlenderFilmic,
+        Exposure::OVERCAST,
         Bloom::NATURAL,
     ));
 
     if cfg.physics.fog {
         commands.entity(camera).insert(fog(cfg));
     }
+
+    Ok(())
+}
+
+pub fn rm_skybox_from_camera(
+    mut commands: Commands,
+    mut camera: Query<Entity, With<Camera3d>>,
+) -> Result {
+    let camera = camera.single_mut()?;
+    commands
+        .entity(camera)
+        .remove::<Atmosphere>()
+        .remove::<AtmosphereSettings>()
+        .remove::<Exposure>()
+        .remove::<Bloom>()
+        .remove::<DistanceFog>()
+        .remove::<Tonemapping>();
 
     Ok(())
 }
@@ -83,14 +130,14 @@ pub fn fog(cfg: Res<Config>) -> impl Bundle {
 
 fn sun_cycle(
     settings: Res<Settings>,
-    mut suns: Query<&mut Transform, With<DirectionalLight>>,
+    mut sky_lights: Query<&mut Transform, With<DirectionalLight>>,
     time: Res<Time>,
 ) {
     match settings.sun_cycle {
-        SunCycle::DayNight => suns
+        SunCycle::DayNight => sky_lights
             .iter_mut()
             .for_each(|mut tf| tf.rotate_x(-time.delta_secs() * std::f32::consts::PI / 50.0)),
-        SunCycle::Nimbus => suns
+        SunCycle::Nimbus => sky_lights
             .iter_mut()
             .for_each(|mut tf| tf.rotate_y(-time.delta_secs() * std::f32::consts::PI / 50.0)),
     }

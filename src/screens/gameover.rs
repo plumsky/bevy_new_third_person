@@ -16,8 +16,8 @@ fn spawn_screen(mut commands: Commands, score: Res<Score>) {
             #[cfg(not(target_family = "wasm"))]
             children![
                 label(format!("Score: {}", score.0)),
-                btn("PlayAgain", enter_gameplay_screen),
-                btn("Exit", exit_app)
+                btn_big("PlayAgain", enter_gameplay_screen),
+                btn_big("Exit", exit_app)
             ],
         ))
         .insert(StateScoped(Screen::GameOver));

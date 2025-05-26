@@ -48,6 +48,12 @@ Feel free to move things around however you want, though.
 - [ ] vault mechanics
 - [ ] small door/portal demo
 
+### TODOs
+- [x] consistent Esc back navigation in gameplay and menu
+- [ ] keys rebind in settings
+- [ ] do not rotate player on aim(silly bug)
+- [ ]
+
 ## Run your game
 
 We recommend using the [Bevy CLI](https://github.com/TheBevyFlock/bevy_cli) to run your game.

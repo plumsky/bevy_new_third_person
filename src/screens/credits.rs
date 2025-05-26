@@ -13,13 +13,14 @@ pub(super) fn plugin(app: &mut App) {
 fn spawn_credits_screen(mut commands: Commands, cfg: Res<Config>) {
     commands.spawn((
         ui_root("Credits Screen"),
+        BackgroundColor(TRANSLUCENT),
         StateScoped(Screen::Credits),
         children![
             header("Created by"),
             flatten(&cfg.credits.devs),
             header("Assets"),
             flatten(&cfg.credits.assets),
-            btn("Back", to_title),
+            btn_big("Back", to::title),
         ],
     ));
 }
@@ -45,12 +46,13 @@ fn grid(content: Vec<[String; 2]>) -> impl Bundle {
     });
 
     (
-        Name::new("Grid"),
+        Name::new("Credits Grid"),
         Node {
             display: Display::Grid,
             row_gap: Px(10.0),
             column_gap: Px(30.0),
             grid_template_columns: RepeatedGridTrack::px(2, 400.0),
+            overflow: Overflow::scroll_y(),
             ..default()
         },
         Children::spawn(SpawnIter(content)),

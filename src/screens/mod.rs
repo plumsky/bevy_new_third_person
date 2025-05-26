@@ -7,7 +7,7 @@ mod credits;
 mod gameover;
 pub mod gameplay;
 mod loading;
-mod settings;
+pub mod settings;
 mod splash;
 mod title;
 
@@ -24,7 +24,9 @@ pub(super) fn plugin(app: &mut App) {
         gameplay::plugin,
         gameover::plugin,
     ))
-    .add_systems(Update, track_last_screen.run_if(state_changed::<Screen>));
+    .add_systems(Update, track_last_screen.run_if(state_changed::<Screen>))
+    .add_observer(on_back)
+    .add_observer(on_go_to);
 }
 
 /// The game's main screen states.
@@ -46,28 +48,62 @@ pub enum Screen {
     GameOver,
 }
 
-fn track_last_screen(current: Res<State<Screen>>, mut settings: ResMut<Settings>) {
-    settings.last_screen = current.get().clone();
-}
-
-fn to_gameplay_or_loading(
-    _: Trigger<OnPress>,
-    resource_handles: Res<ResourceHandles>,
-    mut next_screen: ResMut<NextState<Screen>>,
+// TODO: figure out how to make it a cool observer
+// mut transitions: Trigger<StateTransitionEvent<Screen>>,
+fn track_last_screen(
+    mut transitions: EventReader<StateTransitionEvent<Screen>>,
+    mut settings: ResMut<Settings>,
 ) {
-    if resource_handles.is_all_done() {
-        next_screen.set(Screen::Gameplay);
-    } else {
-        next_screen.set(Screen::Loading);
-    }
+    let Some(transition) = transitions.read().last() else {
+        return;
+    };
+    settings.last_screen = transition.clone().exited.unwrap_or(Screen::Title);
 }
 
-pub fn to_title(_trigger: Trigger<OnPress>, mut next_screen: ResMut<NextState<Screen>>) {
-    next_screen.set(Screen::Title);
+fn on_back(
+    trigger: Trigger<OnBack>,
+    mut next_screen: ResMut<NextState<Screen>>,
+    screen: Res<State<Screen>>,
+) {
+    // Do not go to the title on back, we'd rather handle it in gameplay observers
+    if *screen.get() == Screen::Gameplay {
+        return;
+    }
+
+    let back = trigger.event();
+    next_screen.set(back.0.clone());
 }
-pub fn to_credits(_trigger: Trigger<OnPress>, mut next_screen: ResMut<NextState<Screen>>) {
-    next_screen.set(Screen::Credits);
+
+pub fn on_go_to(trig: Trigger<OnGoTo>, mut next_screen: ResMut<NextState<Screen>>) {
+    let go_to = trig.event();
+    next_screen.set(go_to.0.clone());
 }
-pub fn to_settings(_trigger: Trigger<OnPress>, mut next_screen: ResMut<NextState<Screen>>) {
-    next_screen.set(Screen::Settings);
+
+// TODO: figure out nice click_go_to(Screen::Title) HOF
+// fn click_go_to<E, B, M>(s: Screen) -> impl IntoObserverSystem<OnPress, B, M> {
+//     |_: Trigger<OnPress>, mut cmds: Commands| cmds.trigger(OnGoTo(s.clone()))
+// }
+pub mod to {
+    use super::*;
+
+    pub fn title(_: Trigger<OnPress>, mut cmds: Commands) {
+        cmds.trigger(OnGoTo(Screen::Title));
+    }
+    pub fn settings(_: Trigger<OnPress>, mut cmds: Commands) {
+        cmds.trigger(OnGoTo(Screen::Settings));
+    }
+    pub fn credits(_: Trigger<OnPress>, mut cmds: Commands) {
+        cmds.trigger(OnGoTo(Screen::Credits));
+    }
+    pub fn gameplay_or_loading(
+        _: Trigger<OnPress>,
+        resource_handles: Res<ResourceHandles>,
+        mut next_screen: ResMut<NextState<Screen>>,
+    ) {
+        if resource_handles.is_all_done() {
+            next_screen.set(Screen::Gameplay);
+        } else {
+            next_screen.set(Screen::Loading);
+        }
+    }
 }
