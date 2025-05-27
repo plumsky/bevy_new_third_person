@@ -1,7 +1,7 @@
 //! Development tools for the game. This plugin is only enabled in dev builds.
 
 use crate::{
-    game::triggers::*,
+    game::input_dispatch::*,
     prelude::*,
     screens::gameplay::{MuteLabel, PauseLabel},
 };

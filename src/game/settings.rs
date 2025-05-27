@@ -19,11 +19,9 @@ pub struct Settings {
 
     // game state things
     pub diagnostics: bool,
-    pub menu_modal: bool,
-    pub settings_modal: bool,
+    pub modals: Vec<Modal>,
     pub muted: bool,
     pub paused: bool,
-    pub scene_initialized: bool,
     pub sun_cycle: SunCycle,
     pub last_screen: Screen,
 }
@@ -34,10 +32,8 @@ impl Default for Settings {
             last_screen: Screen::Splash,
             sun_cycle: SunCycle::DayNight,
             sound: Sound::default(),
-            scene_initialized: false,
-            settings_modal: false,
+            modals: vec![],
             diagnostics: true,
-            menu_modal: false,
             paused: false,
             muted: false,
             fov: 45.0, // bevy default
@@ -45,12 +41,10 @@ impl Default for Settings {
     }
 }
 
-impl Settings {
-    pub fn reset(&mut self) {
-        self.diagnostics = true;
-        self.paused = false;
-        self.muted = false;
-    }
+#[derive(Debug, Clone)]
+pub enum Modal {
+    Main,
+    Settings,
 }
 
 fn inject_settings_from_cfg(mut commands: Commands, cfg: Res<Config>) {

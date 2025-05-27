@@ -1,11 +1,12 @@
-use super::*;
-use bevy::scene::SceneInstanceReady;
+use crate::prelude::*;
+use bevy::{prelude::*, scene::SceneInstanceReady};
 use bevy_tnua::{
     TnuaAnimatingState, TnuaAnimatingStateDirective,
     builtins::{
         TnuaBuiltinCrouch, TnuaBuiltinCrouchState, TnuaBuiltinDash, TnuaBuiltinJumpState,
         TnuaBuiltinKnockback, TnuaBuiltinKnockbackState,
     },
+    prelude::*,
 };
 
 const BASE_SPEED_SCALE: f32 = 0.0002;
@@ -93,7 +94,7 @@ pub fn prepare_animations(
 }
 
 pub fn animating(
-    mut player: Query<&mut Player>,
+    mut player: Query<&mut player::Player>,
     mut tnua_controller: Query<(&TnuaController, &mut TnuaAnimatingState<AnimationState>)>,
     mut animation_player: Query<&mut AnimationPlayer>,
     animation_nodes: Option<Res<AnimationNodes>>,

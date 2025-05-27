@@ -7,7 +7,6 @@ use bevy_tnua_avian3d::*;
 
 mod animation;
 mod control;
-
 pub use animation::*;
 pub use control::*;
 
@@ -37,8 +36,8 @@ pub fn plugin(app: &mut App) {
 
 #[derive(Component)]
 pub struct Player {
-    speed: f32,
-    animation_state: AnimationState,
+    pub speed: f32,
+    pub animation_state: AnimationState,
 }
 
 impl Default for Player {

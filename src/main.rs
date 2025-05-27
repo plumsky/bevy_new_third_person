@@ -9,7 +9,7 @@ use winit::window::Icon;
 
 mod audio;
 mod dev_tools;
-pub mod game;
+mod game;
 mod loading;
 mod pre_load;
 mod screens;
@@ -18,12 +18,15 @@ mod ui;
 pub(crate) mod prelude {
     use super::*;
 
+    pub use avian3d::prelude::*;
+    pub use bevy::prelude::*;
+
     pub use audio::{Music, Sound, SoundEffect, music, sfx};
     pub(crate) use game::{
-        Score, camera, player,
-        settings::{Action, Settings},
-        skybox::{SunCycle, SunCycleLabel},
-        triggers::*,
+        Score, camera,
+        input_dispatch::*,
+        scene::{SunCycle, SunCycleLabel, player},
+        settings::{Action, Modal, Settings},
     };
     pub use loading::{AudioSources, Models, ResourceHandles};
     pub use pre_load::Config;

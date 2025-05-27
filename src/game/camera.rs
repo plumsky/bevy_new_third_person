@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use bevy::prelude::*;
 use bevy_third_person_camera::*;
 use leafwing_input_manager::prelude::ActionState;
 
@@ -54,6 +53,8 @@ fn add_tpv_cam(
             // bounds: vec![Bound::NO_FLIP, Bound::ABOVE_FLOOR],
             ..default()
         },
+        RigidBody::Static,
+        Collider::sphere(0.2),
         Projection::from(PerspectiveProjection {
             fov: cfg.player.fov.to_radians(),
             ..Default::default()

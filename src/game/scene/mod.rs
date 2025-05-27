@@ -1,15 +1,23 @@
 use crate::prelude::*;
 use avian3d::prelude::*;
-use bevy::{pbr::DirectionalLightShadowMap, prelude::*};
+use bevy::prelude::*;
 use bevy_fix_gltf_coordinate_system::prelude::*;
+
+pub mod player;
+pub mod skybox;
+
+pub use skybox::*;
 
 /// This plugin handles loading and saving scenes
 /// Scene logic is only active during the State `Screen::Playing`
 pub fn plugin(app: &mut App) {
-    app.add_plugins(PhysicsPlugins::default())
-        .add_plugins(FixGltfCoordinateSystemPlugin)
-        .insert_resource(DirectionalLightShadowMap { size: 4096 })
-        .add_systems(OnEnter(Screen::Gameplay), setup);
+    app.add_plugins((
+        PhysicsPlugins::default(),
+        FixGltfCoordinateSystemPlugin,
+        player::plugin,
+        skybox::plugin,
+    ))
+    .add_systems(OnEnter(Screen::Gameplay), setup);
 }
 
 // TODO: The idea is to create a boombox with spatial audio

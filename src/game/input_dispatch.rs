@@ -5,10 +5,12 @@ use leafwing_input_manager::prelude::*;
 pub fn plugin(app: &mut App) {
     app.add_event::<OnBack>()
         .add_event::<OnGoTo>()
+        .add_event::<OnNewModal>()
+        .add_event::<OnPopModal>()
+        .add_event::<OnClearModals>()
         .add_event::<OnPauseToggle>()
         .add_event::<OnMuteToggle>()
         .add_event::<OnFovIncrement>()
-        .add_event::<OnMenuToggle>()
         .add_event::<OnCamCursorToggle>()
         .add_event::<OnDebugUiToggle>()
         .add_event::<OnDiagnosticsToggle>()
@@ -19,10 +21,12 @@ pub fn plugin(app: &mut App) {
 pub struct OnGoTo(pub Screen);
 #[derive(Event)]
 pub struct OnBack(pub Screen);
+#[derive(Event, Deref)]
+pub struct OnNewModal(pub Modal);
 #[derive(Event)]
-pub struct OnMenuToggle;
+pub struct OnPopModal;
 #[derive(Event)]
-pub struct OnSettingsToggle;
+pub struct OnClearModals;
 #[derive(Event)]
 pub struct OnCamCursorToggle;
 #[derive(Event)]

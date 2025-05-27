@@ -48,7 +48,8 @@ pub fn toggle_settings(
     if *screen.get() == Screen::Settings {
         next_screen.set(Screen::Title);
     } else {
-        cmds.trigger(OnSettingsToggle);
+        cmds.trigger(OnPopModal);
+        // cmds.trigger(OnSettingsToggle);
     }
 }
 
