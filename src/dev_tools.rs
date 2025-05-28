@@ -10,6 +10,7 @@ use bevy::{
     prelude::*,
     ui::{Display as NodeDisplay, UiDebugOptions},
 };
+use bevy_seedling::{prelude::*, sample::Sample};
 
 pub(super) fn plugin(app: &mut App) {
     app.add_observer(toggle_mute)
@@ -41,8 +42,8 @@ fn toggle_pause(
     mut settings: ResMut<Settings>,
     mut time: ResMut<Time<Virtual>>,
     mut label: Query<(&mut BackgroundColor, &mut TextColor), With<PauseLabel>>,
-    mut music: Query<&mut AudioSink, (With<Music>, Without<SoundEffect>)>,
-    mut sfx: Query<&mut AudioSink, (With<SoundEffect>, Without<Music>)>,
+    mut music: Query<&mut PlaybackParams, (With<Music>, Without<SoundEffect>)>,
+    mut sfx: Query<&mut PlaybackParams, (With<SoundEffect>, Without<Music>)>,
 ) {
     if let Ok((mut bg, mut color)) = label.single_mut() {
         if time.is_paused() || settings.paused {
@@ -55,32 +56,41 @@ fn toggle_pause(
             *bg = BackgroundColor(WHITEISH);
         }
     }
+
     // TODO: use seedling when it's migrated to 0.16
-    for s in music.iter_mut().chain(sfx.iter_mut()) {
-        s.toggle_playback();
-    }
     settings.paused = !settings.paused;
+    for mut s in music.iter_mut().chain(sfx.iter_mut()) {
+        if settings.paused {
+            s.pause();
+        } else {
+            s.play();
+        }
+    }
 }
 
 fn toggle_mute(
     _: Trigger<OnMuteToggle>,
     mut settings: ResMut<Settings>,
     mut label: Query<(&mut BackgroundColor, &mut TextColor), With<MuteLabel>>,
-    mut music: Query<&mut AudioSink, (With<Music>, Without<SoundEffect>)>,
-    mut sfx: Query<&mut AudioSink, (With<SoundEffect>, Without<Music>)>,
+    mut music: Query<&mut PlaybackSettings, (With<Music>, Without<SoundEffect>)>,
+    mut sfx: Query<&mut PlaybackSettings, (With<SoundEffect>, Without<Music>)>,
 ) {
     if let Ok((mut bg, mut color)) = label.single_mut() {
         if settings.muted {
+            for mut s in music.iter_mut() {
+                s.volume = Volume::Linear(settings.sound.general * settings.sound.music);
+            }
+            for mut s in sfx.iter_mut() {
+                s.volume = Volume::Linear(settings.sound.general * settings.sound.sfx);
+            }
             *color = TextColor(WHITEISH);
             *bg = BackgroundColor(TRANSPARENT);
         } else {
+            for mut s in music.iter_mut().chain(sfx.iter_mut()) {
+                s.volume = Volume::Linear(0.0);
+            }
             *color = TextColor(GRAY);
             *bg = BackgroundColor(WHITEISH);
-        }
-        // TODO: use seedling when it's migrated to 0.16
-        // s.set_volume(Volume::Linear(settings.sound.general * settings.sound.sfx));
-        for mut s in music.iter_mut().chain(sfx.iter_mut()) {
-            s.toggle_mute();
         }
     }
     settings.muted = !settings.muted;

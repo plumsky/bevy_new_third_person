@@ -3,7 +3,8 @@
 //! For 3D, we'd also place the camera sensitivity and FOV here.
 
 use super::*;
-use bevy::{audio::Volume, ui::Val::*};
+use bevy::ui::Val::*;
+use bevy_seedling::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<GeneralVolumeLabel>();
@@ -108,6 +109,7 @@ fn volume_widget() -> impl Bundle {
 
 const MIN_VOLUME: f32 = 0.0;
 const MAX_VOLUME: f32 = 3.0;
+const STEP: f32 = 0.1;
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
@@ -116,23 +118,35 @@ struct GeneralVolumeLabel;
 fn lower_general(
     _: Trigger<Pointer<Click>>,
     mut settings: ResMut<Settings>,
-    mut global_volume: ResMut<GlobalVolume>,
+    mut music: Query<&mut PlaybackSettings, (With<Music>, Without<SoundEffect>)>,
+    mut sfx: Query<&mut PlaybackSettings, (With<SoundEffect>, Without<Music>)>,
 ) {
-    let new_volume = (settings.sound.general - 0.1).max(MIN_VOLUME);
+    let new_volume = (settings.sound.general - STEP).max(MIN_VOLUME);
     settings.sound.general = new_volume;
-    global_volume.volume = Volume::Linear(settings.sound.general);
-    // TODO: update all playing music because updating global volume does not affect existing Playback
+
+    for mut param_set in music.iter_mut() {
+        param_set.volume = Volume::Linear(new_volume * settings.sound.music);
+    }
+    for mut param_set in sfx.iter_mut() {
+        param_set.volume = Volume::Linear(new_volume * settings.sound.sfx);
+    }
 }
 
 fn raise_general(
     _: Trigger<Pointer<Click>>,
     mut settings: ResMut<Settings>,
-    mut global_volume: ResMut<GlobalVolume>,
+    mut music: Query<&mut PlaybackSettings, (With<Music>, Without<SoundEffect>)>,
+    mut sfx: Query<&mut PlaybackSettings, (With<SoundEffect>, Without<Music>)>,
 ) {
-    let new_volume = (settings.sound.general + 0.1).min(MAX_VOLUME);
+    let new_volume = (settings.sound.general + STEP).min(MAX_VOLUME);
     settings.sound.general = new_volume;
-    global_volume.volume = Volume::Linear(settings.sound.general);
-    // TODO: update all playing music because updating global volume does not affect existing Playback
+
+    for mut param_set in music.iter_mut() {
+        param_set.volume = Volume::Linear(new_volume * settings.sound.music);
+    }
+    for mut param_set in sfx.iter_mut() {
+        param_set.volume = Volume::Linear(new_volume * settings.sound.sfx);
+    }
 }
 
 fn update_volume_label(

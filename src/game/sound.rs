@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use bevy::{audio::Volume, prelude::*};
+use bevy::prelude::*;
+use bevy_seedling::prelude::*;
 use leafwing_input_manager::prelude::*;
 use rand::prelude::*;
 
@@ -17,14 +18,14 @@ pub fn plugin(app: &mut App) {
 // TODO: implement different music states
 // good structure in this example: <https://github.com/bevyengine/bevy/blob/main/examples/audio/soundtrack.rs#L29>
 fn start_or_resume_soundtrack(
-    mut commands: Commands,
+    mut cmds: Commands,
     settings: Res<Settings>,
     sources: ResMut<AudioSources>,
     // boombox: Query<Entity, With<Boombox>>,
-    mut music_query: Query<&mut AudioSink, With<Music>>,
+    mut music_query: Query<(&SamplePlayer, &mut PlaybackParams), With<Music>>,
 ) -> Result {
-    if let Ok(instance) = music_query.single_mut() {
-        if instance.is_paused() {
+    if let Ok((player, mut instance)) = music_query.single_mut() {
+        if !player.is_playing() {
             // TODO: use seedling under feature
             instance.play();
         }
@@ -32,11 +33,11 @@ fn start_or_resume_soundtrack(
         let handle = *[&sources.bg_music].choose(&mut thread_rng()).unwrap();
         let vol = settings.sound.general * settings.sound.music;
         // // Play music from boombox entity
-        // commands
+        // cmds
         //     .entity(boombox.single()?)
         //     .insert(music(handle.clone(), vol));
         // Or just play music
-        commands.spawn(music(handle.clone(), vol));
+        cmds.spawn(music(handle.clone(), vol));
     }
 
     Ok(())
@@ -44,15 +45,15 @@ fn start_or_resume_soundtrack(
 
 fn stop_soundtrack(
     // boombox: Query<Entity, With<Boombox>>,
-    mut bg_music: Query<&mut AudioSink, With<Music>>,
+    mut bg_music: Query<&mut PlaybackParams, With<Music>>,
 ) {
-    for s in bg_music.iter_mut() {
+    for mut s in bg_music.iter_mut() {
         s.pause();
     }
 }
 
 fn movement_sound(
-    mut commands: Commands,
+    mut cmds: Commands,
     time: Res<Time>,
     settings: Res<Settings>,
     mut step_timer: Query<&mut player::StepTimer>,
@@ -80,14 +81,8 @@ fn movement_sound(
             let mut rng = thread_rng();
             let i = rng.gen_range(0..sources.steps.len());
             let handle = sources.steps[i].clone();
-            commands.spawn((
-                SoundEffect,
-                AudioPlayer::new(handle),
-                PlaybackSettings {
-                    volume: Volume::Linear(settings.sound.general * settings.sound.sfx),
-                    ..Default::default()
-                },
-            ));
+            let vol = settings.sound.general * settings.sound.sfx;
+            cmds.spawn(sfx(handle, vol));
         }
     }
 

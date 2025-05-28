@@ -29,9 +29,11 @@ pub fn movement(
     >,
     mut air_counter: Query<&mut TnuaSimpleAirActionsCounter>,
     camera: Query<&Transform, With<camera::SceneCamera>>,
+    mut player: Query<&mut player::Player>,
 ) -> Result {
     let (mut controller, mut avian_collider, mut collider, mut debug_capsule) =
         tnua.single_mut()?;
+    let mut player = player.single_mut()?;
     let mut direction = Vec3::ZERO;
     let mut speed = cfg.player.movement.speed * time.delta_secs();
 
@@ -39,37 +41,25 @@ pub fn movement(
     let forward = camera_transform.forward().normalize();
     let forward_flat = Vec3::new(forward.x, 0.0, forward.z);
 
-    if state.pressed(&Action::Sprint) {
-        speed *= 2.0;
+    if state.just_pressed(&Action::Sprint) {
+        player.speed *= 2.0;
+    }
+    if state.just_released(&Action::Sprint) {
+        player.speed /= 2.0;
     }
 
     if state.just_pressed(&Action::Crouch) {
-        // TODO: play crouch sink animation
-        #[cfg(feature = "dev_native")]
-        {
-            debug_capsule.scale.y = 0.5;
-        }
         collider.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
         avian_collider.0.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
     }
     if state.pressed(&Action::Crouch) {
-        // TODO: replace with actual crouch animation instead of just scaling
-
         controller.action(TnuaBuiltinCrouch {
             float_offset: -0.1,
             ..Default::default()
         });
-        // debug_capsule.scale.y = 0.5;
-        // avian_collider.0.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
-        // collider.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
         speed /= 2.0;
     }
     if state.just_released(&Action::Crouch) {
-        // TODO: replace with actual rise animation instead of just scaling
-        #[cfg(feature = "dev_native")]
-        {
-            debug_capsule.scale.y = 1.0;
-        }
         collider.set_scale(Vec3::ONE, 4);
         avian_collider.0.set_scale(Vec3::ONE, 4);
     }

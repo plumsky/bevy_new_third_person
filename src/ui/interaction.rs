@@ -55,7 +55,8 @@ fn trigger_on_press(
     }
 }
 
-// TODO: not sure it's possible to do efficiently with observers in 3d, it's dropping FPS like crazy
+// TODO: not sure it's possible to do efficiently with observers in 3d, like in BevyFlock,
+// it's dropping FPS like crazy
 fn btn_sounds(
     mut commands: Commands,
     settings: Res<Settings>,

@@ -19,6 +19,8 @@ pub struct Settings {
 
     // game state things
     pub diagnostics: bool,
+    /// Modal stack. kudo for the idea to @skyemakesgames
+    /// Only relevant in [`Screen::Gameplay`]
     pub modals: Vec<Modal>,
     pub muted: bool,
     pub paused: bool,

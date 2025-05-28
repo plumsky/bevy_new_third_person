@@ -171,9 +171,6 @@ pub fn animating(
                 .concrete_action::<TnuaBuiltinDash>()
                 .expect("action name mismatch: Dash");
             // TODO: replace roll with actual dash
-            //match dash_state {
-            //    _ => AnimationState::Dash,
-            //}
             AnimationState::Dash
         }
         Some(other) => panic!("Unknown action {other}"),
@@ -196,7 +193,7 @@ pub fn animating(
             } else {
                 let basis_speed = basis_state.running_velocity.length();
                 if basis_speed > IDLE_TO_RUN_TRESHOLD {
-                    // TODO: apply status player speed to animation, but it needs to be paired with control
+                    // TODO: apply player speed to animation, but it needs to be paired with control
                     let speed = BASE_SPEED_SCALE * basis_speed * player.speed;
                     AnimationState::Run(speed)
                 } else {

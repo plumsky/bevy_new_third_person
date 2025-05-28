@@ -1,4 +1,6 @@
-use bevy::{audio::Volume, prelude::*};
+// use bevy::{audio::Volume, prelude::*};
+use bevy::prelude::*;
+use bevy_seedling::{prelude::*, sample::Sample};
 use serde::{Deserialize, Serialize};
 
 #[derive(Resource, Debug, Clone, Serialize, Deserialize, Reflect)]
@@ -26,10 +28,10 @@ impl Default for Sound {
 pub struct Music;
 
 /// A music audio instance.
-pub fn music(handle: Handle<AudioSource>, volume: f32) -> impl Bundle {
+pub fn music(handle: Handle<Sample>, volume: f32) -> impl Bundle {
     (
         Music,
-        AudioPlayer(handle),
+        SamplePlayer::new(handle),
         PlaybackSettings {
             volume: Volume::Linear(volume),
             ..PlaybackSettings::LOOP
@@ -45,13 +47,13 @@ pub fn music(handle: Handle<AudioSource>, volume: f32) -> impl Bundle {
 pub struct SoundEffect;
 
 /// A sound effect audio instance.
-pub fn sfx(handle: Handle<AudioSource>, volume: f32) -> impl Bundle {
+pub fn sfx(handle: Handle<Sample>, volume: f32) -> impl Bundle {
     (
         SoundEffect,
-        AudioPlayer(handle),
+        SamplePlayer::new(handle),
         PlaybackSettings {
             volume: Volume::Linear(volume),
-            ..PlaybackSettings::DESPAWN
+            ..PlaybackSettings::REMOVE
         },
     )
 }

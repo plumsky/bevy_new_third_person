@@ -85,8 +85,10 @@ pub struct MenuModal;
 #[derive(Component)]
 pub struct SettingsModal;
 
-// TODO: maybe we don't need 3 separate functions to manage menu, but for now this is the way
-
+fn click_to_menu(_: Trigger<Pointer<Click>>, mut cmds: Commands) {
+    cmds.trigger(OnGoTo(Screen::Title));
+    cmds.trigger(OnPauseToggle);
+}
 fn click_pop_modal(_: Trigger<Pointer<Click>>, mut cmds: Commands) {
     cmds.trigger(OnPopModal);
 }
@@ -247,7 +249,7 @@ fn menu_modal() -> impl Bundle {
                     },
                     children![
                         btn(opts.clone(), click_spawn_settings),
-                        btn(opts.text("Main Menu"), to::title)
+                        btn(opts.text("Main Menu"), click_to_menu)
                     ]
                 )
             ]

@@ -4,6 +4,7 @@ use bevy::{
     app::App, asset::AssetMetaCheck, log, prelude::*, window::PrimaryWindow,
     window::WindowResolution, winit::WinitWindows,
 };
+use bevy_seedling::SeedlingPlugin;
 use std::io::Cursor;
 use winit::window::Icon;
 
@@ -69,7 +70,10 @@ fn main() {
         ..Default::default()
     };
 
-    app.add_plugins(DefaultPlugins.set(window).set(assets).set(log_level));
+    app.add_plugins((
+        DefaultPlugins.set(window).set(assets).set(log_level),
+        SeedlingPlugin::default(),
+    ));
 
     // custom plugins. the order is important
     // be sure you use resources/types AFTER you add plugins that insert them

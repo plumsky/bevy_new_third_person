@@ -9,9 +9,7 @@ repository = "https://github.com/olekspickle/bevy_new_third_person"
 description = "Simple third person view 3D game template"
 
 [features]
-default = [
-    "dev_native",                   # Default to a native dev build.
-]
+default = [ "dev_native" ]
 dev_native = [
     "bevy/bevy_dev_tools",
     "bevy/bevy_ui_debug",
@@ -30,7 +28,7 @@ enhanced = [
 ]
 
 [dependencies]
-# bevy_seedling = "0.3"
+bevy_seedling = "0.3"
 # everything except bevy_audio
 bevy = { version = "^0.16", default-features = false, features = [
     "std",
@@ -57,8 +55,6 @@ bevy = { version = "^0.16", default-features = false, features = [
     "custom_cursor",
     "default_font",
     "animation",
-    "vorbis",
-    "bevy_audio",
     "bevy_log",
     "bevy_gilrs",
     "bevy_gizmos",
@@ -104,8 +100,8 @@ winit = { version = "0.30", default-features = false }
 bevy_fix_gltf_coordinate_system = "0.1.0"
 
 # TODO: delete after everyone migrates to 0.16
-# [patch.crates-io]
-# bevy_seedling = { git = "https://github.com/CorvusPrudens/bevy_seedling",  branch = "bevy-0.16" }
+[patch.crates-io]
+bevy_seedling = { git = "https://github.com/CorvusPrudens/bevy_seedling",  branch = "bevy-0.16" }
 
 [lints.clippy]
 # Bevy supplies arguments to systems via dependency injection, so it's natural for systems to

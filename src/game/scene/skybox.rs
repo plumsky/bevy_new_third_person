@@ -115,7 +115,6 @@ pub fn rm_skybox_from_camera(
 }
 
 pub fn fog(cfg: Res<Config>) -> impl Bundle {
-    // TODO: fog visibility and directional_light_exponent sliders in settings for experimenting
     DistanceFog {
         color: Color::srgba(0.35, 0.48, 0.66, 1.0),
         directional_light_color: Color::srgba(1.0, 0.95, 0.85, 0.5),

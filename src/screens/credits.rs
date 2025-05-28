@@ -2,6 +2,7 @@
 
 use super::*;
 use bevy::{ecs::spawn::SpawnIter, ui::Val::*};
+use bevy_seedling::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
@@ -66,9 +67,9 @@ fn start_credits_music(
     mut commands: Commands,
     settings: Res<Settings>,
     sources: ResMut<AudioSources>,
-    mut bg_music: Query<&mut AudioSink, With<Music>>,
+    mut bg_music: Query<&mut PlaybackParams, With<Music>>,
 ) {
-    for s in bg_music.iter_mut() {
+    for mut s in bg_music.iter_mut() {
         s.pause();
     }
     let vol = settings.sound.general * settings.sound.music;

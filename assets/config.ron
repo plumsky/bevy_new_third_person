@@ -18,7 +18,7 @@
     ),
     sound: (
         general: 1.0,
-        music: 0.1,
+        music: 0.3,
         sfx: 0.5,
     ),
     physics: (
