@@ -23,7 +23,6 @@ pub fn movement(
             &mut TnuaController,
             &mut TnuaAvian3dSensorShape,
             &mut Collider,
-            &mut Transform,
         ),
         (With<Player>, Without<camera::SceneCamera>),
     >,
@@ -31,8 +30,7 @@ pub fn movement(
     camera: Query<&Transform, With<camera::SceneCamera>>,
     mut player: Query<&mut player::Player>,
 ) -> Result {
-    let (mut controller, mut avian_collider, mut collider, mut debug_capsule) =
-        tnua.single_mut()?;
+    let (mut controller, mut avian_sensor, mut collider) = tnua.single_mut()?;
     let mut player = player.single_mut()?;
     let mut direction = Vec3::ZERO;
     let mut speed = cfg.player.movement.speed * time.delta_secs();
@@ -50,7 +48,7 @@ pub fn movement(
 
     if state.just_pressed(&Action::Crouch) {
         collider.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
-        avian_collider.0.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
+        avian_sensor.0.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
     }
     if state.pressed(&Action::Crouch) {
         controller.action(TnuaBuiltinCrouch {
@@ -61,7 +59,7 @@ pub fn movement(
     }
     if state.just_released(&Action::Crouch) {
         collider.set_scale(Vec3::ONE, 4);
-        avian_collider.0.set_scale(Vec3::ONE, 4);
+        avian_sensor.0.set_scale(Vec3::ONE, 4);
     }
 
     if state.pressed(&Action::Right) {

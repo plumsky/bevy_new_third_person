@@ -10,7 +10,7 @@ use bevy::{
     prelude::*,
     ui::{Display as NodeDisplay, UiDebugOptions},
 };
-use bevy_seedling::{prelude::*, sample::Sample};
+use bevy_seedling::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_observer(toggle_mute)
