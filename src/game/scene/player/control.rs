@@ -11,7 +11,7 @@ pub struct StepTimer(pub Timer);
 pub struct JumpTimer(pub Timer);
 
 /// Tnua configuration is tricky to grasp from the get go, this is the best demo:
-/// https://github.com/idanarye/bevy-tnua/blob/main/demos/src/character_control_systems/platformer_control_systems.rs
+/// <https://github.com/idanarye/bevy-tnua/blob/main/demos/src/character_control_systems/platformer_control_systems.rs>
 pub fn movement(
     cfg: Res<Config>,
     time: Res<Time<Virtual>>,

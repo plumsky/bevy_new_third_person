@@ -20,7 +20,7 @@ impl Default for Sound {
     }
 }
 
-/// An organizational marker component that should be added to a spawned [`AudioPlayer`] if it's in the
+/// An organizational marker component that should be added to a spawned [`SamplePlayer`] if it's in the
 /// general "music" category (e.g. global background music, soundtrack).
 ///
 /// This can then be used to query for and operate on sounds in that category.
@@ -39,7 +39,7 @@ pub fn music(handle: Handle<Sample>, volume: f32) -> impl Bundle {
     )
 }
 
-/// An organizational marker component that should be added to a spawned [`AudioPlayer`] if it's in the
+/// An organizational marker component that should be added to a spawned [`SamplePlayer`] if it's in the
 /// general "sound effect" category (e.g. footsteps, the sound of a magic spell, a door opening).
 ///
 /// This can then be used to query for and operate on sounds in that category.
