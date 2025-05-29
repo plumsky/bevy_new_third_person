@@ -19,6 +19,8 @@ You can [try this template in your browser!](https://olekspickle.itch.io/bevy-th
 Install [cargo-generate] and run:
 ```bash
 cargo generate olekspickle/bevy_new_third_person
+# or with bevy_cli
+bevy new -t=https://github.com/olekspickle/bevy_new_third_person my_bevy_app
 ```
 
 ## Write your game
