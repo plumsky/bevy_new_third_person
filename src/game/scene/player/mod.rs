@@ -103,7 +103,7 @@ pub fn spawn_player(
             TnuaAvian3dSensorShape(collider.clone()),
             RigidBody::Dynamic,
             collider,
-            JumpTimer(Timer::from_seconds(0.5, TimerMode::Repeating)),
+            // JumpTimer(Timer::from_seconds(0.5, TimerMode::Repeating)),
             StepTimer(Timer::from_seconds(0.39, TimerMode::Repeating)),
         ))
         .with_children(|spawner| {

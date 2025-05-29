@@ -7,8 +7,8 @@ use leafwing_input_manager::prelude::ActionState;
 
 #[derive(Component)]
 pub struct StepTimer(pub Timer);
-#[derive(Component)]
-pub struct JumpTimer(pub Timer);
+// #[derive(Component)]
+// pub struct JumpTimer(pub Timer);
 
 /// Tnua configuration is tricky to grasp from the get go, this is the best demo:
 /// <https://github.com/idanarye/bevy-tnua/blob/main/demos/src/character_control_systems/platformer_control_systems.rs>
@@ -17,7 +17,7 @@ pub fn movement(
     time: Res<Time<Virtual>>,
     //touch_input: Res<Touches>,
     action: Query<&ActionState<Action>>,
-    mut jump_timer: Query<&mut JumpTimer>,
+    // mut jump_timer: Query<&mut JumpTimer>,
     mut step_timer: Query<&mut StepTimer>,
     mut tnua: Query<
         (

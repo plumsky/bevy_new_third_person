@@ -59,12 +59,11 @@ impl LoadResource for App {
                   mut events: EventReader<AssetEvent<T>>,
                   assets: Res<Assets<T>>| {
                 for event in events.read() {
-                    if let AssetEvent::Modified { id } = event {
-                        if *id == handle.id() {
-                            if let Some(asset) = assets.get(&handle) {
-                                commands.insert_resource(asset.clone());
-                            }
-                        }
+                    if let AssetEvent::Modified { id } = event
+                        && *id == handle.id()
+                        && let Some(asset) = assets.get(&handle)
+                    {
+                        commands.insert_resource(asset.clone());
                     }
                 }
             },
