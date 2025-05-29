@@ -50,7 +50,6 @@ pub fn toggle_settings(
         next_screen.set(Screen::Title);
     } else {
         cmds.trigger(OnPopModal);
-        // cmds.trigger(OnSettingsToggle);
     }
 }
 
@@ -81,12 +80,12 @@ fn core_grid() -> impl Bundle {
                 },
                 label("General Audio"),
             ),
-            volume_widget(),
+            general_volume(),
         ],
     )
 }
 
-fn volume_widget() -> impl Bundle {
+fn general_volume() -> impl Bundle {
     (
         Node {
             justify_self: JustifySelf::Start,
@@ -118,35 +117,25 @@ struct GeneralVolumeLabel;
 fn lower_general(
     _: Trigger<Pointer<Click>>,
     mut settings: ResMut<Settings>,
-    mut music: Query<&mut PlaybackSettings, (With<Music>, Without<SoundEffect>)>,
-    mut sfx: Query<&mut PlaybackSettings, (With<SoundEffect>, Without<Music>)>,
+    mut music: Single<&mut VolumeNode, (With<SamplerPool<Music>>, Without<SamplerPool<Sfx>>)>,
+    mut sfx: Single<&mut VolumeNode, (With<SamplerPool<Sfx>>, Without<SamplerPool<Music>>)>,
 ) {
     let new_volume = (settings.sound.general - STEP).max(MIN_VOLUME);
     settings.sound.general = new_volume;
-
-    for mut param_set in music.iter_mut() {
-        param_set.volume = Volume::Linear(new_volume * settings.sound.music);
-    }
-    for mut param_set in sfx.iter_mut() {
-        param_set.volume = Volume::Linear(new_volume * settings.sound.sfx);
-    }
+    music.volume = Volume::Linear(new_volume * settings.sound.music);
+    sfx.volume = Volume::Linear(new_volume * settings.sound.sfx);
 }
 
 fn raise_general(
     _: Trigger<Pointer<Click>>,
     mut settings: ResMut<Settings>,
-    mut music: Query<&mut PlaybackSettings, (With<Music>, Without<SoundEffect>)>,
-    mut sfx: Query<&mut PlaybackSettings, (With<SoundEffect>, Without<Music>)>,
+    mut music: Single<&mut VolumeNode, (With<SamplerPool<Music>>, Without<SamplerPool<Sfx>>)>,
+    mut sfx: Single<&mut VolumeNode, (With<SamplerPool<Sfx>>, Without<SamplerPool<Music>>)>,
 ) {
     let new_volume = (settings.sound.general + STEP).min(MAX_VOLUME);
     settings.sound.general = new_volume;
-
-    for mut param_set in music.iter_mut() {
-        param_set.volume = Volume::Linear(new_volume * settings.sound.music);
-    }
-    for mut param_set in sfx.iter_mut() {
-        param_set.volume = Volume::Linear(new_volume * settings.sound.sfx);
-    }
+    music.volume = Volume::Linear(new_volume * settings.sound.music);
+    sfx.volume = Volume::Linear(new_volume * settings.sound.sfx);
 }
 
 fn update_volume_label(

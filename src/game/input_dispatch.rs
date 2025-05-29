@@ -58,7 +58,7 @@ fn trigger_input_dispatch(
     if state.just_pressed(&Action::ToggleMute) {
         commands.trigger(OnMuteToggle);
     }
-    if state.just_pressed(&Action::ToggleDebugUi) {
+    if state.just_pressed(&Action::ToggleUiDebug) {
         commands.trigger(OnDebugUiToggle);
     }
     if state.just_pressed(&Action::Back) {

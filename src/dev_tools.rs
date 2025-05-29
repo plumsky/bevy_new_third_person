@@ -42,8 +42,8 @@ fn toggle_pause(
     mut settings: ResMut<Settings>,
     mut time: ResMut<Time<Virtual>>,
     mut label: Query<(&mut BackgroundColor, &mut TextColor), With<PauseLabel>>,
-    mut music: Query<&mut PlaybackParams, (With<Music>, Without<SoundEffect>)>,
-    mut sfx: Query<&mut PlaybackParams, (With<SoundEffect>, Without<Music>)>,
+    mut music: Query<&mut PlaybackParams, (With<Music>, Without<Sfx>)>,
+    mut sfx: Query<&mut PlaybackParams, (With<Sfx>, Without<Music>)>,
 ) {
     if let Ok((mut bg, mut color)) = label.single_mut() {
         if time.is_paused() || settings.paused {
@@ -72,23 +72,18 @@ fn toggle_mute(
     _: Trigger<OnMuteToggle>,
     mut settings: ResMut<Settings>,
     mut label: Query<(&mut BackgroundColor, &mut TextColor), With<MuteLabel>>,
-    mut music: Query<&mut PlaybackSettings, (With<Music>, Without<SoundEffect>)>,
-    mut sfx: Query<&mut PlaybackSettings, (With<SoundEffect>, Without<Music>)>,
+    mut music: Single<&mut VolumeNode, (With<SamplerPool<Music>>, Without<SamplerPool<Sfx>>)>,
+    mut sfx: Single<&mut VolumeNode, (With<SamplerPool<Sfx>>, Without<SamplerPool<Music>>)>,
 ) {
     if let Ok((mut bg, mut color)) = label.single_mut() {
         if settings.muted {
-            for mut s in music.iter_mut() {
-                s.volume = Volume::Linear(settings.sound.general * settings.sound.music);
-            }
-            for mut s in sfx.iter_mut() {
-                s.volume = Volume::Linear(settings.sound.general * settings.sound.sfx);
-            }
+            music.volume = Volume::Linear(settings.sound.general * settings.sound.music);
+            sfx.volume = Volume::Linear(settings.sound.general * settings.sound.sfx);
             *color = TextColor(WHITEISH);
             *bg = BackgroundColor(TRANSPARENT);
         } else {
-            for mut s in music.iter_mut().chain(sfx.iter_mut()) {
-                s.volume = Volume::Linear(0.0);
-            }
+            music.volume = Volume::SILENT;
+            sfx.volume = Volume::SILENT;
             *color = TextColor(GRAY);
             *bg = BackgroundColor(WHITEISH);
         }

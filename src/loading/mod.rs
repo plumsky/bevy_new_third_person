@@ -81,7 +81,6 @@ impl AudioSources {
         "audio/sfx/step2.ogg",
         "audio/sfx/step3.ogg",
         "audio/sfx/step4.ogg",
-        "audio/sfx/step5.ogg",
     ];
     pub const BTN_HOVER: &'static str = "audio/sfx/btn-hover.ogg";
     pub const BTN_PRESS: &'static str = "audio/sfx/btn-press.ogg";

@@ -18,6 +18,7 @@ pub fn movement(
     //touch_input: Res<Touches>,
     action: Query<&ActionState<Action>>,
     mut jump_timer: Query<&mut JumpTimer>,
+    mut step_timer: Query<&mut StepTimer>,
     mut tnua: Query<
         (
             &mut TnuaController,
@@ -39,11 +40,27 @@ pub fn movement(
     let forward = camera_transform.forward().normalize();
     let forward_flat = Vec3::new(forward.x, 0.0, forward.z);
 
+    let left_stick = state.clamped_axis_pair(&Action::Move);
+    if left_stick.length() >= 0.1 {
+        let right = forward_flat.cross(Vec3::Y).normalize();
+        direction = (right * left_stick.x) + (forward_flat * left_stick.y);
+        // direction = Vec3::new(
+        //     left_stick.x + forward_flat.x,
+        //     0.0,
+        //     left_stick.y + forward_flat.z,
+        // );
+    }
+
+    let mut step_timer = step_timer.single_mut()?;
     if state.just_pressed(&Action::Sprint) {
-        player.speed *= 2.0;
+        let new = step_timer.0.duration() / SPRINT_FACTOR as u32;
+        step_timer.0.set_duration(new);
+        player.speed *= SPRINT_FACTOR;
     }
     if state.just_released(&Action::Sprint) {
-        player.speed /= 2.0;
+        let new = step_timer.0.duration() * SPRINT_FACTOR as u32;
+        step_timer.0.set_duration(new);
+        player.speed /= SPRINT_FACTOR;
     }
 
     if state.just_pressed(&Action::Crouch) {
@@ -101,9 +118,11 @@ pub fn movement(
     });
 
     let mut air_counter = air_counter.single_mut()?;
-    let mut timer = jump_timer.single_mut()?;
-    // if state.pressed(&Action::Jump) {
-    if state.pressed(&Action::Jump) && timer.0.tick(time.delta()).just_finished() {
+    if state.pressed(&Action::Jump) {
+        // TODO: figure out jump timer with tnua
+        // let mut timer = jump_timer.single_mut()?;
+        // if state.pressed(&Action::Jump) && timer.0.tick(time.delta()).just_finished() {
+
         // Feed the jump action every frame as long as the player holds the jump button. If the player
         // stops holding the jump button, simply stop feeding the action.
         air_counter.update(controller.as_mut());

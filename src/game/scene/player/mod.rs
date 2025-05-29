@@ -12,6 +12,8 @@ pub use control::*;
 
 use super::skybox;
 
+pub const SPRINT_FACTOR: f32 = 2.0;
+
 /// This plugin handles player related stuff like movement, shooting
 /// Player logic is only active during the State `Screen::Playing`
 pub fn plugin(app: &mut App) {
@@ -102,7 +104,7 @@ pub fn spawn_player(
             RigidBody::Dynamic,
             collider,
             JumpTimer(Timer::from_seconds(0.5, TimerMode::Repeating)),
-            StepTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+            StepTimer(Timer::from_seconds(0.39, TimerMode::Repeating)),
         ))
         .with_children(|spawner| {
             let mut e = spawner.spawn((

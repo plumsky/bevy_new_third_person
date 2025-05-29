@@ -7,7 +7,7 @@ pub fn plugin(app: &mut App) {
     app.add_plugins(InputManagerPlugin::<Action>::default())
         .add_systems(Startup, spawn_player_input_map)
         .add_systems(
-            OnEnter(Screen::Title),
+            OnEnter(Screen::Gameplay),
             inject_settings_from_cfg.run_if(resource_exists::<Config>),
         );
 }
@@ -18,10 +18,10 @@ pub struct Settings {
     pub sound: Sound,
 
     // game state things
-    pub diagnostics: bool,
     /// Modal stack. kudo for the idea to @skyemakesgames
     /// Only relevant in [`Screen::Gameplay`]
     pub modals: Vec<Modal>,
+    pub diagnostics: bool,
     pub muted: bool,
     pub paused: bool,
     pub sun_cycle: SunCycle,
@@ -31,7 +31,7 @@ pub struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         Self {
-            last_screen: Screen::Splash,
+            last_screen: Screen::Title,
             sun_cycle: SunCycle::DayNight,
             sound: Sound::default(),
             modals: vec![],
@@ -65,24 +65,31 @@ pub enum Action {
     Backward,
     Left,
     Right,
+    #[actionlike(DualAxis)]
+    Move,
+    #[actionlike(DualAxis)]
+    LookAround,
+
     Jump,
-    Dash,
     Sprint,
     Crouch,
+    Dash,
 
     // Miscellaneous
-    ToggleDebugUi,
+    ToggleUiDebug,
     Back,
     ToggleMute,
     TogglePause,
+    ToggleSunCycle,
     ToggleDiagnostics,
     Toot,
-    ToggleSunCycle,
     FovIncr,
 }
 
 fn spawn_player_input_map(mut commands: Commands) {
-    let mut input_map = InputMap::default();
+    let mut input_map = InputMap::default()
+        .with_dual_axis(Action::Move, GamepadStick::LEFT)
+        .with_dual_axis(Action::LookAround, GamepadStick::RIGHT);
 
     input_map.insert(Action::Left, KeyCode::KeyA);
     input_map.insert(Action::Right, KeyCode::KeyD);
@@ -95,18 +102,22 @@ fn spawn_player_input_map(mut commands: Commands) {
     input_map.insert(Action::Backward, KeyCode::ArrowDown);
 
     input_map.insert(Action::Jump, KeyCode::Space);
-    input_map.insert(Action::Crouch, KeyCode::ControlLeft);
-    input_map.insert(Action::Dash, KeyCode::AltLeft);
+    input_map.insert(Action::Jump, GamepadButton::South);
     input_map.insert(Action::Sprint, KeyCode::ShiftLeft);
+    input_map.insert(Action::Sprint, GamepadButton::LeftThumb);
+    input_map.insert(Action::Crouch, KeyCode::ControlLeft);
+    input_map.insert(Action::Crouch, GamepadButton::East);
+    input_map.insert(Action::Dash, KeyCode::AltLeft);
+    input_map.insert(Action::Dash, GamepadButton::LeftTrigger);
 
     input_map.insert(Action::Back, KeyCode::Escape);
     input_map.insert(Action::TogglePause, KeyCode::KeyP);
     input_map.insert(Action::ToggleMute, KeyCode::KeyM);
-    input_map.insert(Action::ToggleDiagnostics, KeyCode::KeyF);
-
-    input_map.insert(Action::ToggleDebugUi, KeyCode::Backquote);
-    input_map.insert(Action::Toot, KeyCode::KeyC);
     input_map.insert(Action::ToggleSunCycle, KeyCode::KeyO);
+    input_map.insert(Action::ToggleDiagnostics, KeyCode::KeyF);
+    input_map.insert(Action::ToggleUiDebug, KeyCode::Backquote);
+
+    input_map.insert(Action::Toot, KeyCode::KeyC);
     input_map.insert(Action::FovIncr, KeyCode::KeyV);
 
     commands.spawn(input_map);

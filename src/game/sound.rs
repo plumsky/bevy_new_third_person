@@ -26,7 +26,7 @@ fn start_or_resume_soundtrack(
 ) -> Result {
     if let Ok((player, mut instance)) = music_query.single_mut() {
         if !player.is_playing() {
-            // TODO: use seedling under feature
+            info!("player is not playing");
             instance.play();
         }
     } else {
@@ -76,7 +76,7 @@ fn movement_sound(
             | state.pressed(&Action::Backward)
             | state.pressed(&Action::Left)
             | state.pressed(&Action::Right))
-            && player_pos.translation.y == 0.0
+            && player_pos.translation.y <= 2.0
         {
             let mut rng = thread_rng();
             let i = rng.gen_range(0..sources.steps.len());

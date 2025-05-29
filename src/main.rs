@@ -4,7 +4,6 @@ use bevy::{
     app::App, asset::AssetMetaCheck, log, prelude::*, window::PrimaryWindow,
     window::WindowResolution, winit::WinitWindows,
 };
-use bevy_seedling::SeedlingPlugin;
 use std::io::Cursor;
 use winit::window::Icon;
 
@@ -22,7 +21,7 @@ pub(crate) mod prelude {
     pub use avian3d::prelude::*;
     pub use bevy::prelude::*;
 
-    pub use audio::{Music, Sound, SoundEffect, music, sfx};
+    pub use audio::{Music, Sfx, Sound, music, sfx};
     pub(crate) use game::{
         Score, camera,
         input_dispatch::*,
@@ -40,7 +39,12 @@ fn main() {
 
     app.configure_sets(
         Update,
-        (AppSet::TickTimers, AppSet::RecordInput, AppSet::Update).chain(),
+        (
+            AppSystems::TickTimers,
+            AppSystems::RecordInput,
+            AppSystems::Update,
+        )
+            .chain(),
     );
     let mut resolution = WindowResolution::default();
     resolution.set_physical_resolution(1600, 1000);
@@ -70,14 +74,11 @@ fn main() {
         ..Default::default()
     };
 
-    app.add_plugins((
-        DefaultPlugins.set(window).set(assets).set(log_level),
-        SeedlingPlugin::default(),
-    ));
+    app.add_plugins(DefaultPlugins.set(window).set(assets).set(log_level));
 
     // custom plugins. the order is important
     // be sure you use resources/types AFTER you add plugins that insert them
-    app.add_plugins((loading::plugin, ui::plugin, screens::plugin))
+    app.add_plugins((audio::plugin, loading::plugin, ui::plugin, screens::plugin))
         .add_systems(Startup, set_window_icon);
 
     #[cfg(feature = "dev_native")]

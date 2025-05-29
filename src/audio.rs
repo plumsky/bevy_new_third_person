@@ -1,7 +1,16 @@
-// use bevy::{audio::Volume, prelude::*};
 use bevy::prelude::*;
-use bevy_seedling::{prelude::*, sample::Sample};
+use bevy_seedling::{pool::SamplerPool, prelude::*, sample::Sample};
 use serde::{Deserialize, Serialize};
+
+pub fn plugin(app: &mut App) {
+    app.add_plugins(SeedlingPlugin::default())
+        .add_systems(Startup, spawn_pools);
+}
+
+fn spawn_pools(mut cmds: Commands) {
+    cmds.spawn(SamplerPool(Music));
+    cmds.spawn(SamplerPool(Sfx));
+}
 
 #[derive(Resource, Debug, Clone, Serialize, Deserialize, Reflect)]
 pub struct Sound {
@@ -24,16 +33,17 @@ impl Default for Sound {
 /// general "music" category (e.g. global background music, soundtrack).
 ///
 /// This can then be used to query for and operate on sounds in that category.
-#[derive(Component, Default)]
+#[derive(PoolLabel, Debug, Clone, PartialEq, Eq, Hash, Default, Reflect)]
+#[reflect(Component)]
 pub struct Music;
 
 /// A music audio instance.
-pub fn music(handle: Handle<Sample>, volume: f32) -> impl Bundle {
+pub fn music(handle: Handle<Sample>, vol: f32) -> impl Bundle {
     (
         Music,
         SamplePlayer::new(handle),
         PlaybackSettings {
-            volume: Volume::Linear(volume),
+            volume: Volume::Linear(vol),
             ..PlaybackSettings::LOOP
         },
     )
@@ -43,16 +53,18 @@ pub fn music(handle: Handle<Sample>, volume: f32) -> impl Bundle {
 /// general "sound effect" category (e.g. footsteps, the sound of a magic spell, a door opening).
 ///
 /// This can then be used to query for and operate on sounds in that category.
-#[derive(Component, Default)]
-pub struct SoundEffect;
+
+#[derive(PoolLabel, Debug, Clone, PartialEq, Eq, Hash, Default, Reflect)]
+#[reflect(Component)]
+pub struct Sfx;
 
 /// A sound effect audio instance.
-pub fn sfx(handle: Handle<Sample>, volume: f32) -> impl Bundle {
+pub fn sfx(handle: Handle<Sample>, vol: f32) -> impl Bundle {
     (
-        SoundEffect,
+        Sfx,
         SamplePlayer::new(handle),
         PlaybackSettings {
-            volume: Volume::Linear(volume),
+            volume: Volume::Linear(vol),
             ..PlaybackSettings::REMOVE
         },
     )
