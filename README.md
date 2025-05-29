@@ -29,7 +29,6 @@ This template comes with a basic project structure that you may find useful:
 | Path                                               | Description                                                        |
 | -------------------------------------------------- | ------------------------------------------------------------------ |
 | [`src/main.rs`](./src/main.rs)                     | App entrypoint(not much going on there)                            |
-| [`src/lib.rs`](./src/lib.rs)                       | App setup                                                          |
 | [`src/loading/`](./src/loading)                    | A high-level way to load collections of asset handles as resources |
 | [`src/game/`](./src/game)                          | Game mechanics & content(inputs, scene, player control & animation)|
 | [`src/audio.rs`](./src/audio.rs)                   | Marker components for sound effects and music                      |
@@ -43,7 +42,7 @@ Feel free to move things around however you want, though.
 - [x] import and usage of game mechanics and parameters from .ron (config, credits)
 - [x] simple asset loading from [BevyFlock] example with loading from path addition
 - [x] third person camera with [bevy_third_person_camera]
-- [x] simple key mapping to game actions using [leafwing-input-manager]
+- [x] simple keyboard & gamepad mapping to game actions using [leafwing-input-manager]
 - [x] simple scene with colliders and rigid bodies using [avian3d]
 - [x] simple player movement using [bevy_tnua]
 - [x] simple skybox sun cycle using [bevy atmosphere example], with daynight and nimbus modes
@@ -51,20 +50,19 @@ Feel free to move things around however you want, though.
 - [x] experimental sound with [bevy_seedling] based on Firewheel audio engine (which will probably replace bevy_audio)
 - [x] consistent Esc back navigation in gameplay and menu via stacked modals
 
-### TODOs
+### TODOs (prioritized)
+- [ ] better scene: I'm thinking woods, campfire, a target practice dummies and a big rock to climb
 - [ ] vault mechanics
 - [ ] climb mechanics
-- [ ] small door/portal demo
 - [ ] small door/portal demo
 - [ ] keys rebind in settings
 - [ ] do not rotate player on aim(silly bug, check it out - release aim looking to the floor)
 - [ ] implement different music states(idle, battle, movement)
 - [ ] Crouch walk
-- [ ] Movement sfx: jump, dash
+- [ ] Movement sfx: jump, dash, sprint
 - [ ] serialize and save settings
 - [ ] Jump with timer(tricky with tnua jump in air)
 - [ ] sky background instead of just void lol
-- [ ] better scene: I'm thinking woods, campfire and a big rock to climb
 - [ ] spatial audio demo: boombox emitting background music
 
 ## Run your game

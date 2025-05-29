@@ -7,66 +7,60 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/{{authors}}/{{authors}}"
 
 [features]
-default = [
-    "dev_native",                   # Default to a native dev build.
-]
+default = [ "dev_native" ]
 dev_native = [
+    "enhanced",
     "bevy/bevy_dev_tools",
     "bevy/bevy_ui_debug",
     "bevy/dynamic_linking",         # Improve compile times for dev builds by linking Bevy as a dynamic library.
-    "bevy/file_watcher",            # Enable asset hot reloading for native dev builds.
+    "bevy/track_location",          # Improve error messages coming from Bevy
     "bevy/embedded_watcher",        # Enable embedded asset hot reloading for native dev builds.
-    "enhanced"
+    "bevy/file_watcher",            # Enable asset hot reloading for native dev builds.
 ]
 
 # For all dev builds (shared logic, wasm-safe)
 wasm = ["bevy/bevy_dev_tools", "enhanced"]
 enhanced = [
-    "bevy/meshlet",                 # new nanite-like rendering system
-    "bevy/pbr_specular_textures"    # PBR specular maps
+    "bevy/bevy_pbr",                # PBR
+    "bevy/pbr_specular_textures",   # PBR specular maps
+    "bevy/meshlet"                  # new nanite-like rendering system
 ]
 
 [dependencies]
-# TODO: use after 0.16 migration
 # bevy_seedling = "0.3"
 # everything except bevy_audio
 bevy = { version = "^0.16", default-features = false, features = [
     "std",
-    "vorbis",
-    "bevy_audio",
-    "animation",
-    "bevy_asset",
-    "bevy_color",
-    "bevy_core_pipeline",
-    "bevy_gilrs",
-    "bevy_gizmos",
-    "bevy_gltf",
-    "bevy_input_focus",
-    "bevy_log",
-    "bevy_mesh_picking_backend",
-    "bevy_pbr",
-    "bevy_picking",
+    "sysinfo_plugin",
+    "multi_threaded",
+    "hdr",
+    "smaa_luts",
+    "tonemapping_luts",
     "bevy_render",
-    "bevy_scene",
-    "bevy_sprite",
-    "bevy_sprite_picking_backend",
+    "bevy_window",
+    "bevy_winit",
     "bevy_state",
+    "bevy_color",
+    "bevy_asset",
+    "bevy_core_pipeline",
+    "bevy_gltf",
+    "bevy_scene",
+    "bevy_picking",
+    "bevy_mesh_picking_backend",
     "bevy_text",
     "bevy_ui",
     "bevy_ui_picking_backend",
-    "bevy_window",
-    "bevy_winit",
+    "bevy_input_focus",
     "custom_cursor",
     "default_font",
-    "hdr",
-    "multi_threaded",
+    "animation",
+    "bevy_log",
+    "bevy_gilrs",
+    "bevy_gizmos",
     "png",
     "jpeg",
-    "smaa_luts",
-    "sysinfo_plugin",
-    "tonemapping_luts",
-    "x11",
     "webgl2",
+    "x11",
     "wayland"
 ] }
 
@@ -105,23 +99,26 @@ bevy_fix_gltf_coordinate_system = "0.1.0"
 
 # TODO: delete after everyone migrates to 0.16
 [patch.crates-io]
-iyes_perf_ui = { git = "https://github.com/IyesGames/iyes_perf_ui", branch = "main" }
+bevy_seedling = { git = "https://github.com/CorvusPrudens/bevy_seedling",  branch = "bevy-0.16" }
 
 [lints.clippy]
 # Bevy supplies arguments to systems via dependency injection, so it's natural for systems to
 # request more than 7 arguments, which would undesirably trigger this lint.
 too_many_arguments = "allow"
-# Queries may access many components, which would undesirably trigger this lint.
-type_complexity = "allow"
-# Make sure macros use their standard braces, such as `[]` for `bevy_ecs::children!`.
-nonstandard_macro_braces = "warn"
+type_complexity = "allow"           # Queries may access many components, which would undesirably trigger this lint.
+nonstandard_macro_braces = "warn"   # Make sure macros use their standard braces, such as `[]` for `bevy_ecs::children!`.
 
+[profile.ci]                # Optimize for build time in CI.
+inherits = "dev"
+opt-level = 0
+debug = "line-tables-only"
+codegen-units = 4
+[profile.ci.package."*"]
+opt-level = 0
 
-# Enable a small amount of optimization in the dev profile.
-[profile.dev]
+[profile.dev]               # Less optimization in the dev profile.
 opt-level = 1
-# Enable a large amount of optimization in the dev profile for dependencies.
-[profile.dev.package."*"]
+[profile.dev.package."*"]   # More optimization in the dev profile for dependencies.
 opt-level = 3
 
 [profile.release]
@@ -131,23 +128,12 @@ lto = "thin"
 # Optimize with size in mind (also try "z", sometimes it is better).
 # Slightly slows compile times, great improvements to file size and runtime performance.
 opt-level = "s"
-# Compile the entire crate as one unit. Slows compile times, marginal improvements.
-codegen-units = 1
+codegen-units = 1           # Compile the entire crate as one unit. Slows compile times, marginal improvements.
 strip = true
 
-# Profile for distribution
-[profile.dist]
+[profile.wasm-release]      # Optimize for size in the wasm-release profile to reduce load times and bandwidth usage on web.
 inherits = "release"
-opt-level = 3
-lto = true
-codegen-units = 1
-strip = true
-
-# Optimize for size in the wasm-release profile to reduce load times and bandwidth usage on web.
-[profile.wasm-release]
-inherits = "release"
-# Strip all debugging information from the binary to slightly reduce file size.
-strip = "debuginfo"
+strip = "debuginfo"         # Strip all debugging information from the binary to slightly reduce file size.
 
 [build-dependencies]
 embed-resource = "1"
