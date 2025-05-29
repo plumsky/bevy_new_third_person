@@ -53,19 +53,22 @@ Feel free to move things around however you want, though.
 - [x] consistent Esc back navigation in gameplay and menu via stacked modals
 
 ### TODOs (prioritized)
+- [ ] Crouch walk
+- [ ] Jump with timer(tricky with tnua jump in air)
+- [ ] fix music not starting on re-enter gameplay
+- [ ] fix sound difference on spawn and unmute
 - [ ] better scene: I'm thinking woods, campfire, a target practice dummies and a big rock to climb
+- [ ] fullscreen in web to avoid key clash(like Alt for browser)
+- [ ] sky background instead of just void lol
+- [ ] Movement sfx: jump, dash, sprint
+- [ ] implement different music states(idle, battle, movement)
+- [ ] spatial audio demo: boombox emitting background music
+- [ ] serialize and save settings
+- [ ] keys rebind in settings
 - [ ] vault mechanics
 - [ ] climb mechanics
 - [ ] small door/portal demo
-- [ ] keys rebind in settings
 - [ ] do not rotate player on aim(silly bug, check it out - release aim looking to the floor)
-- [ ] implement different music states(idle, battle, movement)
-- [ ] Crouch walk
-- [ ] Movement sfx: jump, dash, sprint
-- [ ] serialize and save settings
-- [ ] Jump with timer(tricky with tnua jump in air)
-- [ ] sky background instead of just void lol
-- [ ] spatial audio demo: boombox emitting background music
 
 ## Run your game
 

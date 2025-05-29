@@ -193,7 +193,6 @@ pub fn animating(
             } else {
                 let basis_speed = basis_state.running_velocity.length();
                 if basis_speed > IDLE_TO_RUN_TRESHOLD {
-                    // TODO: apply player speed to animation, but it needs to be paired with control
                     let speed = BASE_SPEED_SCALE * basis_speed * player.speed;
                     AnimationState::Run(speed)
                 } else {
@@ -216,7 +215,6 @@ pub fn animating(
             // still change. When it does, we simply need to update the speed in the animation
             // player.
             if let AnimationState::Run(speed) = state {
-                // && let Some(animation) = animation_player.animation_mut(animation_nodes.running)
                 if let Some(animation) = animation_player.animation_mut(animation_nodes.running) {
                     animation.set_speed(*speed);
                 }

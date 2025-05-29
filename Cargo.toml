@@ -17,6 +17,7 @@ dev = [
     "bevy/track_location",          # Improve error messages coming from Bevy
 ]
 dev_native = [
+    "dev",
     "enhanced",
     "bevy/embedded_watcher",        # Enable embedded asset hot reloading for native dev builds.
     "bevy/file_watcher",            # Enable asset hot reloading for native dev builds.
