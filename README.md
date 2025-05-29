@@ -41,7 +41,7 @@ This template comes with a basic project structure that you may find useful:
 Feel free to move things around however you want, though.
 
 ## Features:
-- [x] import and usage of game mechanics and parameters from .ron (config, credits)
+- [x] import and usage of game mechanics and parameters from .ron (config, credits) (kudos to Caudiciform)
 - [x] simple asset loading from [BevyFlock] example with loading from path addition
 - [x] third person camera with [bevy_third_person_camera]
 - [x] simple keyboard & gamepad mapping to game actions using [leafwing-input-manager]

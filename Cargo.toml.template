@@ -8,26 +8,34 @@ repository = "https://github.com/{{authors}}/{{authors}}"
 
 [features]
 default = [ "dev_native" ]
-dev_native = [
-    "enhanced",
+dev = [
     "bevy/bevy_dev_tools",
     "bevy/bevy_ui_debug",
     "bevy/dynamic_linking",         # Improve compile times for dev builds by linking Bevy as a dynamic library.
     "bevy/track_location",          # Improve error messages coming from Bevy
+]
+dev_native = [
+    "enhanced",
     "bevy/embedded_watcher",        # Enable embedded asset hot reloading for native dev builds.
     "bevy/file_watcher",            # Enable asset hot reloading for native dev builds.
 ]
-
-# For all dev builds (shared logic, wasm-safe)
-wasm = ["bevy/bevy_dev_tools", "enhanced"]
 enhanced = [
     "bevy/bevy_pbr",                # PBR
     "bevy/pbr_specular_textures",   # PBR specular maps
     "bevy/meshlet"                  # new nanite-like rendering system
 ]
 
+[package.metadata.bevy_cli.release]
+# Disable dev features for release builds.
+default-features = false
+[package.metadata.bevy_cli.web]
+# Disable native features for web builds.
+default-features = false
+[package.metadata.bevy_cli.web.dev]
+features = ["dev"]
+
 [dependencies]
-# bevy_seedling = "0.3"
+bevy_seedling = "0.3"
 # everything except bevy_audio
 bevy = { version = "^0.16", default-features = false, features = [
     "std",
@@ -74,18 +82,19 @@ avian3d = { version = "0.3", features = ["3d", "parallel", "collider-from-mesh"]
 
 # camera
 bevy_third_person_camera = "0.2"
+# bevy_third_person_camera = { path = "../../Documents/rust/bevy_third_person_camera" }
 
 # floating character control
 bevy-tnua = "0.24"
 bevy-tnua-avian3d = "0.5"
 
 # diagnostics overlay
-iyes_perf_ui = "0.5.0-rc.1"
+iyes_perf_ui = "0.5"
 
 # key bindings
 leafwing-input-manager = "0.17"
 
-# other
+# misc
 ron = "0.10"
 rand = { version = "0.8" }
 serde = "1"
@@ -97,8 +106,12 @@ log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"
 winit = { version = "0.30", default-features = false }
 bevy_fix_gltf_coordinate_system = "0.1.0"
 
-# TODO: delete after everyone migrates to 0.16
+# TODO: rm after getrandom feature fix
+[target.wasm32-unknown-unknown.dependencies]
+getrandom = { version = "0.3", features = ["wasm_js"] }
+
 [patch.crates-io]
+getrandom = { git = "https://github.com/benfrankel/getrandom" }
 bevy_seedling = { git = "https://github.com/CorvusPrudens/bevy_seedling",  branch = "bevy-0.16" }
 
 [lints.clippy]
@@ -121,6 +134,9 @@ opt-level = 1
 [profile.dev.package."*"]   # More optimization in the dev profile for dependencies.
 opt-level = 3
 
+[profile.dev.package.wgpu-types] # Remove expensive debug assertions due to <https://github.com/bevyengine/bevy/issues/14291>
+debug-assertions = false
+
 [profile.release]
 # Do a second optimization pass over the entire program, including dependencies.
 # Slows compile times, marginal improvements.
@@ -130,6 +146,7 @@ lto = "thin"
 opt-level = "s"
 codegen-units = 1           # Compile the entire crate as one unit. Slows compile times, marginal improvements.
 strip = true
+
 
 [profile.wasm-release]      # Optimize for size in the wasm-release profile to reduce load times and bandwidth usage on web.
 inherits = "release"
