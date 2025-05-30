@@ -15,8 +15,8 @@ pub struct StepTimer(pub Timer);
 pub fn movement(
     cfg: Res<Config>,
     time: Res<Time<Virtual>>,
-    //touch_input: Res<Touches>,
     action: Query<&ActionState<Action>>,
+    //touch_input: Res<Touches>,
     // mut jump_timer: Query<&mut JumpTimer>,
     mut step_timer: Query<&mut StepTimer>,
     mut tnua: Query<
@@ -44,11 +44,6 @@ pub fn movement(
     if left_stick.length() >= 0.1 {
         let right = forward_flat.cross(Vec3::Y).normalize();
         direction = (right * left_stick.x) + (forward_flat * left_stick.y);
-        // direction = Vec3::new(
-        //     left_stick.x + forward_flat.x,
-        //     0.0,
-        //     left_stick.y + forward_flat.z,
-        // );
     }
 
     let mut step_timer = step_timer.single_mut()?;
