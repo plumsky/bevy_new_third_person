@@ -59,6 +59,7 @@ Feel free to move things around however you want, though.
 - [ ] fix sound difference on spawn and unmute
 - [ ] better scene: I'm thinking woods, campfire, a target practice dummies and a big rock to climb
 - [ ] fullscreen in web to avoid key clash(like Alt for browser)
+- [ ] custom font replace example using pre-loaded font
 - [ ] sky background instead of just void lol
 - [ ] Movement sfx: jump, dash, sprint
 - [ ] implement different music states(idle, battle, movement)
@@ -69,6 +70,8 @@ Feel free to move things around however you want, though.
 - [ ] climb mechanics
 - [ ] small door/portal demo
 - [ ] do not rotate player on aim(silly bug, check it out - release aim looking to the floor)
+- [ ] basic fighting: punch, kick, take weapon
+- [ ] bow, rifle
 
 ## Run your game
 

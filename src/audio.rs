@@ -1,3 +1,9 @@
+//! Simple setup for a game: general, music and sfx channels settings
+//!
+//! [General bus](General)
+//! [Music sampler pool](Music)
+//! [Sfx sampler pool](Sfx)
+//!
 use bevy::prelude::*;
 use bevy_seedling::{pool::SamplerPool, prelude::*, sample::Sample};
 use serde::{Deserialize, Serialize};
@@ -7,10 +13,42 @@ pub fn plugin(app: &mut App) {
         .add_systems(Startup, spawn_pools);
 }
 
-fn spawn_pools(mut cmds: Commands) {
-    cmds.spawn(SamplerPool(Music));
-    cmds.spawn(SamplerPool(Sfx));
-}
+/// Bus for controlling general volume.
+///
+/// We set up the following structure:
+///
+/// ┌─────┐┌───┐┌───────┐
+/// │Music││Sfx││General│
+/// └┬────┘└┬──┘└┬──────┘
+/// ┌▽──────▽┐   │
+/// │Bus 1   │   │
+/// └┬───────┘   │
+/// ┌▽───────────▽┐
+/// │MainBus      │
+/// └─────────────┘
+///
+/// A "bus" is really just a node that we've given a label, usually a VolumeNode
+/// The default pool is already connected to the MainBus,
+/// and the Bus node will be automatically connected as well since we didn't specify any connections for it.
+///
+/// A sampler pool is basically a collective sound source, so it doesn't really make any sense to route audio "through" it.
+/// We don't use relationships right now to represent connections because Bevy's implementation doesn't support M:N-style relationships.
+/// So for now, we have to stick to the imperative connect methods.
+///
+/// System query example:
+///
+/// ```rust,no_run
+/// fn lower_general(
+///     mut sound: ResMut<Sound>,
+///     mut general: Single<&mut VolumeNode, With<Bus>>,
+/// ) {
+///     let new_volume = (sound.general - 0.1).max(3.0);
+///     sound.general = new_volume;
+///     general.volume = Volume::Linear(new_volume);
+/// }
+/// ```
+#[derive(NodeLabel, PartialEq, Eq, Debug, Hash, Clone)]
+pub struct General;
 
 #[derive(Resource, Debug, Clone, Serialize, Deserialize, Reflect)]
 pub struct Sound {
@@ -29,6 +67,12 @@ impl Default for Sound {
     }
 }
 
+fn spawn_pools(mut cmds: Commands) {
+    cmds.spawn((General, VolumeNode::default()));
+    cmds.spawn(SamplerPool(Music)).connect(General);
+    cmds.spawn(SamplerPool(Sfx)).connect(General);
+}
+
 /// An organizational marker component that should be added to a spawned [`SamplePlayer`] if it's in the
 /// general "music" category (e.g. global background music, soundtrack).
 ///
@@ -41,11 +85,7 @@ pub struct Music;
 pub fn music(handle: Handle<Sample>, vol: f32) -> impl Bundle {
     (
         Music,
-        SamplePlayer::new(handle),
-        PlaybackSettings {
-            volume: Volume::Linear(vol),
-            ..PlaybackSettings::LOOP
-        },
+        SamplePlayer::new(handle).with_volume(Volume::Linear(vol)),
     )
 }
 
@@ -62,10 +102,6 @@ pub struct Sfx;
 pub fn sfx(handle: Handle<Sample>, vol: f32) -> impl Bundle {
     (
         Sfx,
-        SamplePlayer::new(handle),
-        PlaybackSettings {
-            volume: Volume::Linear(vol),
-            ..PlaybackSettings::REMOVE
-        },
+        SamplePlayer::new(handle).with_volume(Volume::Linear(vol)),
     )
 }

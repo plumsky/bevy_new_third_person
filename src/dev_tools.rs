@@ -47,8 +47,6 @@ fn toggle_pause(
     mut settings: ResMut<Settings>,
     mut time: ResMut<Time<Virtual>>,
     mut label: Query<(&mut BackgroundColor, &mut TextColor), With<PauseLabel>>,
-    mut music: Query<&mut PlaybackParams, (With<Music>, Without<Sfx>)>,
-    mut sfx: Query<&mut PlaybackParams, (With<Sfx>, Without<Music>)>,
 ) {
     if let Ok((mut bg, mut color)) = label.single_mut() {
         if time.is_paused() || settings.paused {
@@ -62,15 +60,7 @@ fn toggle_pause(
         }
     }
 
-    // TODO: use seedling when it's migrated to 0.16
     settings.paused = !settings.paused;
-    for mut s in music.iter_mut().chain(sfx.iter_mut()) {
-        if settings.paused {
-            s.pause();
-        } else {
-            s.play();
-        }
-    }
 }
 
 fn toggle_mute(

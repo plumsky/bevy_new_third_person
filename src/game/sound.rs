@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use bevy::prelude::*;
-use bevy_seedling::prelude::*;
+use bevy_seedling::{pool::Sampler, prelude::*};
+// use bevy_seedling::{pool::Sampler, prelude::*};
 use leafwing_input_manager::prelude::*;
 use rand::prelude::*;
 
@@ -22,7 +23,7 @@ fn start_or_resume_soundtrack(
     settings: Res<Settings>,
     sources: ResMut<AudioSources>,
     // boombox: Query<Entity, With<Boombox>>,
-    mut music_query: Query<(&SamplePlayer, &mut PlaybackParams), With<Music>>,
+    mut music_query: Query<(&Sampler, &mut PlaybackSettings), With<Music>>,
 ) -> Result {
     if let Ok((player, mut instance)) = music_query.single_mut() {
         if !player.is_playing() {
@@ -45,7 +46,7 @@ fn start_or_resume_soundtrack(
 
 fn stop_soundtrack(
     // boombox: Query<Entity, With<Boombox>>,
-    mut bg_music: Query<&mut PlaybackParams, With<Music>>,
+    mut bg_music: Query<&mut PlaybackSettings, With<Music>>,
 ) {
     for mut s in bg_music.iter_mut() {
         s.pause();

@@ -28,17 +28,9 @@ enhanced = [
     "bevy/meshlet"                  # new nanite-like rendering system
 ]
 
-[package.metadata.bevy_cli.release]
-# Disable dev features for release builds.
-default-features = false
-[package.metadata.bevy_cli.web]
-# Disable native features for web builds.
-default-features = false
-[package.metadata.bevy_cli.web.dev]
-features = ["dev"]
 
 [dependencies]
-bevy_seedling = "0.3"
+bevy_seedling = "0.4"
 # everything except bevy_audio
 bevy = { version = "^0.16", default-features = false, features = [
     "std",
@@ -48,7 +40,6 @@ bevy = { version = "^0.16", default-features = false, features = [
     "smaa_luts",
     "tonemapping_luts",
     "bevy_render",
-    "bevy_window",
     "bevy_winit",
     "bevy_state",
     "bevy_color",
@@ -109,13 +100,7 @@ log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"
 winit = { version = "0.30", default-features = false }
 bevy_fix_gltf_coordinate_system = "0.1.0"
 
-# TODO: rm after getrandom feature fix
-[target.wasm32-unknown-unknown.dependencies]
-getrandom = { version = "0.3", features = ["wasm_js"] }
-
-[patch.crates-io]
-getrandom = { git = "https://github.com/benfrankel/getrandom" }
-bevy_seedling = { git = "https://github.com/CorvusPrudens/bevy_seedling",  branch = "bevy-0.16" }
+# [patch.crates-io]
 
 [lints.clippy]
 # Bevy supplies arguments to systems via dependency injection, so it's natural for systems to
@@ -123,6 +108,13 @@ bevy_seedling = { git = "https://github.com/CorvusPrudens/bevy_seedling",  branc
 too_many_arguments = "allow"
 type_complexity = "allow"           # Queries may access many components, which would undesirably trigger this lint.
 nonstandard_macro_braces = "warn"   # Make sure macros use their standard braces, such as `[]` for `bevy_ecs::children!`.
+
+[package.metadata.bevy_cli.release] # Disable dev features for release builds.
+default-features = false
+[package.metadata.bevy_cli.web]     # Disable native features for web builds.
+default-features = false
+[package.metadata.bevy_cli.web.dev]
+features = ["dev"]
 
 [profile.ci]                # Optimize for build time in CI.
 inherits = "dev"

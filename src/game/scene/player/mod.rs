@@ -106,15 +106,15 @@ pub fn spawn_player(
             // JumpTimer(Timer::from_seconds(0.5, TimerMode::Repeating)),
             StepTimer(Timer::from_seconds(0.39, TimerMode::Repeating)),
         ))
-        .with_children(|spawner| {
-            let mut e = spawner.spawn((
+        .with_children(|parent| {
+            let mut e = parent.spawn((
                 Transform::from_xyz(0.0, -1.0, 0.0),
                 mesh,
                 Visibility::default(),
             ));
-            e.with_children(|spawner| {
+            e.with_children(|parent| {
                 #[cfg(feature = "dev_native")]
-                spawner.spawn((
+                parent.spawn((
                     debug_collider_mesh,
                     debug_collider_color,
                     Transform::from_xyz(0.0, 0.9, 0.0),

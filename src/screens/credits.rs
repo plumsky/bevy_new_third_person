@@ -67,7 +67,7 @@ fn start_credits_music(
     mut commands: Commands,
     settings: Res<Settings>,
     sources: ResMut<AudioSources>,
-    mut bg_music: Query<&mut PlaybackParams, With<Music>>,
+    mut bg_music: Query<&mut PlaybackSettings, With<Music>>,
 ) {
     for mut s in bg_music.iter_mut() {
         s.pause();

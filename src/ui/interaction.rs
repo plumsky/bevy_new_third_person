@@ -9,8 +9,6 @@ pub(super) fn plugin(app: &mut App) {
             (trigger_on_press, btn_sounds).run_if(resource_exists::<AudioSources>),
         ),
     );
-    // .add_observer(play_on_hover_sfx)
-    // .add_observer(play_on_click_sfx);
 }
 
 /// Palette for widget interactions. Add this to an entity that supports

@@ -1,8 +1,7 @@
 // disable console on windows for release builds
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use bevy::{
-    app::App, asset::AssetMetaCheck, log, prelude::*, window::PrimaryWindow,
-    window::WindowResolution, winit::WinitWindows,
+    app::App, asset::AssetMetaCheck, log, prelude::*, window::PrimaryWindow, winit::WinitWindows,
 };
 use std::io::Cursor;
 use winit::window::Icon;
@@ -21,7 +20,7 @@ pub(crate) mod prelude {
     pub use avian3d::prelude::*;
     pub use bevy::prelude::*;
 
-    pub use audio::{Music, Sfx, Sound, music, sfx};
+    pub use audio::{General, Music, Sfx, Sound, music, sfx};
     pub(crate) use game::{
         Score, camera,
         input_dispatch::*,
@@ -46,17 +45,15 @@ fn main() {
         )
             .chain(),
     );
-    let mut resolution = WindowResolution::default();
-    resolution.set_physical_resolution(1600, 1000);
+
     let window = WindowPlugin {
         primary_window: Some(Window {
             title: "Bevy Game".to_string(),
-            // Bind to canvas included in `index.html`
+            // Bind to canvas included in `index.html` for custom wasm js logic
             // canvas: Some("#bevy".to_owned()),
             fit_canvas_to_parent: true,
             // Tells wasm not to override default event handling, like F5 and Ctrl+R
             prevent_default_event_handling: false,
-            resolution,
             ..default()
         }),
         ..default()
@@ -81,7 +78,7 @@ fn main() {
     app.add_plugins((audio::plugin, loading::plugin, ui::plugin, screens::plugin))
         .add_systems(Startup, set_window_icon);
 
-    #[cfg(feature = "dev_native")]
+    #[cfg(any(feature = "dev", feature = "dev_native"))]
     app.add_plugins(dev_tools::plugin);
 
     app.run();
