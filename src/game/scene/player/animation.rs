@@ -9,7 +9,7 @@ use bevy_tnua::{
     prelude::*,
 };
 
-const BASE_SPEED_SCALE: f32 = 0.0002;
+const BASE_SPEED_SCALE: f32 = 0.01;
 const IDLE_TO_RUN_TRESHOLD: f32 = 0.01;
 
 #[derive(Default, Clone)]

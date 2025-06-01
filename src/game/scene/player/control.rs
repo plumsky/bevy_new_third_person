@@ -13,11 +13,11 @@ pub struct StepTimer(pub Timer);
 /// Tnua configuration is tricky to grasp from the get go, this is the best demo:
 /// <https://github.com/idanarye/bevy-tnua/blob/main/demos/src/character_control_systems/platformer_control_systems.rs>
 pub fn movement(
-    cfg: Res<Config>,
-    time: Res<Time<Virtual>>,
-    action: Query<&ActionState<Action>>,
+    // time: Res<Time<Virtual>>,
     //touch_input: Res<Touches>,
     // mut jump_timer: Query<&mut JumpTimer>,
+    cfg: Res<Config>,
+    action: Query<&ActionState<Action>>,
     mut step_timer: Query<&mut StepTimer>,
     mut tnua: Query<
         (
@@ -34,7 +34,6 @@ pub fn movement(
     let (mut controller, mut avian_sensor, mut collider) = tnua.single_mut()?;
     let mut player = player.single_mut()?;
     let mut direction = Vec3::ZERO;
-    let mut speed = cfg.player.movement.speed * time.delta_secs();
 
     let (state, camera_transform) = (action.single()?, camera.single()?);
     let forward = camera_transform.forward().normalize();
@@ -67,7 +66,7 @@ pub fn movement(
             float_offset: -0.1,
             ..Default::default()
         });
-        speed /= 2.0;
+        player.speed /= 2.0;
     }
     if state.just_released(&Action::Crouch) {
         collider.set_scale(Vec3::ONE, 4);
@@ -104,7 +103,7 @@ pub fn movement(
     // just fall.
     controller.basis(TnuaBuiltinWalk {
         // The `desired_velocity` determines how the character will move.
-        desired_velocity: direction.normalize_or_zero() * speed,
+        desired_velocity: direction.normalize_or_zero() * player.speed,
         desired_forward: Dir3::new(direction).ok(),
         // The `float_height` must be greater (even if by little) from the distance between the
         // character's center and the lowest point of its collider.

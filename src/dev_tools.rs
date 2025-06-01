@@ -5,13 +5,13 @@ use crate::{
     prelude::*,
     screens::gameplay::{MuteLabel, PauseLabel},
 };
-#[cfg(any(feature = "dev", feature = "dev_native"))]
+#[cfg(feature = "dev_native")]
 use bevy::{
     dev_tools::states::log_transitions,
     prelude::*,
     ui::{Display as NodeDisplay, UiDebugOptions},
 };
-#[cfg(all(not(feature = "dev"), not(feature = "dev_native")))]
+#[cfg(not(feature = "dev_native"))]
 use bevy::{prelude::*, ui::Display as NodeDisplay};
 use bevy_seedling::prelude::*;
 
@@ -20,7 +20,7 @@ pub(super) fn plugin(app: &mut App) {
         .add_observer(toggle_pause)
         .add_observer(toggle_diagnostics);
 
-    #[cfg(any(feature = "dev", feature = "dev_native"))]
+    #[cfg(feature = "dev_native")]
     {
         app.add_systems(Update, log_transitions::<Screen>);
         app.add_observer(toggle_debug_ui);
@@ -86,7 +86,7 @@ fn toggle_mute(
     settings.muted = !settings.muted;
 }
 
-#[cfg(any(feature = "dev", feature = "dev_native"))]
+#[cfg(feature = "dev_native")]
 fn toggle_debug_ui(_: Trigger<OnDebugUiToggle>, mut options: ResMut<UiDebugOptions>) {
     options.toggle();
 }

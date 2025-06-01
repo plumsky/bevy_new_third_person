@@ -47,6 +47,8 @@ impl FromWorld for Textures {
 pub struct Models {
     #[dependency]
     pub player: Handle<Gltf>,
+    #[dependency]
+    pub rock: Handle<Gltf>,
 }
 
 impl FromWorld for Models {
@@ -54,6 +56,7 @@ impl FromWorld for Models {
         let assets = world.resource::<AssetServer>();
         Self {
             player: assets.load("models/player.glb"),
+            rock: assets.load("models/rock.glb"),
         }
     }
 }

@@ -75,11 +75,14 @@ fn main() {
 
     // custom plugins. the order is important
     // be sure you use resources/types AFTER you add plugins that insert them
-    app.add_plugins((audio::plugin, loading::plugin, ui::plugin, screens::plugin))
-        .add_systems(Startup, set_window_icon);
-
-    #[cfg(any(feature = "dev", feature = "dev_native"))]
-    app.add_plugins(dev_tools::plugin);
+    app.add_plugins((
+        audio::plugin,
+        loading::plugin,
+        ui::plugin,
+        screens::plugin,
+        dev_tools::plugin,
+    ))
+    .add_systems(Startup, set_window_icon);
 
     app.run();
 }

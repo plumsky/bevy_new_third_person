@@ -17,6 +17,7 @@ pub fn plugin(app: &mut App) {
         player::plugin,
         skybox::plugin,
     ))
+    // .add_systems(Update, rotate_rock.run_if(in_state(Screen::Gameplay)))
     .add_systems(OnEnter(Screen::Gameplay), setup);
 }
 
@@ -24,13 +25,20 @@ pub fn plugin(app: &mut App) {
 // <https://github.com/bevyengine/bevy/blob/main/examples/audio/spatial_audio_3d.rs>
 // #[derive(Component)]
 // pub struct Boombox;
+#[derive(Component)]
+pub struct Rock;
 
 pub(crate) fn setup(
     cfg: Res<Config>,
+    models: Res<Models>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    gltf_assets: Res<Assets<Gltf>>,
 ) {
+    let Some(gltf) = gltf_assets.get(&models.rock) else {
+        return;
+    };
     let main_plane = cfg.geom.main_plane;
 
     // Plane
@@ -44,6 +52,31 @@ pub(crate) fn setup(
         RigidBody::Static,
         Collider::half_space(Vec3::Y),
     ));
+
+    // Rock
+    // for mesh_handle in &gltf.meshes {
+    //     if let Some(mesh) = meshes.get(mesh_handle) {
+    //         info!(
+    //             "Extracted mesh: {}, vertex count: {:?}",
+    //             name,
+    //             mesh.count_vertices()
+    //         );
+    //         // You could now use `mesh` directly or clone it
+    //         // e.g., commands.spawn(PbrBundle { mesh: mesh_handle.clone(), ..default() });
+    //     }
+    // }
+    // let mesh = gltf.named_meshes.get("mt_lp").expect("");
+    // let mesh = Mesh3d(models.rock.clone());
+    // let pos = Transform::from_translation(Vec3::new(5.0, 3.0, 5.0));
+    // commands.spawn((
+    //     StateScoped(Screen::Gameplay),
+    //     Rock,
+    //     pos,
+    //     mesh,
+    //     // children![mesh],
+    //     RigidBody::Static,
+    //     Collider::trimesh_from_mesh(rock_mesh).expect("failed to create collider from rock mesh"),
+    // ));
 
     let size = main_plane / 2.0;
     let geom = cfg.geom.clone();
@@ -100,4 +133,11 @@ pub(crate) fn setup(
         brightness: 500.0,
         ..Default::default()
     });
+}
+
+fn rotate_rock(time: Res<Time>, mut rock: Query<&mut Transform, With<Rock>>) -> Result {
+    let mut rock_transform = rock.single_mut()?;
+    rock_transform.rotate_y(time.delta_secs());
+
+    Ok(())
 }
