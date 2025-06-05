@@ -1055,6 +1055,7 @@ dependencies = [
  "bevy_seedling",
  "bevy_third_person_camera",
  "embed-resource",
+ "firewheel-web-audio",
  "image",
  "iyes_perf_ui",
  "leafwing-input-manager",
@@ -2408,9 +2409,9 @@ dependencies = [
 
 [[package]]
 name = "firewheel"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4aeb70c39d48389aaec78f232a7a8ed0456d15e71c16fd9db0d6b2a09405bfa0"
+checksum = "4b1daa84455940de19fbf625ad515a501d38ba03fa262f4dd8809ec30dcf5d04"
 dependencies = [
  "firewheel-core",
  "firewheel-cpal",
@@ -2440,10 +2441,11 @@ dependencies = [
 
 [[package]]
 name = "firewheel-cpal"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6611521514a6ee2dd1baff31a86d142ebffac86996dc0737e557a3c46a2398e0"
+checksum = "38741472dd746a186471b4d2d72cfc003f6a9a3666481df67e3271de3a983f6a"
 dependencies = [
+ "bevy_platform",
  "cpal",
  "fast-interleave",
  "firewheel-core",
@@ -2495,6 +2497,19 @@ dependencies = [
  "firewheel-core",
  "fixed-resample",
  "smallvec",
+]
+
+[[package]]
+name = "firewheel-web-audio"
+version = "0.1.0"
+source = "git+https://github.com/CorvusPrudens/firewheel-web-audio#4b374b3a81ef3fffc096a8b1b1220758b62fd543"
+dependencies = [
+ "firewheel",
+ "js-sys",
+ "log",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]

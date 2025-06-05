@@ -49,7 +49,7 @@ Feel free to move things around however you want, though.
 - [x] simple player movement using [bevy_tnua]
 - [x] simple skybox sun cycle using [bevy atmosphere example], with daynight and nimbus modes
 - [x] rig and animations using [Universal Animation Library] from quaternius
-- [x] experimental sound with [bevy_seedling] based on Firewheel audio engine (which will probably replace bevy_audio)
+- [x] experimental sound with [bevy_seedling] based on Firewheel audio engine (which will probably replace bevy_audio), with experimental audio stutter fix
 - [x] consistent Esc back navigation in gameplay and menu via stacked modals
 
 ### TODOs (prioritized)
@@ -79,7 +79,10 @@ We recommend using the [Bevy CLI](https://github.com/TheBevyFlock/bevy_cli) to r
 Running your game locally is very simple:
 
 - Use `bevy run` to run a native dev build.
-- Use `bevy run web` to run a web dev build.
+- Use this command to run a web dev build to run audio in separate thread to avoid audio stuttering:
+```bash
+bevy run web --headers="Cross-Origin-Opener-Policy:same-origin" --headers="Cross-Origin-Embedder-Policy:credentialless"
+```
 
 <details>
     <summary><ins>Running release builds</ins></summary>

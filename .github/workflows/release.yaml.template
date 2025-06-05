@@ -121,11 +121,11 @@ jobs:
           - platform: web
             targets: wasm32-unknown-unknown
             package_ext: .zip
+            features: dev,wasm_audio
             runner: ubuntu-latest
 
           - platform: linux
             targets: x86_64-unknown-linux-gnu
-            features: bevy/wayland
             package_ext: .zip
             runner: ubuntu-latest
 

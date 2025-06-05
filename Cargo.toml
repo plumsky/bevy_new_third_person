@@ -16,6 +16,9 @@ dev = [
     "bevy/dynamic_linking",         # Improve compile times for dev builds by linking Bevy as a dynamic library.
     "bevy/track_location",          # Improve error messages coming from Bevy
 ]
+wasm_audio = [
+    "firewheel-web-audio"
+]
 dev_native = [
     "dev",
     "enhanced",
@@ -66,6 +69,8 @@ bevy = { version = "^0.16", default-features = false, features = [
     "wayland"
 ] }
 
+firewheel-web-audio = { git = "https://github.com/CorvusPrudens/firewheel-web-audio", optional = true }
+
 # plugins
 # wireframes
 # TODO: add when 0.16
@@ -99,8 +104,6 @@ log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"
 # keep the following in sync with Bevy's dependencies
 winit = { version = "0.30", default-features = false }
 bevy_fix_gltf_coordinate_system = "0.1.0"
-
-# [patch.crates-io]
 
 [lints.clippy]
 # Bevy supplies arguments to systems via dependency injection, so it's natural for systems to

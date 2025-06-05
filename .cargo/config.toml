@@ -120,6 +120,10 @@
 # [profile.dev]
 # debug = 1
 
-# help trunk
+# wasm hack to run audio in separate thread to avoid stuttering audio on start
 [target.wasm32-unknown-unknown]
-runner = "wasm-server-runner"
+rustflags = ["-C", "target-feature=+atomics,+bulk-memory,+mutable-globals"]
+
+# This means you'll need a nightly version of the compiler
+[unstable]
+build-std = ["std", "core", "alloc", "panic_abort"]

@@ -1,5 +1,6 @@
-// disable console on windows for release builds
+// Disable console on Windows for non-dev builds.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use bevy::{
     app::App, asset::AssetMetaCheck, log, prelude::*, window::PrimaryWindow, winit::WinitWindows,
 };

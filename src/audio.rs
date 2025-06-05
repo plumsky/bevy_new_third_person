@@ -9,14 +9,26 @@ use bevy_seedling::{pool::SamplerPool, prelude::*, sample::Sample};
 use serde::{Deserialize, Serialize};
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(SeedlingPlugin::default())
-        .add_systems(Startup, spawn_pools);
+    #[cfg(target_arch = "wasm32")]
+    app.add_plugins(
+        bevy_seedling::SeedlingPlugin::<firewheel_web_audio::WebAudioBackend> {
+            config: Default::default(),
+            stream_config: Default::default(),
+            spawn_default_pool: true,
+            pool_size: 4..=32,
+        },
+    );
+
+    #[cfg(not(target_arch = "wasm32"))]
+    app.add_plugins(bevy_seedling::SeedlingPlugin::default());
+
+    app.add_systems(Startup, spawn_pools);
 }
 
 /// Bus for controlling general volume.
 ///
 /// We set up the following structure:
-///
+/// ```text
 /// ┌─────┐┌───┐┌───────┐
 /// │Music││Sfx││General│
 /// └┬────┘└┬──┘└┬──────┘
@@ -26,6 +38,7 @@ pub fn plugin(app: &mut App) {
 /// ┌▽───────────▽┐
 /// │MainBus      │
 /// └─────────────┘
+/// ```
 ///
 /// A "bus" is really just a node that we've given a label, usually a VolumeNode
 /// The default pool is already connected to the MainBus,
