@@ -28,6 +28,15 @@ pub struct Settings {
     pub last_screen: Screen,
 }
 
+impl Settings {
+    pub fn music(&self) -> f32 {
+        self.sound.general * self.sound.music
+    }
+    pub fn sfx(&self) -> f32 {
+        self.sound.general * self.sound.sfx
+    }
+}
+
 impl Default for Settings {
     fn default() -> Self {
         Self {

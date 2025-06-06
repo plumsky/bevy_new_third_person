@@ -32,13 +32,12 @@ fn start_or_resume_soundtrack(
         }
     } else {
         let handle = *[&sources.bg_music].choose(&mut thread_rng()).unwrap();
-        let vol = settings.sound.general * settings.sound.music;
         // // Play music from boombox entity
         // cmds
         //     .entity(boombox.single()?)
         //     .insert(music(handle.clone(), vol));
         // Or just play music
-        cmds.spawn(music(handle.clone(), vol));
+        cmds.spawn(music(handle.clone(), settings.sfx()));
     }
 
     Ok(())
@@ -82,8 +81,7 @@ fn movement_sound(
             let mut rng = thread_rng();
             let i = rng.gen_range(0..sources.steps.len());
             let handle = sources.steps[i].clone();
-            let vol = settings.sound.general * settings.sound.sfx;
-            cmds.spawn(sfx(handle, vol));
+            cmds.spawn(sfx(handle, settings.sfx()));
         }
     }
 

@@ -72,11 +72,10 @@ fn start_credits_music(
     for mut s in bg_music.iter_mut() {
         s.pause();
     }
-    let vol = settings.sound.general * settings.sound.music;
     let handle = sources.bg_music.clone();
     commands.spawn((
         StateScoped(Screen::Credits),
         Name::new("Credits Music"),
-        music(handle, vol),
+        music(handle, settings.music()),
     ));
 }

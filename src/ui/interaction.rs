@@ -17,26 +17,33 @@ pub(super) fn plugin(app: &mut App) {
 #[derive(Component, Debug, Reflect)]
 #[reflect(Component)]
 pub struct InteractionPalette {
-    pub none: Color,
-    pub hovered: Color,
-    pub pressed: Color,
+    pub none: (Color, Color),
+    pub hovered: (Color, Color),
+    pub pressed: (Color, Color),
 }
 
 fn apply_interaction_palette(
     mut palette_query: Query<
-        (&Interaction, &InteractionPalette, &mut BackgroundColor),
+        (
+            &Interaction,
+            &InteractionPalette,
+            &mut BorderColor,
+            &mut BackgroundColor,
+        ),
         Changed<Interaction>,
     >,
 ) {
-    for (interaction, palette, mut background) in &mut palette_query {
-        *background = match interaction {
+    for (interaction, palette, mut border_color, mut background) in &mut palette_query {
+        let (bg, border) = match interaction {
             Interaction::None => palette.none,
             Interaction::Hovered => palette.hovered,
             Interaction::Pressed => palette.pressed,
-        }
-        .into();
+        };
+        *background = bg.into();
+        *border_color = border.into();
     }
 }
+
 /// Event triggered on a UI entity when the [`Interaction`] component on the same entity changes to
 /// [`Interaction::Pressed`]. Observe this event to detect e.g. button presses.
 #[derive(Event)]
@@ -67,7 +74,6 @@ fn btn_sounds(
             Interaction::Pressed => audio_sources.btn_press.clone(),
             _ => continue,
         };
-        let vol = settings.sound.general * settings.sound.sfx;
-        commands.spawn(sfx(source, vol));
+        commands.spawn(sfx(source, settings.sfx()));
     }
 }

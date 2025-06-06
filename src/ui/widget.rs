@@ -123,6 +123,11 @@ where
                     BorderRadius::all(Px(opts.border_radius)),
                     BorderColor(opts.border_color),
                     InteractionPalette {
+                        none: (DIM_BLUE, DIM_BLUE),
+                        hovered: (LIGHT_BLUE, WHITEISH),
+                        pressed: (DIM_GREEN, WHITEISH),
+                    },
+                    InteractionPalette {
                         none: BLUE,
                         hovered: DIM_BLUE,
                         pressed: LIGHT_BLUE,

@@ -73,8 +73,7 @@ fn toot(
 ) -> Result {
     let state = action.single()?;
     if state.just_pressed(&Action::Toot) {
-        let vol = settings.sound.general * settings.sound.sfx;
-        cmds.spawn(sfx(sources.btn_press.clone(), vol));
+        cmds.spawn(sfx(sources.btn_press.clone(), settings.sfx()));
     }
 
     Ok(())
