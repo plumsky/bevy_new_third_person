@@ -152,6 +152,12 @@ The source code in this repository is licensed under any of the following at you
 
 The [assets](./assets) in this repository are all 3rd-party. See the see [credits](assets/credits.json) for more information.
 
+## Bevy Compatibility
+
+| bevy | bevy_new_third_person  |
+| ---- | ---------------------- |
+| 0.16 |       main,0.1.3       |
+
 [avian3d]: https://github.com/Jondolf/avian/tree/main/crates/avian3d
 [bevy]: https://bevyengine.org/
 [bevy atmosphere example]: https://bevyengine.org/examples/3d-rendering/atmosphere/
