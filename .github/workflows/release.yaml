@@ -22,17 +22,16 @@ permissions:
 
 env:
   pkg_name: bevy_third_person
-  build: {
-    web: true,
-    linux: false,
-    windows: false,
-    macos: false,
-  }
-  upload: {
-    # The itch.io project to upload to in the format `user-name/project-name`.
-    itch: olekspickle/bevy-third-person,
-    github: true
-  }
+
+  build_web: true
+  build_linux: false
+  build_windows: false
+  build_macos: false
+
+  # The itch.io project to upload to in the format `user-name/project-name`.
+  upload_itch: olekspickle/bevy-third-person
+  upload_github: true
+
   # The path to the assets directory.
   assets_path: assets
 
@@ -161,13 +160,13 @@ jobs:
             echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> "${GITHUB_ENV}"
           fi
 
-          # Check if building for this platform is enabled.
-          echo 'is_platform_enabled=${{
-            (matrix.platform == 'web' && env.build.web == 'true') ||
-            (matrix.platform == 'linux' && env.build.linux == 'true') ||
-            (matrix.platform == 'windows' && env.build.windows == 'true') ||
-            (matrix.platform == 'macos' && env.build_macos == 'true')
-          }}' >> "${GITHUB_ENV}"
+      - name: Should continue
+        if: |
+          (matrix.platform == 'web' && env.build_web == 'true') ||
+          (matrix.platform == 'linux' && env.build_linux == 'true') ||
+          (matrix.platform == 'windows' && env.build_windows == 'true') ||
+          (matrix.platform == 'macos' && env.build_macos == 'true')
+        run: echo 'is_platform_enabled=true' >> "${GITHUB_ENV}"
 
       - name: Checkout repository
         if: ${{ env.is_platform_enabled == 'true' }}
@@ -201,7 +200,7 @@ jobs:
 
       - name: Install Bevy CLI
         if: ${{ env.is_platform_enabled == 'true' }}
-        run: cargo binstall --locaked --no-confirm --force --git=https://github.com/TheBevyFlock/bevy_cli bevy_cli
+        run: cargo binstall --locked --no-confirm --force --git=https://github.com/TheBevyFlock/bevy_cli bevy_cli
 
       - name: Build web bundle and add it to app (Web)
         if: ${{ env.is_platform_enabled == 'true' && matrix.platform == 'web' }}
@@ -288,7 +287,7 @@ jobs:
           retention-days: 1
 
       - name: Upload package to GitHub release
-        if: ${{ env.is_platform_enabled == 'true' && env.upload.github }}
+        if: ${{ env.is_platform_enabled == 'true' && env.upload_github }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -305,7 +304,7 @@ jobs:
       - forward-env
       - get-version
       - build
-    if: ${{ needs.forward-env.outputs.upload.itch != '' }}
+    if: ${{ needs.forward-env.outputs.upload_itch != '' }}
 
     steps:
       - name: Download all packages
@@ -330,5 +329,5 @@ jobs:
               --fix-permissions \
               --userversion='${{ needs.get-version.outputs.version }}' \
               tmp/"${channel}"/* \
-              '${{ env.upload.itch }}':"${channel#package-}"
+              '${{ env.upload_itch }}':"${channel#package-}"
           done

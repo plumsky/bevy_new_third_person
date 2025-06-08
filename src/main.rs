@@ -21,7 +21,7 @@ pub(crate) mod prelude {
     pub use avian3d::prelude::*;
     pub use bevy::prelude::*;
 
-    pub use audio::{General, Music, Sfx, Sound, music, sfx};
+    pub use audio::{General, Music, Sfx, Sound, music, music_looping, sfx, sfx_looping};
     pub(crate) use game::{
         Score, camera,
         input_dispatch::*,

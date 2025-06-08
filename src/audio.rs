@@ -94,11 +94,21 @@ fn spawn_pools(mut cmds: Commands) {
 #[reflect(Component)]
 pub struct Music;
 
-/// A music audio instance.
+/// A music audio instance that will be played exactly once
 pub fn music(handle: Handle<Sample>, vol: f32) -> impl Bundle {
     (
         Music,
         SamplePlayer::new(handle).with_volume(Volume::Linear(vol)),
+    )
+}
+
+/// A music audio instance to play in loop
+pub fn music_looping(handle: Handle<Sample>, vol: f32) -> impl Bundle {
+    (
+        Music,
+        SamplePlayer::new(handle)
+            .with_volume(Volume::Linear(vol))
+            .looping(),
     )
 }
 
@@ -111,10 +121,19 @@ pub fn music(handle: Handle<Sample>, vol: f32) -> impl Bundle {
 #[reflect(Component)]
 pub struct Sfx;
 
-/// A sound effect audio instance.
+/// An sfx audio instance that will be played exactly once
 pub fn sfx(handle: Handle<Sample>, vol: f32) -> impl Bundle {
     (
         Sfx,
         SamplePlayer::new(handle).with_volume(Volume::Linear(vol)),
+    )
+}
+
+pub fn sfx_looping(handle: Handle<Sample>, vol: f32) -> impl Bundle {
+    (
+        Sfx,
+        SamplePlayer::new(handle)
+            .with_volume(Volume::Linear(vol))
+            .looping(),
     )
 }
