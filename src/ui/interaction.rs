@@ -2,7 +2,7 @@ use crate::prelude::*;
 use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
-    app.register_type::<InteractionPalette>().add_systems(
+    app.register_type::<UiInteraction>().add_systems(
         Update,
         (
             apply_interaction_palette,
@@ -12,25 +12,56 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 /// Palette for widget interactions. Add this to an entity that supports
-/// [`Interaction`]s, such as a button, to change its [`BackgroundColor`] based
-/// on the current interaction state.
-#[derive(Component, Debug, Reflect)]
+/// [`Interaction`]s, such as a button, to change its [`BackgroundColor`]
+/// and [`BorderColor`] based on the current interaction state.
+///
+/// Struct of pairs (bg_color, border_color)
+#[derive(Component, Clone, Debug, Reflect)]
 #[reflect(Component)]
-pub struct InteractionPalette {
+pub struct UiInteraction {
     pub none: (Color, Color),
     pub hovered: (Color, Color),
     pub pressed: (Color, Color),
 }
+impl UiInteraction {
+    pub const DEFAULT: Self = Self {
+        none: (TRANSPARENT, WHITEISH),
+        hovered: (LIGHT_BLUE, WHITEISH),
+        pressed: (DIM_BLUE, WHITEISH),
+    };
+    pub fn all(c: Color) -> Self {
+        Self {
+            none: (c, c),
+            hovered: (c, c),
+            pressed: (c, c),
+        }
+    }
+    pub fn none(mut self, c: (Color, Color)) -> Self {
+        self.none = c;
+        self
+    }
+    pub fn pressed(mut self, c: (Color, Color)) -> Self {
+        self.pressed = c;
+        self
+    }
+    pub fn hovered(mut self, c: (Color, Color)) -> Self {
+        self.hovered = c;
+        self
+    }
+}
+
+#[derive(Component)]
+pub struct DisabledButton;
 
 fn apply_interaction_palette(
     mut palette_query: Query<
         (
             &Interaction,
-            &InteractionPalette,
+            &UiInteraction,
             &mut BorderColor,
             &mut BackgroundColor,
         ),
-        Changed<Interaction>,
+        (Changed<Interaction>, Without<DisabledButton>),
     >,
 ) {
     for (interaction, palette, mut border_color, mut background) in &mut palette_query {
@@ -66,7 +97,7 @@ fn btn_sounds(
     mut commands: Commands,
     settings: Res<Settings>,
     audio_sources: Res<AudioSources>,
-    interaction_query: Query<&Interaction, Changed<Interaction>>,
+    interaction_query: Query<&Interaction, (Changed<Interaction>, Without<DisabledButton>)>,
 ) {
     for interaction in &interaction_query {
         let source = match interaction {

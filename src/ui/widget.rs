@@ -26,40 +26,55 @@ pub fn ui_root(name: impl Into<Cow<'static, str>>) -> impl Bundle {
     )
 }
 
-pub fn text(opts: impl Into<Opts>) -> impl Bundle {
+pub fn icon(opts: impl Into<Opts>) -> impl Bundle {
     let opts = opts.into();
     (
-        BackgroundColor(opts.bg_color),
-        Text(opts.text.to_string()),
-        TextColor(opts.color),
-        opts.font.clone(),
-        opts.text_layout,
+        Label,
+        Name::new("Label"),
+        opts.node.clone(),
+        opts.border_radius,
+        // Don't bubble picking events from the text up to parent
+        Pickable::IGNORE,
+        children![opts.into_image_bundle()],
+    )
+}
+pub fn label(opts: impl Into<Opts>) -> impl Bundle {
+    let opts = opts.into();
+    (
+        Label,
+        Name::new("Label"),
+        opts.border_radius,
+        opts.into_text_bundle(),
         // Don't bubble picking events from the text up to parent
         Pickable::IGNORE,
     )
 }
 
-pub fn label(opts: impl Into<Opts>) -> impl Bundle {
-    let opts = opts.into();
-    let s = opts.text.clone();
-    let short = if s.len() > 10 { &s[..8] } else { &s };
-
-    (
-        Label,
-        Name::new(format!("Label {short}")),
-        BorderRadius::all(Px(opts.border_radius)),
-        text(opts),
-    )
-}
-
 /// A simple header label. Bigger than [`label`].
 pub fn header(opts: impl Into<Opts>) -> impl Bundle {
-    let mut opts = opts.into();
-    let s = opts.text.clone();
-    let short = if s.len() > 10 { &s[..8] } else { &s };
-    opts.font.font_size = 40.0;
+    let opts = opts.into();
+    (Label, Name::new("Header"), opts.into_text_bundle())
+}
 
-    (Label, Name::new(format!("Header {short}")), text(opts))
+// buttons used in gameplay
+pub fn btn_sq<E, B, M, I>(opts: impl Into<Opts>, action: I) -> impl Bundle
+where
+    E: Event,
+    B: Bundle,
+    I: IntoObserverSystem<E, B, M>,
+{
+    let opts: Opts = opts.into();
+    let new_node = Node {
+        width: Vw(5.0),
+        height: Vw(5.0),
+        padding: UiRect::all(Vw(3.0)),
+        align_items: AlignItems::Center,
+        justify_content: JustifyContent::Center,
+        ..opts.node.clone()
+    };
+    let opts = opts.node(new_node).border_color(WHITEISH);
+
+    btn(opts, action)
 }
 
 // A regular wide button with text and an action defined as an [`Observer`].
@@ -97,7 +112,7 @@ where
         ..opts.node.clone()
     };
     let mut opts = opts.node(new_node);
-    opts.border_radius = 7.0;
+    opts.border_radius = BorderRadius::all(Px(7.0));
 
     btn(opts, action)
 }
@@ -110,31 +125,26 @@ where
     B: Bundle,
     I: IntoObserverSystem<E, B, M>,
 {
-    let opts = opts.into();
+    let opts: Opts = opts.into();
     let action = IntoObserverSystem::into_system(action);
 
     (
         Name::new("Button"),
         Node::default(),
         Children::spawn(SpawnWith(move |parent: &mut ChildSpawner| {
+            let content = match &opts.inner {
+                WidgetContent::Image(_) => parent.spawn(opts.clone().into_image_bundle()).id(),
+                WidgetContent::Text(_) => parent.spawn(opts.clone().into_text_bundle()).id(),
+            };
             parent
                 .spawn((
                     Button,
-                    BorderRadius::all(Px(opts.border_radius)),
-                    BorderColor(opts.border_color),
-                    InteractionPalette {
-                        none: (DIM_BLUE, DIM_BLUE),
-                        hovered: (LIGHT_BLUE, WHITEISH),
-                        pressed: (DIM_GREEN, WHITEISH),
-                    },
-                    InteractionPalette {
-                        none: BLUE,
-                        hovered: DIM_BLUE,
-                        pressed: LIGHT_BLUE,
-                    },
-                    children![Name::new("Button text"), text(opts.clone())],
+                    opts.border_radius,
+                    opts.border_color,
+                    opts.ui_palette,
                 ))
                 .insert(opts.node)
+                .add_children(&[content])
                 .observe(action);
         })),
     )

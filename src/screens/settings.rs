@@ -245,14 +245,14 @@ fn sfx_volume() -> impl Bundle {
 #[reflect(Component)]
 struct SfxVolumeLabel;
 
-fn knob_label(label: impl Component) -> impl Bundle {
+fn knob_label(knob: impl Component) -> impl Bundle {
     (
         Node {
             padding: UiRect::horizontal(Px(10.0)),
             justify_content: JustifyContent::Center,
             ..Default::default()
         },
-        children![(text(""), label)],
+        children![(label(""), knob)],
     )
 }
 
