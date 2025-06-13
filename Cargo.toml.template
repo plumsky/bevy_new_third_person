@@ -1,17 +1,17 @@
 [package]
 name = "{{project-name}}"
+edition = "2024"
+
+[workspace.package]
 version = "0.1.0"
 authors = ["{{authors}}"]
 edition = "2024"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/{{authors}}/{{authors}}"
+repository = "https://github.com/{{authors}}/{{project-name}}"
+keywords = ["bevy", "game", "template", "devkit", "third person", "gamedev"]
 
 [workspace]
 members = [ "crates/*" ]
-
-[[bin]]
-name = "{{project-name}}"
-path = "bin/{{project-name}}.rs"
 
 [features]
 default = [ "dev_native" ]
@@ -21,9 +21,7 @@ dev = [
     "bevy/dynamic_linking",         # Improve compile times for dev builds by linking Bevy as a dynamic library.
     "bevy/track_location",          # Improve error messages coming from Bevy
 ]
-wasm_audio = [
-    "firewheel-web-audio"
-]
+# wasm_audio = [ "firewheel-web-audio" ]
 dev_native = [
     "dev",
     "enhanced",
@@ -36,10 +34,19 @@ enhanced = [
     "bevy/meshlet"                  # new nanite-like rendering system
 ]
 
-[workspace.dependencies]
-bevy_seedling = "0.4"
-# experimelntal web audio fix
+[dependencies]
+audio = { path = "crates/audio" }
+asset_loading = { path = "crates/asset_loading" }
+game = { path = "crates/game" }
+models = { path = "crates/models" }
+ui = { path = "crates/ui" }
+screens = { path = "crates/screens" }
+# experimental web audio fix
 firewheel-web-audio = { git = "https://github.com/CorvusPrudens/firewheel-web-audio", optional = true }
+bevy = { workspace = true }
+bevy_seedling = { workspace = true }
+
+[workspace.dependencies]
 # everything except bevy_audio
 bevy = { version = "^0.16", default-features = false, features = [
     "std",
@@ -74,7 +81,8 @@ bevy = { version = "^0.16", default-features = false, features = [
     "x11",
     "wayland"
 ] }
-
+# stupid gltf 180 rotation fix
+bevy_fix_gltf_coordinate_system = "0.1.0"
 
 # plugins
 # wireframes
@@ -84,9 +92,11 @@ bevy = { version = "^0.16", default-features = false, features = [
 # physics
 avian3d = { version = "0.3", features = ["3d", "parallel", "collider-from-mesh"] }
 
+# audio engine
+bevy_seedling = "0.4"
+
 # camera
 bevy_third_person_camera = "0.2"
-# bevy_third_person_camera = { path = "../../Documents/rust/bevy_third_person_camera" }
 
 # floating character control
 bevy-tnua = "0.24"
@@ -108,9 +118,11 @@ image = "0.25.6"
 log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"] }
 # keep the following in sync with Bevy's dependencies
 winit = { version = "0.30", default-features = false }
-bevy_fix_gltf_coordinate_system = "0.1.0"
 
-[lints.clippy]
+
+
+
+[workspace.lints.clippy]
 # Bevy supplies arguments to systems via dependency injection, so it's natural for systems to
 # request more than 7 arguments, which would undesirably trigger this lint.
 too_many_arguments = "allow"
