@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use super::*;
 use bevy::{prelude::*, scene::SceneInstanceReady};
 use bevy_tnua::{
     TnuaAnimatingState, TnuaAnimatingStateDirective,

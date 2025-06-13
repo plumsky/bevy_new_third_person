@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use bevy::prelude::*;
+use super::*;
 use bevy_seedling::{pool::Sampler, prelude::*};
 // use bevy_seedling::{pool::Sampler, prelude::*};
 use leafwing_input_manager::prelude::*;
@@ -35,7 +34,7 @@ fn start_or_resume_soundtrack(
         // // Play music from boombox entity
         // cmds
         //     .entity(boombox.single()?)
-        //     .insert(music(handle.clone(), vol));
+        //     .insert(music(handle.clone(), settings.music());
         // Or just play music
         cmds.spawn(music(handle.clone(), settings.sfx()));
     }

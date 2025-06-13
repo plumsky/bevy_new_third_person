@@ -34,7 +34,7 @@
         ("Button hover/press sounds, step sounds", "smnbl records\ngifted to rust community under CC0" ),
         ],
         devs: [
-        ( "olekspickle", "compiled different bevy crates to have a consistent template covering stuff average third person game need")
+        ( "olekspickle", "compiled different bevy crates to have a consistent template covering stuff average third person RPG game need")
         ]
     )
 )

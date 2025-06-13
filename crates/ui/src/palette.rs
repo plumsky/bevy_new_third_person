@@ -13,5 +13,3 @@ pub const TRANSLUCENT: Color = Color::srgba(0.0, 0.0, 0.0, 0.5);
 
 pub const SUN: Color = Color::srgb(248.0 / 255.0, 176.0 / 255.0, 14.0 / 255.0);
 pub const MOON: Color = Color::srgb(80.0 / 255.0, 104.0 / 255.0, 134.0 / 255.0);
-
-// pub const DEBUG_BLUE: Color = Color::srgba(0.3, 0.3, 0.7, 0.5);

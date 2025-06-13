@@ -1,5 +1,5 @@
-use crate::prelude::*;
-use bevy::prelude::*;
+use super::*;
+use asset_loading::AudioSources;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<UiInteraction>().add_systems(

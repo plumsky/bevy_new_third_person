@@ -1,4 +1,3 @@
-use crate::prelude::*;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -10,6 +9,23 @@ pub struct Config {
     pub geom: Geometry,
     pub player: PlayerConfig,
     pub credits: Credits,
+}
+
+#[derive(Resource, Debug, Clone, Serialize, Deserialize, Reflect)]
+pub struct Sound {
+    pub general: f32,
+    pub music: f32,
+    pub sfx: f32,
+}
+
+impl Default for Sound {
+    fn default() -> Self {
+        Self {
+            general: 1.0,
+            music: 0.5,
+            sfx: 0.5,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect)]

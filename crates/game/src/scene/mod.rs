@@ -1,6 +1,5 @@
-use crate::prelude::*;
+use super::*;
 use avian3d::prelude::*;
-use bevy::prelude::*;
 use bevy_fix_gltf_coordinate_system::prelude::*;
 
 pub mod player;
@@ -54,29 +53,25 @@ pub(crate) fn setup(
     ));
 
     // Rock
-    // for mesh_handle in &gltf.meshes {
-    //     if let Some(mesh) = meshes.get(mesh_handle) {
-    //         info!(
-    //             "Extracted mesh: {}, vertex count: {:?}",
-    //             name,
-    //             mesh.count_vertices()
-    //         );
-    //         // You could now use `mesh` directly or clone it
-    //         // e.g., commands.spawn(PbrBundle { mesh: mesh_handle.clone(), ..default() });
-    //     }
-    // }
-    // let mesh = gltf.named_meshes.get("mt_lp").expect("");
-    // let mesh = Mesh3d(models.rock.clone());
-    // let pos = Transform::from_translation(Vec3::new(5.0, 3.0, 5.0));
-    // commands.spawn((
-    //     StateScoped(Screen::Gameplay),
-    //     Rock,
-    //     pos,
-    //     mesh,
-    //     // children![mesh],
-    //     RigidBody::Static,
-    //     Collider::trimesh_from_mesh(rock_mesh).expect("failed to create collider from rock mesh"),
-    // ));
+    for mesh_handle in &gltf.meshes {
+        if let Some(mesh) = meshes.get(mesh_handle) {
+            info!(" vertex count: {:?}", mesh.count_vertices());
+            // let mesh = gltf.named_meshes.get("mt_lp").expect("");
+            let pos = Transform::from_translation(Vec3::new(5.0, 3.0, 5.0));
+            commands.spawn((
+                StateScoped(Screen::Gameplay),
+                Rock,
+                pos,
+                Mesh3d(mesh),
+                // children![mesh],
+                RigidBody::Static,
+                Collider::trimesh_from_mesh(mesh)
+                    .expect("failed to create collider from rock mesh"),
+            ));
+            // You could now use `mesh` directly or clone it
+            // e.g., commands.spawn(PbrBundle { mesh: mesh_handle.clone(), ..default() });
+        }
+    }
 
     let size = main_plane / 2.0;
     let geom = cfg.geom.clone();

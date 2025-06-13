@@ -1,0 +1,15 @@
+[package]
+name = "screens"
+authors.workspace = true
+version.workspace = true
+repository.workspace = true
+edition.workspace = true
+
+[dependencies]
+bevy.workspace = true
+bevy_seedling.workspace = true
+models = { path = "../models" }
+game = { path = "../game" }
+
+[lints]
+workspace = true

@@ -1,23 +1,14 @@
 //! The screen state for the main gameplay.
 
 use super::*;
-use crate::{
-    game::{input_dispatch::*, scene},
-    screens::settings,
-};
 use bevy::ui::Val::*;
-use leafwing_input_manager::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_plugins(crate::game::plugin)
+    app.add_plugins(game::plugin)
         .add_systems(
             OnEnter(Screen::Gameplay),
-            spawn_gameplay_ui.after(scene::setup),
-        )
-        .add_systems(
-            Update,
-            toot.run_if(resource_exists::<AudioSources>)
-                .run_if(in_state(Screen::Gameplay)),
+            spawn_gameplay_ui,
+            // spawn_gameplay_ui.after(scene::setup),
         )
         .add_observer(trigger_menu_toggle_on_esc)
         .add_observer(add_new_modal)
@@ -26,20 +17,21 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 #[derive(Component)]
-pub struct DevUi;
+pub struct GameplayUi;
 #[derive(Component)]
 pub struct PauseLabel;
 #[derive(Component)]
 pub struct MuteLabel;
+#[derive(Component)]
+pub struct MenuModal;
+#[derive(Component)]
+pub struct SettingsModal;
 
 fn spawn_gameplay_ui(mut cmds: Commands, settings: Res<Settings>) {
     cmds.spawn((
         StateScoped(Screen::Gameplay),
-        DevUi,
-        Node {
-            flex_direction: FlexDirection::Row,
-            ..Default::default()
-        },
+        GameplayUi,
+        ui_root("Gameplay Ui"),
         children![
             // Demo keys
             (
@@ -64,25 +56,6 @@ fn spawn_gameplay_ui(mut cmds: Commands, settings: Res<Settings>) {
         ],
     ));
 }
-
-fn toot(
-    mut cmds: Commands,
-    settings: Res<Settings>,
-    sources: ResMut<AudioSources>,
-    action: Query<&ActionState<Action>>,
-) -> Result {
-    let state = action.single()?;
-    if state.just_pressed(&Action::Toot) {
-        cmds.spawn(sfx(sources.btn_press.clone(), settings.sfx()));
-    }
-
-    Ok(())
-}
-
-#[derive(Component)]
-pub struct MenuModal;
-#[derive(Component)]
-pub struct SettingsModal;
 
 fn click_to_menu(_: Trigger<Pointer<Click>>, mut cmds: Commands) {
     cmds.trigger(OnGoTo(Screen::Title));

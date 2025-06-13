@@ -51,6 +51,12 @@ pub fn plugin(app: &mut App) {
 /// System query example:
 ///
 /// ```rust,no_run
+/// #[derive(Resource, Debug, Clone, Serialize, Deserialize, Reflect)]
+/// pub struct Sound {
+///     pub general: f32,
+///     pub music: f32,
+///     pub sfx: f32,
+/// }
 /// fn lower_general(
 ///     mut sound: ResMut<Sound>,
 ///     mut general: Single<&mut VolumeNode, With<Bus>>,
@@ -62,23 +68,6 @@ pub fn plugin(app: &mut App) {
 /// ```
 #[derive(NodeLabel, PartialEq, Eq, Debug, Hash, Clone)]
 pub struct General;
-
-#[derive(Resource, Debug, Clone, Serialize, Deserialize, Reflect)]
-pub struct Sound {
-    pub general: f32,
-    pub music: f32,
-    pub sfx: f32,
-}
-
-impl Default for Sound {
-    fn default() -> Self {
-        Self {
-            general: 1.0,
-            music: 0.5,
-            sfx: 0.5,
-        }
-    }
-}
 
 fn spawn_pools(mut cmds: Commands) {
     cmds.spawn((General, VolumeNode::default()));

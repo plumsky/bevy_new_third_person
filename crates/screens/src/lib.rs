@@ -1,17 +1,15 @@
 //! The game's main screen states and transitions between them.
 
-use crate::prelude::*;
 use bevy::prelude::*;
 
 mod credits;
-mod gameover;
-pub mod gameplay;
+mod gameplay;
 mod loading;
-pub mod settings;
+mod settings;
 mod splash;
 mod title;
 
-pub(super) fn plugin(app: &mut App) {
+pub fn plugin(app: &mut App) {
     app.init_state::<Screen>();
     app.enable_state_scoped_entities::<Screen>();
 
@@ -22,30 +20,10 @@ pub(super) fn plugin(app: &mut App) {
         settings::plugin,
         credits::plugin,
         gameplay::plugin,
-        gameover::plugin,
     ))
     .add_systems(Update, track_last_screen.run_if(state_changed::<Screen>))
     .add_observer(on_back)
     .add_observer(on_go_to);
-}
-
-/// The game's main screen states.
-/// See <https://bevy-cheatbook.github.io/programming/states.html>
-/// Or <https://github.com/bevyengine/bevy/blob/main/examples/ecs/state.rs>
-#[derive(States, Default, Clone, Eq, PartialEq, Debug, Hash)]
-pub enum Screen {
-    // Bevy tribute <3
-    #[default]
-    Splash,
-    // During the loading State the LoadingPlugin will load our assets
-    Loading,
-    Credits,
-    Settings,
-    // Here the menu is drawn and waiting for player interaction
-    Title,
-    // During this State the actual game logic is executed
-    Gameplay,
-    GameOver,
 }
 
 // TODO: figure out how to make it a cool observer

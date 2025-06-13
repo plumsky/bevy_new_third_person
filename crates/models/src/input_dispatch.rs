@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use bevy::prelude::*;
+use super::*;
 use leafwing_input_manager::prelude::*;
 
 pub fn plugin(app: &mut App) {

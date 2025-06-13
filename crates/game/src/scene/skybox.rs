@@ -1,8 +1,7 @@
-use crate::prelude::*;
+use super::*;
 use bevy::{
     core_pipeline::{bloom::Bloom, tonemapping::Tonemapping},
     pbr::{Atmosphere, AtmosphereSettings, CascadeShadowConfigBuilder, light_consts::lux},
-    prelude::*,
     render::camera::Exposure,
 };
 use leafwing_input_manager::prelude::*;
@@ -23,12 +22,6 @@ pub fn plugin(app: &mut App) {
 pub struct Sun;
 #[derive(Component)]
 pub struct Moon;
-
-#[derive(Debug)]
-pub enum SunCycle {
-    DayNight,
-    Nimbus,
-}
 
 /// Mainly this example:
 /// <https://bevyengine.org/examples/3d-rendering/atmosphere/>

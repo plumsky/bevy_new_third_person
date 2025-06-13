@@ -1,0 +1,18 @@
+[package]
+name = "ui"
+authors.workspace = true
+version.workspace = true
+repository.workspace = true
+edition.workspace = true
+
+[dependencies]
+asset_loading = { path = "../asset_loading" }
+bevy.workspace = true
+bevy_seedling.workspace = true
+leafwing-input-manager.workspace = true
+iyes_perf_ui.workspace = true
+ron.workspace = true
+serde.workspace = true
+
+[lints]
+workspace = true

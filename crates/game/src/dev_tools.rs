@@ -1,10 +1,6 @@
 //! Development tools for the game. This plugin is only enabled in dev builds.
 
-use crate::{
-    game::input_dispatch::*,
-    prelude::*,
-    screens::gameplay::{MuteLabel, PauseLabel},
-};
+use super::*;
 #[cfg(feature = "dev_native")]
 use bevy::{
     dev_tools::states::log_transitions,

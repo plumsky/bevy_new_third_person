@@ -7,33 +7,6 @@ use bevy::{
 use std::io::Cursor;
 use winit::window::Icon;
 
-mod audio;
-mod dev_tools;
-mod game;
-mod loading;
-mod pre_load;
-mod screens;
-mod ui;
-
-pub(crate) mod prelude {
-    use super::*;
-
-    pub use avian3d::prelude::*;
-    pub use bevy::prelude::*;
-
-    pub use audio::{General, Music, Sfx, Sound, music, music_looping, sfx, sfx_looping};
-    pub(crate) use game::{
-        Score, camera,
-        input_dispatch::*,
-        scene::{SunCycle, SunCycleLabel, player},
-        settings::{Action, Modal, Settings},
-    };
-    pub use loading::{AudioSources, Models, ResourceHandles};
-    pub use pre_load::Config;
-    pub use screens::Screen;
-    pub use ui::*;
-}
-
 fn main() {
     let mut app = App::new();
 
@@ -77,25 +50,15 @@ fn main() {
     // custom plugins. the order is important
     // be sure you use resources/types AFTER you add plugins that insert them
     app.add_plugins((
+        models::plugin,
         audio::plugin,
-        loading::plugin,
+        asset_loading::plugin,
         ui::plugin,
         screens::plugin,
-        dev_tools::plugin,
     ))
     .add_systems(Startup, set_window_icon);
 
     app.run();
-}
-
-/// High-level groupings of systems for the app in the `Update` schedule.
-/// When adding a new variant, make sure to order it in the `configure_sets`
-/// call above.
-#[derive(SystemSet, Debug, Clone, Copy, Eq, PartialEq, Hash, PartialOrd, Ord)]
-pub enum AppSystems {
-    TickTimers,
-    RecordInput,
-    Update,
 }
 
 /// Sets the icon on windows and X11
