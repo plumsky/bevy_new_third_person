@@ -1,6 +1,5 @@
 use super::*;
 use avian3d::prelude::*;
-use bevy_fix_gltf_coordinate_system::prelude::*;
 
 pub mod player;
 pub mod skybox;
@@ -12,7 +11,7 @@ pub use skybox::*;
 pub fn plugin(app: &mut App) {
     app.add_plugins((
         PhysicsPlugins::default(),
-        FixGltfCoordinateSystemPlugin,
+        bevy_fix_gltf_coordinate_system::FixGltfCoordinateSystemPlugin,
         player::plugin,
         skybox::plugin,
     ))

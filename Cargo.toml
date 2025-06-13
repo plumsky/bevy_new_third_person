@@ -24,7 +24,7 @@ dev = [
     "bevy/dynamic_linking",         # Improve compile times for dev builds by linking Bevy as a dynamic library.
     "bevy/track_location",          # Improve error messages coming from Bevy
 ]
-# wasm_audio = [ "firewheel-web-audio" ]
+wasm_audio = [ "firewheel-web-audio" ]
 dev_native = [
     "dev",
     "enhanced",
@@ -44,10 +44,10 @@ game = { path = "crates/game" }
 models = { path = "crates/models" }
 ui = { path = "crates/ui" }
 screens = { path = "crates/screens" }
-# experimental web audio fix
-firewheel-web-audio = { git = "https://github.com/CorvusPrudens/firewheel-web-audio", optional = true }
 bevy = { workspace = true }
 bevy_seedling = { workspace = true }
+# experimental web audio fix
+firewheel-web-audio = { git = "https://github.com/CorvusPrudens/firewheel-web-audio", optional = true }
 
 [workspace.dependencies]
 # everything except bevy_audio
@@ -85,7 +85,7 @@ bevy = { version = "^0.16", default-features = false, features = [
     "wayland"
 ] }
 # stupid gltf 180 rotation fix
-bevy_fix_gltf_coordinate_system = "0.1.0"
+bevy_fix_gltf_coordinate_system = "0.1"
 
 # plugins
 # wireframes
@@ -112,12 +112,12 @@ iyes_perf_ui = "0.5"
 leafwing-input-manager = "0.17"
 
 # misc
+image = "0.25.6"
 ron = "0.10"
 rand = { version = "0.8" }
 serde = "1"
 thiserror = "2.0.12"
-image = "0.25.6"
-## This greatly improves WGPU's performance due to its heavy use of trace! calls
+# This greatly improves WGPU's performance due to its heavy use of trace! calls
 log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"] }
 # keep the following in sync with Bevy's dependencies
 winit = { version = "0.30", default-features = false }
