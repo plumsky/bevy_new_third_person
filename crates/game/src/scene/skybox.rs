@@ -18,11 +18,6 @@ pub fn plugin(app: &mut App) {
     );
 }
 
-#[derive(Component)]
-pub struct Sun;
-#[derive(Component)]
-pub struct Moon;
-
 /// Mainly this example:
 /// <https://bevyengine.org/examples/3d-rendering/atmosphere/>
 pub fn add_skybox_to_camera(
@@ -134,9 +129,6 @@ fn sun_cycle(
             .for_each(|mut tf| tf.rotate_y(-time.delta_secs() * std::f32::consts::PI / 50.0)),
     }
 }
-
-#[derive(Component)]
-pub struct SunCycleLabel;
 
 fn toggle_sun_cycle(
     mut settings: ResMut<Settings>,

@@ -4,6 +4,7 @@
 use bevy::{
     app::App, asset::AssetMetaCheck, log, prelude::*, window::PrimaryWindow, winit::WinitWindows,
 };
+use models::*;
 use std::io::Cursor;
 use winit::window::Icon;
 
@@ -51,7 +52,6 @@ fn main() {
     // be sure you use resources/types AFTER you add plugins that insert them
     app.add_plugins((
         audio::plugin,
-        models::plugin,
         asset_loading::plugin,
         ui::plugin,
         screens::plugin,

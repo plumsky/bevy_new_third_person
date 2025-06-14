@@ -11,10 +11,14 @@ dev_native = [ "dev" ]
 dev = [ ]
 
 [dependencies]
+audio = { path = "../audio" }
+asset_loading = { path = "../asset_loading" }
+game = { path = "../game" }
+models = { path = "../models" }
+ui = { path = "../ui" }
+
 bevy.workspace = true
 bevy_seedling.workspace = true
-models = { path = "../models" }
-game = { path = "../game" }
 
 [lints]
 workspace = true

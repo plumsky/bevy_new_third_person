@@ -1,9 +1,8 @@
 //! A splash screen that plays briefly at startup.
-use crate::{AppSystems, prelude::*};
+use super::*;
 use bevy::{
     image::{ImageLoaderSettings, ImageSampler},
     input::common_conditions::input_just_pressed,
-    prelude::*,
     ui::Val::*,
 };
 

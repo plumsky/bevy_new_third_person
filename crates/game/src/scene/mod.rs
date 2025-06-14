@@ -1,6 +1,7 @@
 use super::*;
 use asset_loading::Models;
 use avian3d::prelude::*;
+use bevy::gltf::GltfMesh;
 use models::{Config, Screen};
 
 pub mod player;
@@ -35,6 +36,7 @@ pub(crate) fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     gltf_assets: Res<Assets<Gltf>>,
+    gltf_handles: Res<Assets<GltfMesh>>,
 ) {
     let Some(gltf) = gltf_assets.get(&models.rock) else {
         return;
@@ -42,7 +44,7 @@ pub(crate) fn setup(
     let main_plane = cfg.geom.main_plane;
 
     // Plane
-    let mesh = Mesh3d(meshes.add(Cuboid::new(main_plane, 0., main_plane)));
+    let mesh = Mesh3d(meshes.add(Cuboid::new(main_plane, 1.0, main_plane)));
     let mat = MeshMaterial3d(materials.add(SAND_YELLOW));
     commands.spawn((
         StateScoped(Screen::Gameplay),
@@ -54,25 +56,31 @@ pub(crate) fn setup(
     ));
 
     // Rock
-    for mesh_handle in &gltf.meshes {
-        if let Some(mesh) = meshes.get(mesh_handle) {
-            info!(" vertex count: {:?}", mesh.count_vertices());
-            // let mesh = gltf.named_meshes.get("mt_lp").expect("");
-            let pos = Transform::from_translation(Vec3::new(5.0, 3.0, 5.0));
-            commands.spawn((
-                StateScoped(Screen::Gameplay),
-                Rock,
-                pos,
-                Mesh3d(mesh),
-                // children![mesh],
-                RigidBody::Static,
-                Collider::trimesh_from_mesh(mesh)
-                    .expect("failed to create collider from rock mesh"),
-            ));
-            // You could now use `mesh` directly or clone it
-            // e.g., commands.spawn(PbrBundle { mesh: mesh_handle.clone(), ..default() });
+    let mesh = gltf.named_meshes.get("mt_lp").expect("");
+    if let Some(mesh) = gltf_handles.get(mesh) {
+        info!(" mesh: {}", mesh.name);
+        for primitive in mesh.primitives.clone() {
+            info!("primitive: {}", primitive.name);
         }
     }
+    // for mesh_handle in &gltf.meshes {
+    //     if let Some(mesh) = meshes.get(mesh_handle) {
+    //         info!(" vertex count: {:?}", mesh.count_vertices());
+    //         let pos = Transform::from_translation(Vec3::new(5.0, 3.0, 5.0));
+    //         commands.spawn((
+    //             StateScoped(Screen::Gameplay),
+    //             Rock,
+    //             pos,
+    //             Mesh3d(mesh),
+    //             // children![mesh],
+    //             RigidBody::Static,
+    //             Collider::trimesh_from_mesh(mesh)
+    //                 .expect("failed to create collider from rock mesh"),
+    //         ));
+    //         // You could now use `mesh` directly or clone it
+    //         // e.g., commands.spawn(PbrBundle { mesh: mesh_handle.clone(), ..default() });
+    //     }
+    // }
 
     let size = main_plane / 2.0;
     let geom = cfg.geom.clone();

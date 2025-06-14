@@ -50,6 +50,8 @@ bevy = { workspace = true }
 bevy_seedling = { workspace = true }
 # experimental web audio fix
 firewheel-web-audio = { git = "https://github.com/CorvusPrudens/firewheel-web-audio", optional = true }
+image = { workspace = true }
+winit = { workspace = true }
 
 [workspace.dependencies]
 # everything except bevy_audio
