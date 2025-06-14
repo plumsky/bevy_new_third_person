@@ -1,5 +1,7 @@
 use super::*;
+use asset_loading::Models;
 use avian3d::prelude::*;
+use models::{Config, Screen};
 
 pub mod player;
 pub mod skybox;

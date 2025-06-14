@@ -3,7 +3,8 @@ use bevy_tnua::{
     builtins::{TnuaBuiltinCrouch, TnuaBuiltinDash},
     control_helpers::TnuaSimpleAirActionsCounter,
 };
-use leafwing_input_manager::prelude::ActionState;
+use leafwing_input_manager::prelude::*;
+use models::Action;
 
 #[derive(Component)]
 pub struct StepTimer(pub Timer);

@@ -5,11 +5,15 @@ version.workspace = true
 repository.workspace = true
 edition = "2024"
 
+[features]
+default = [ "dev_native" ]
+dev_native = [ "dev" ]
+dev = [ ]
+
 [dependencies]
 bevy.workspace = true
 bevy_seedling.workspace = true
 ron.workspace = true
-serde.workspace = true
 
 [lints]
 workspace = true

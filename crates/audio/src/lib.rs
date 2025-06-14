@@ -6,7 +6,6 @@
 //!
 use bevy::prelude::*;
 use bevy_seedling::{pool::SamplerPool, prelude::*, sample::Sample};
-use serde::{Deserialize, Serialize};
 
 pub fn plugin(app: &mut App) {
     #[cfg(target_arch = "wasm32")]

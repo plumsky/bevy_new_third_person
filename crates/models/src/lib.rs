@@ -1,10 +1,12 @@
 use bevy::prelude::*;
 
 pub mod input_dispatch;
+pub mod marker;
 pub mod pre_load;
 pub mod settings;
 
 pub use input_dispatch::*;
+pub use marker::*;
 pub use pre_load::*;
 pub use settings::*;
 

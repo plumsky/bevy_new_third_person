@@ -50,8 +50,8 @@ fn main() {
     // custom plugins. the order is important
     // be sure you use resources/types AFTER you add plugins that insert them
     app.add_plugins((
-        models::plugin,
         audio::plugin,
+        models::plugin,
         asset_loading::plugin,
         ui::plugin,
         screens::plugin,

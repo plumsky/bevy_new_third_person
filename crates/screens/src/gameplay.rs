@@ -16,17 +16,6 @@ pub(super) fn plugin(app: &mut App) {
         .add_observer(clear_modals);
 }
 
-#[derive(Component)]
-pub struct GameplayUi;
-#[derive(Component)]
-pub struct PauseLabel;
-#[derive(Component)]
-pub struct MuteLabel;
-#[derive(Component)]
-pub struct MenuModal;
-#[derive(Component)]
-pub struct SettingsModal;
-
 fn spawn_gameplay_ui(mut cmds: Commands, settings: Res<Settings>) {
     cmds.spawn((
         StateScoped(Screen::Gameplay),

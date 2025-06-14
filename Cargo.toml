@@ -23,6 +23,7 @@ dev = [
     "bevy/bevy_ui_debug",
     "bevy/dynamic_linking",         # Improve compile times for dev builds by linking Bevy as a dynamic library.
     "bevy/track_location",          # Improve error messages coming from Bevy
+    "audio/dev", "asset_loading/dev", "screens/dev", "game/dev", "ui/dev", "models/dev"
 ]
 wasm_audio = [ "firewheel-web-audio" ]
 dev_native = [
@@ -30,6 +31,7 @@ dev_native = [
     "enhanced",
     "bevy/embedded_watcher",        # Enable embedded asset hot reloading for native dev builds.
     "bevy/file_watcher",            # Enable asset hot reloading for native dev builds.
+    "audio/dev_native", "asset_loading/dev_native", "screens/dev_native", "game/dev_native", "ui/dev_native", "models/dev_native"
 ]
 enhanced = [
     "bevy/bevy_pbr",                # PBR

@@ -1,8 +1,7 @@
-use crate::prelude::*;
-use avian3d::{math::PI, prelude::*};
-use bevy::prelude::*;
+use super::*;
+use avian3d::math::PI;
 use bevy_third_person_camera::*;
-use bevy_tnua::{control_helpers::TnuaSimpleAirActionsCounter, prelude::*, TnuaAnimatingState};
+use bevy_tnua::{TnuaAnimatingState, control_helpers::TnuaSimpleAirActionsCounter, prelude::*};
 use bevy_tnua_avian3d::*;
 
 mod animation;
