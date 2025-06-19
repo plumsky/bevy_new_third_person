@@ -8,6 +8,8 @@
         zoom: (1.5, 30.0),
         movement: (
             speed: 11,
+            sprint_factor: 1.5,
+            crouch_factor: 0.8,
             actions_in_air: 3,
             dash_distance: 10,
         ),
@@ -27,11 +29,20 @@
         fog_visibility: 500.0,
         shadow_distance: 100,
     ),
+    settings: (
+        min_volume: 0.0,
+        max_volume: 3.0,
+        min_fov: 20.0,
+        max_fov: 160.0,
+        step: 0.1,
+
+    ),
     credits: (
         assets: [
         ("Bevy Logo", "All rights reserved by the Bevy Foundation, permission granted for splash screen use when unmodified" ),
-        ("Background Music", "smnbl-time-for-fun\ngifted to rust community under CC0" ),
-        ("Button hover/press sounds, step sounds", "smnbl records\ngifted to rust community under CC0" ),
+        ("Background Music", "smnbl-time-for-fun\ngifted to rust community, CC0" ),
+        ("Button hover/press sounds, step sounds", "smnbl records\ngifted to rust community, CC0" ),
+        ("icons", "khusmeen, CC4" ),
         ],
         devs: [
         ( "olekspickle", "compiled different bevy crates to have a consistent template covering stuff average third person RPG game need")
