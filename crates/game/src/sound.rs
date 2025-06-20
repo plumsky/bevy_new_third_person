@@ -50,7 +50,7 @@ fn stop_soundtrack(
 }
 
 fn movement_sound(
-    _: Trigger<Fired<Navigate>>,
+    on: Trigger<Fired<Navigate>>,
     time: Res<Time>,
     settings: Res<Settings>,
     sources: ResMut<AudioSources>,
@@ -58,11 +58,11 @@ fn movement_sound(
     mut cmds: Commands,
     mut step_timer: Query<&mut StepTimer>,
 ) -> Result {
-    let player_pos = player_pos.single()?;
+    let player_pos = player_pos.get(on.target())?;
     let mut step_timer = step_timer.single_mut()?;
 
     // WALK SOUND
-    if step_timer.0.tick(time.delta()).just_finished() {
+    if step_timer.tick(time.delta()).just_finished() {
         // TODO: only run animation after tick
         if player_pos.translation.y <= 2.0 {
             let mut rng = thread_rng();

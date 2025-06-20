@@ -46,7 +46,7 @@ fn track_last_screen(
 }
 
 fn on_back(
-    trigger: Trigger<OnBack>,
+    trigger: Trigger<Back>,
     mut next_screen: ResMut<NextState<Screen>>,
     screen: Res<State<Screen>>,
 ) {

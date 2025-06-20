@@ -39,7 +39,14 @@ declare_markers!(
     FovLabel
 );
 
-#[derive(Component)]
-pub struct StepTimer(pub Timer);
-#[derive(Component)]
-pub struct JumpTimer(pub Timer);
+macro_rules! timers {
+  ( $( $name:ident ),* ) => {
+        $(
+            #[derive(Component, Reflect, Deref, DerefMut)]
+            #[reflect(Component)]
+            pub struct $name(pub Timer);
+        )*
+    };
+}
+
+timers!(JumpTimer, StepTimer);

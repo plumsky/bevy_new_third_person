@@ -50,7 +50,7 @@ Feel free to move things around however you want, though.
 - [x] import and usage of game mechanics and parameters from .ron (config, credits) (kudos to Caudiciform)
 - [x] simple asset loading based on [bevy_asset_loader] with loading from path addition (kudos to Caudiciform)
 - [x] third person camera with [bevy_third_person_camera]
-- [x] simple keyboard & gamepad mapping to game actions using [leafwing-input-manager]
+- [x] solid keyboard & gamepad mapping to ui & game actions using [bevy_enhanced_input]
 - [x] simple scene with colliders and rigid bodies using [avian3d]
 - [x] simple player movement using [bevy_tnua]
 - [x] simple skybox sun cycle using [bevy atmosphere example], with daynight and nimbus modes
@@ -59,6 +59,8 @@ Feel free to move things around however you want, though.
 - [x] consistent Esc back navigation in gameplay and menu via stacked modals (kudos for the idea to skyemakesgames)
 
 ### TODOs (prioritized)
+- [ ] fix sound timing for sprint
+- [ ] figure out rock spawn
 - [ ] Crouch walk, fix bug when unable to move after crouch
 - [ ] Jump with timer(tricky with tnua jump in air counter)
 - [ ] fix music not starting on re-enter gameplay
@@ -177,7 +179,7 @@ The [assets](./assets) in this repository are all 3rd-party. See the see [credit
 [Bevy Cheat Book]: https://bevy-cheatbook.github.io/introduction.html
 [BevyFlock]: https://github.com/TheBevyFlock/bevy_new_2d
 [cargo-generate]: https://github.com/cargo-generate/cargo-generate
-[leafwing-input-manager]: https://github.com/Leafwing-Studios/leafwing-input-manager
+[bevy_enhanced_input]: https://github.com/projectharmonia/bevy_enhanced_input
 [Linux dependencies]: https://github.com/bevyengine/bevy/blob/main/docs/linux_dependencies.md
 [trunk]: https://trunkrs.dev/
 [Universal Animation Library]: https://quaternius.itch.io/universal-animation-library

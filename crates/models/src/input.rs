@@ -15,7 +15,7 @@ fn spawn_ctx(mut cmds: Commands) {
 }
 
 fn on_ctx_switch(
-    event: Trigger<OnInputCtxSwitch>,
+    event: Trigger<SwitchInputCtx>,
     input_ctx: Single<Entity, With<InputCtx>>,
     players: Query<Entity, With<Player>>,
     mut cmds: Commands,
@@ -87,16 +87,24 @@ pub struct Mute;
 pub struct ModalCtx;
 
 #[derive(Debug, InputAction)]
+#[input_action(output = Vec2, require_reset = true)]
+struct NavigateModal;
+
+#[derive(Debug, InputAction)]
 #[input_action(output = bool, require_reset = true)]
-pub struct Back;
+pub struct Escape;
 
 #[derive(Debug, InputAction)]
 #[input_action(output = bool)]
 pub struct Select;
 
 #[derive(Debug, InputAction)]
-#[input_action(output = Vec2, require_reset = true)]
-struct NavigateModal;
+#[input_action(output = bool)]
+pub struct RightTab;
+
+#[derive(Debug, InputAction)]
+#[input_action(output = bool)]
+pub struct LeftTab;
 
 fn bind_gameplay(
     trigger: Trigger<Binding<GameplayCtx>>,
@@ -114,7 +122,6 @@ fn bind_gameplay(
         .to((Cardinal::wasd_keys(), Axial::left_stick()))
         .with_modifiers((
             DeadZone::default(), // Apply non-uniform normalization to ensure consistent speed, otherwise diagonal movement will be faster.
-            SmoothNudge::new(1.0), // Make movement smooth and independent of the framerate. To only make it framerate-independent, use `DeltaScale`.
             Scale::splat(0.3), // Additionally multiply by a constant to achieve the desired speed.
         ));
 
@@ -126,14 +133,14 @@ fn bind_gameplay(
     actions.bind::<Pause>().to(KeyCode::KeyP);
     actions.bind::<Mute>().to(KeyCode::KeyM);
     actions
+        .bind::<Escape>()
+        .to((KeyCode::Escape, GamepadButton::Select));
+    actions
         .bind::<Crouch>()
-        .to((KeyCode::Escape, GamepadButton::East));
+        .to((KeyCode::ControlLeft, GamepadButton::East));
     actions
         .bind::<Jump>()
         .to((KeyCode::Space, GamepadButton::South));
-    actions
-        .bind::<Attack>()
-        .to((MouseButton::Left, GamepadButton::RightTrigger2));
     actions
         .bind::<Dash>()
         .to((KeyCode::AltLeft, GamepadButton::LeftTrigger));
@@ -141,8 +148,8 @@ fn bind_gameplay(
         .bind::<Sprint>()
         .to((KeyCode::ShiftLeft, GamepadButton::LeftThumb));
     actions
-        .bind::<Back>()
-        .to((KeyCode::Escape, GamepadButton::Select));
+        .bind::<Attack>()
+        .to((MouseButton::Left, GamepadButton::RightTrigger2));
 }
 
 fn bind_modal(
@@ -163,9 +170,11 @@ fn bind_modal(
     ));
 
     actions
-        .bind::<Back>()
+        .bind::<Escape>()
         .to((KeyCode::Escape, GamepadButton::East));
     actions
         .bind::<Select>()
         .to((KeyCode::Enter, GamepadButton::South, MouseButton::Left));
+    actions.bind::<RightTab>().to(GamepadButton::RightTrigger);
+    actions.bind::<LeftTab>().to(GamepadButton::LeftTrigger);
 }

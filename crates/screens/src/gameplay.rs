@@ -90,7 +90,7 @@ fn toggle_mute(
 
 fn click_to_menu(_: Trigger<Pointer<Click>>, mut cmds: Commands) {
     cmds.trigger(OnGoTo(Screen::Title));
-    cmds.trigger(OnPauseToggle);
+    cmds.trigger(OnPauseToggle); // reset to false
 }
 fn click_pop_modal(_: Trigger<Pointer<Click>>, mut cmds: Commands) {
     cmds.trigger(OnPopModal);
@@ -100,7 +100,7 @@ fn click_spawn_settings(_: Trigger<Pointer<Click>>, mut cmds: Commands) {
 }
 
 fn trigger_menu_toggle_on_esc(
-    _: Trigger<OnBack>,
+    _: Trigger<Back>,
     mut cmds: Commands,
     screen: Res<State<Screen>>,
     settings: ResMut<Settings>,
@@ -108,7 +108,7 @@ fn trigger_menu_toggle_on_esc(
     if *screen.get() != Screen::Gameplay {
         return;
     }
-    info!("on BACK in gameplay, modals: {:?}", settings.modals);
+
     if settings.modals.is_empty() {
         cmds.trigger(OnNewModal(Modal::Main));
     } else {
@@ -127,7 +127,7 @@ fn add_new_modal(
     }
 
     if settings.modals.is_empty() {
-        cmds.trigger(OnInputCtxSwitch(Context::Modal));
+        cmds.trigger(SwitchInputCtx(Context::Modal));
         if Modal::Main == trig.0 {
             cmds.trigger(OnPauseToggle);
         }
@@ -148,8 +148,8 @@ fn add_new_modal(
 fn pop_modal(
     _: Trigger<OnPopModal>,
     screen: Res<State<Screen>>,
-    menu_marker: Single<Entity, With<MenuModal>>,
-    settings_marker: Single<Entity, With<SettingsModal>>,
+    menu_marker: Query<Entity, With<MenuModal>>,
+    settings_marker: Query<Entity, With<SettingsModal>>,
     mut cmds: Commands,
     mut settings: ResMut<Settings>,
 ) {
@@ -163,10 +163,14 @@ fn pop_modal(
     let popped = settings.modals.pop().expect("failed to pop modal");
     match popped {
         Modal::Main => {
-            cmds.entity(*menu_marker).despawn();
+            if let Ok(menu) = menu_marker.single() {
+                cmds.entity(menu).despawn();
+            }
         }
         Modal::Settings => {
-            cmds.entity(*settings_marker).despawn();
+            if let Ok(menu) = settings_marker.single() {
+                cmds.entity(menu).despawn();
+            }
         }
     }
 
@@ -179,7 +183,7 @@ fn pop_modal(
     }
 
     if settings.modals.is_empty() {
-        cmds.trigger(OnInputCtxSwitch(Context::Gameplay));
+        cmds.trigger(SwitchInputCtx(Context::Gameplay));
         cmds.trigger(OnPauseToggle);
         cmds.trigger(OnCamCursorToggle);
     }
