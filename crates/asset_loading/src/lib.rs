@@ -32,6 +32,10 @@ pub struct Fonts {
 pub struct Textures {
     #[dependency]
     pub github: Handle<Image>,
+    #[dependency]
+    pub pause: Handle<Image>,
+    #[dependency]
+    pub mute: Handle<Image>,
 }
 
 impl FromWorld for Textures {
@@ -39,6 +43,8 @@ impl FromWorld for Textures {
         let assets = world.resource::<AssetServer>();
         Self {
             github: assets.load("textures/github.png"),
+            pause: assets.load("textures/pause.png"),
+            mute: assets.load("textures/mute.png"),
         }
     }
 }

@@ -1,5 +1,5 @@
 [package]
-name = "ui"
+name = "scene"
 authors.workspace = true
 version.workspace = true
 repository.workspace = true
@@ -7,20 +7,24 @@ edition.workspace = true
 
 [features]
 default = [ "dev_native" ]
-dev_native = [ "dev" ]
-dev = [ ]
+dev_native = [ "enhanced" ]
+enhanced = [ ]
 
 [dependencies]
 audio = { path = "../audio" }
 asset_loading = { path = "../asset_loading" }
 models = { path = "../models" }
+ui = { path = "../ui" }
 
+avian3d.workspace = true
 bevy.workspace = true
-bevy_enhanced_input.workspace = true
 bevy_seedling.workspace = true
-iyes_perf_ui.workspace = true
-ron.workspace = true
-serde.workspace = true
+bevy-tnua.workspace = true
+bevy-tnua-avian3d.workspace = true
+bevy_third_person_camera.workspace = true
+bevy_fix_gltf_coordinate_system.workspace = true
+bevy_enhanced_input.workspace = true
+rand.workspace = true
 
 [lints]
 workspace = true

@@ -82,6 +82,14 @@ impl Opts {
         self.node = new;
         self
     }
+    pub fn border(mut self, b: UiRect) -> Self {
+        self.node.border = b;
+        self
+    }
+    pub fn hidden(mut self) -> Self {
+        self.node.display = Display::None;
+        self
+    }
     pub fn width(mut self, w: Val) -> Self {
         self.node.width = w;
         self

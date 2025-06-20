@@ -30,12 +30,11 @@ pub fn icon(opts: impl Into<Opts>) -> impl Bundle {
     let opts = opts.into();
     (
         Label,
-        Name::new("Label"),
+        Name::new("Icon"),
         opts.node.clone(),
         opts.border_radius,
-        // Don't bubble picking events from the text up to parent
-        Pickable::IGNORE,
         children![opts.into_image_bundle()],
+        Pickable::IGNORE,
     )
 }
 pub fn label(opts: impl Into<Opts>) -> impl Bundle {
@@ -43,9 +42,9 @@ pub fn label(opts: impl Into<Opts>) -> impl Bundle {
     (
         Label,
         Name::new("Label"),
+        opts.node.clone(),
         opts.border_radius,
-        opts.into_text_bundle(),
-        // Don't bubble picking events from the text up to parent
+        children![opts.into_text_bundle()],
         Pickable::IGNORE,
     )
 }
@@ -53,28 +52,11 @@ pub fn label(opts: impl Into<Opts>) -> impl Bundle {
 /// A simple header label. Bigger than [`label`].
 pub fn header(opts: impl Into<Opts>) -> impl Bundle {
     let opts = opts.into();
-    (Label, Name::new("Header"), opts.into_text_bundle())
-}
-
-// buttons used in gameplay
-pub fn btn_sq<E, B, M, I>(opts: impl Into<Opts>, action: I) -> impl Bundle
-where
-    E: Event,
-    B: Bundle,
-    I: IntoObserverSystem<E, B, M>,
-{
-    let opts: Opts = opts.into();
-    let new_node = Node {
-        width: Vw(5.0),
-        height: Vw(5.0),
-        padding: UiRect::all(Vw(3.0)),
-        align_items: AlignItems::Center,
-        justify_content: JustifyContent::Center,
-        ..opts.node.clone()
-    };
-    let opts = opts.node(new_node).border_color(WHITEISH);
-
-    btn(opts, action)
+    (
+        Label,
+        Name::new("Header"),
+        children![opts.into_text_bundle()],
+    )
 }
 
 // A regular wide button with text and an action defined as an [`Observer`].

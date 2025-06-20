@@ -1,4 +1,5 @@
 use super::*;
+use bevy_seedling::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<UiInteraction>().add_systems(
@@ -104,6 +105,9 @@ fn btn_sounds(
             Interaction::Pressed => audio_sources.btn_press.clone(),
             _ => continue,
         };
-        commands.spawn(sfx(source, settings.sfx()));
+        commands.spawn((
+            Sfx,
+            SamplePlayer::new(source.clone()).with_volume(settings.sfx()),
+        ));
     }
 }

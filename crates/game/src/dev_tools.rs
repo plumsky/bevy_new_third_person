@@ -1,88 +1,24 @@
 //! Development tools for the game. This plugin is only enabled in dev builds.
 
 use super::*;
-#[cfg(feature = "dev_native")]
 use bevy::{
-    dev_tools::states::log_transitions,
-    prelude::*,
-    ui::{Display as NodeDisplay, UiDebugOptions},
+    dev_tools::states::log_transitions, input::common_conditions::input_toggle_active,
+    pbr::wireframe::WireframePlugin, ui::UiDebugOptions,
 };
-#[cfg(not(feature = "dev_native"))]
-use bevy::{prelude::*, ui::Display as NodeDisplay};
-use bevy_seedling::prelude::*;
+use bevy_inspector_egui::{bevy_egui::EguiPlugin, quick::WorldInspectorPlugin};
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_observer(toggle_mute)
-        .add_observer(toggle_pause)
-        .add_observer(toggle_diagnostics);
-
-    #[cfg(feature = "dev_native")]
-    {
-        app.add_systems(Update, log_transitions::<Screen>);
-        app.add_observer(toggle_debug_ui);
-    }
+    app.add_plugins((
+        EguiPlugin {
+            enable_multipass_for_primary_context: true,
+        },
+        // WireframePlugin::default(),
+    ))
+    .add_plugins(WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::Backquote)))
+    .add_systems(Update, log_transitions::<Screen>)
+    .add_observer(toggle_debug_ui);
 }
 
-fn toggle_diagnostics(
-    _: Trigger<OnDiagnosticsToggle>,
-    mut settings: ResMut<Settings>,
-    mut perf_ui: Query<&mut Node, With<PerfUiMarker>>,
-) {
-    if let Ok(mut perf_ui) = perf_ui.single_mut() {
-        if perf_ui.display == NodeDisplay::None {
-            perf_ui.display = NodeDisplay::Flex;
-        } else {
-            perf_ui.display = NodeDisplay::None;
-        }
-        settings.diagnostics = !settings.diagnostics;
-    }
-}
-
-fn toggle_pause(
-    _: Trigger<OnPauseToggle>,
-    mut settings: ResMut<Settings>,
-    mut time: ResMut<Time<Virtual>>,
-    mut label: Query<(&mut BackgroundColor, &mut TextColor), With<PauseLabel>>,
-) {
-    if let Ok((mut bg, mut color)) = label.single_mut() {
-        if time.is_paused() || settings.paused {
-            time.unpause();
-            *color = TextColor(WHITEISH);
-            *bg = BackgroundColor(TRANSPARENT);
-        } else {
-            time.pause();
-            *color = TextColor(GRAY);
-            *bg = BackgroundColor(WHITEISH);
-        }
-    }
-
-    settings.paused = !settings.paused;
-}
-
-fn toggle_mute(
-    _: Trigger<OnMuteToggle>,
-    mut settings: ResMut<Settings>,
-    mut label: Query<(&mut BackgroundColor, &mut TextColor), With<MuteLabel>>,
-    mut music: Single<&mut VolumeNode, (With<SamplerPool<Music>>, Without<SamplerPool<Sfx>>)>,
-    mut sfx: Single<&mut VolumeNode, (With<SamplerPool<Sfx>>, Without<SamplerPool<Music>>)>,
-) {
-    if let Ok((mut bg, mut color)) = label.single_mut() {
-        if settings.muted {
-            music.volume = Volume::Linear(settings.sound.general * settings.sound.music);
-            sfx.volume = Volume::Linear(settings.sound.general * settings.sound.sfx);
-            *color = TextColor(WHITEISH);
-            *bg = BackgroundColor(TRANSPARENT);
-        } else {
-            music.volume = Volume::SILENT;
-            sfx.volume = Volume::SILENT;
-            *color = TextColor(GRAY);
-            *bg = BackgroundColor(WHITEISH);
-        }
-    }
-    settings.muted = !settings.muted;
-}
-
-#[cfg(feature = "dev_native")]
 fn toggle_debug_ui(_: Trigger<OnDebugUiToggle>, mut options: ResMut<UiDebugOptions>) {
     options.toggle();
 }

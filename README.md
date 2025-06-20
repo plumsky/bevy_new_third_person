@@ -11,6 +11,7 @@ This template is based on the awesome [BevyFlock 2D template][BevyFlock] featuri
 - macOS
 - Web (Wasm)
 This template is a great way to get started if you aim to build new 3D RPG [Bevy] game!
+It is not as simple as bevy_new_2d which is aimed to an easy start. It focuses to have a rather solid structure to be able to carry the weight of big projects and uses cargo workspaces for that. It adds a bit of complexity, but for big projects it's unavoidable, and this is an example of a [flat architercture](#project-structure).
 Start with a [basic project](#write-your-game) and [CI / CD](#release-your-game) that can deploy to [itch.io](https://itch.io).
 You can [try this template in your browser!](https://olekspickle.itch.io/bevy-third-person)
 
@@ -28,57 +29,63 @@ bevy new -t=https://github.com/olekspickle/bevy_new_third_person my_bevy_app
 The best way to get started is to play around with the code you find in [`src/game/`](./src/game).
 This template comes with a basic project structure that you may find useful:
 
+### Project structure
 | Path                                               | Description                                                        |
 | -------------------------------------------------- | ------------------------------------------------------------------ |
-| [`src/main.rs`](./src/main.rs)                     | App entrypoint(not much going on there)                            |
-| [`src/loading/`](./src/loading)                    | A high-level way to load collections of asset handles as resources |
-| [`src/game/`](./src/game)                          | Game mechanics & content(inputs, scene, player control & animation)|
-| [`src/audio.rs`](./src/audio.rs)                   | Marker components for sound effects and music                      |
-| [`src/dev_tools.rs`](./src/dev_tools.rs)           | Dev tools for dev builds (press \` aka backtick to toggle)         |
-| [`src/screens/`](./src/screens)                    | Splash screen, title screen, gameplay screen, etc.                 |
-| [`src/ui/`](./src/ui)                              | Reusable UI widgets & theming                                      |
+| workspace                                          |                                                                    |
+| |-[`src/main.rs`](./src/main.rs)                   | App entrypoint where system plugins and window set up              |
+| |-[`assets`](./assets)                             | Asset directory                                                    |
+| |-[`crates`](./crates)                             | A set of crates to separate logic in a contained ordered way       |
+| |-|-[`asset_loading`](./crates/asset_loading)      | A high-level way to load collections of asset handles as resources |
+| |-|-[`models`](./crates/models)                    | Data source for the game, all pre defined structs and states       |
+| |-|-[`game`](./crates/game)                        | Game mechanics & content(inputs, scene, player control & animation)|
+| |-|-[`audio`](./crates/audio)                      | Marker components for sound effects and music                      |
+| |-|-[`screens`](./crates/screens)                  | Splash screen, title screen, gameplay screen, etc.                 |
+| |-|-[`ui`](./crates/ui)                            | Reusable UI widgets & game color pallet control                    |
 
 Feel free to move things around however you want, though.
 
 ## Features:
+- [x] flat cargo workspace based project structure for game logic crates that can grow and be maintainable
 - [x] import and usage of game mechanics and parameters from .ron (config, credits) (kudos to Caudiciform)
-- [x] simple asset loading from [BevyFlock] example with loading from path addition
+- [x] simple asset loading based on [bevy_asset_loader] with loading from path addition (kudos to Caudiciform)
 - [x] third person camera with [bevy_third_person_camera]
 - [x] simple keyboard & gamepad mapping to game actions using [leafwing-input-manager]
 - [x] simple scene with colliders and rigid bodies using [avian3d]
 - [x] simple player movement using [bevy_tnua]
 - [x] simple skybox sun cycle using [bevy atmosphere example], with daynight and nimbus modes
-- [x] rig and animations using [Universal Animation Library] from quaternius
-- [x] experimental sound with [bevy_seedling] based on Firewheel audio engine (which will probably replace bevy_audio), with experimental audio stutter fix
-- [x] consistent Esc back navigation in gameplay and menu via stacked modals
+- [x] featuring rig and animations using [Universal Animation Library] from quaternius
+- [x] experimental sound with [bevy_seedling] based on Firewheel audio engine (which will probably replace bevy_audio), with **highly** experimental audio stutter fix for web
+- [x] consistent Esc back navigation in gameplay and menu via stacked modals (kudos for the idea to skyemakesgames)
 
 ### TODOs (prioritized)
-- [ ] Crouch walk
-- [ ] Jump with timer(tricky with tnua jump in air)
+- [ ] Crouch walk, fix bug when unable to move after crouch
+- [ ] Jump with timer(tricky with tnua jump in air counter)
 - [ ] fix music not starting on re-enter gameplay
 - [ ] fix sound difference on spawn and unmute
-- [ ] better scene: I'm thinking woods, campfire, a target practice dummies and a big rock to climb
-- [ ] fullscreen in web to avoid key clash(like Alt for browser)
+- [ ] better scene: I'm thinking woods, campfire, a target practice dummies and a big rock to ~~climb~~
 - [ ] custom font replace example using pre-loaded font
 - [ ] sky background instead of just void lol
 - [ ] Movement sfx: jump, dash, sprint
-- [ ] implement different music states(idle, battle, movement)
-- [ ] spatial audio demo: boombox emitting background music
 - [ ] serialize and save settings
 - [ ] keys rebind in settings
-- [ ] vault mechanics
-- [ ] climb mechanics
+- [ ] implement different music states(idle, battle, movement)
+- [ ] spatial audio demo: boombox emitting background music
+- [ ] split screen
+- [ ] vault on objects if they are reachable
+- [ ] climbing
 - [ ] small door/portal demo
 - [ ] do not rotate player on aim(silly bug, check it out - release aim looking to the floor)
 - [ ] basic fighting: punch, kick, take weapon
-- [ ] bow, rifle
+- [ ] bow
+- [ ] rifle
 
 ## Run your game
 
 We recommend using the [Bevy CLI](https://github.com/TheBevyFlock/bevy_cli) to run your game.
 Running your game locally is very simple:
 
-- Use `bevy run` to run a native dev build.
+- Use `bevy run` or `cargo run` to run a native dev build.
 - Use this command to run a web dev build to run audio in separate thread to avoid audio stuttering:
 ```bash
 bevy run web --headers="Cross-Origin-Opener-Policy:same-origin" --headers="Cross-Origin-Embedder-Policy:credentialless"
@@ -162,6 +169,7 @@ The [assets](./assets) in this repository are all 3rd-party. See the see [credit
 [bevy]: https://bevyengine.org/
 [bevy atmosphere example]: https://bevyengine.org/examples/3d-rendering/atmosphere/
 [bevy-discord]: https://discord.gg/bevy
+[bevy_asset_loader]: https://github.com/NiklasEi/bevy_asset_loader
 [bevy-learn]: https://bevyengine.org/learn/
 [bevy_third_person_camera]: https://github.com/The-DevBlog/bevy_third_person_camera
 [bevy_tnua]: https://github.com/idanarye/bevy-tnua

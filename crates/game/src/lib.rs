@@ -1,14 +1,18 @@
-use asset_loading::AudioSources;
+use asset_loading::*;
 use audio::*;
 use avian3d::prelude::*;
 use bevy::prelude::*;
+use bevy_enhanced_input::prelude::*;
 use models::*;
-use ui::*;
+use scene::*;
 
 pub mod camera;
+#[cfg(feature = "dev_native")]
 pub mod dev_tools;
-pub mod scene;
+pub mod player;
 pub mod sound;
+
+pub use camera::*;
 
 pub fn plugin(app: &mut App) {
     app.insert_resource(Score(0));
@@ -16,7 +20,9 @@ pub fn plugin(app: &mut App) {
         models::plugin,
         camera::plugin,
         scene::plugin,
+        player::plugin,
         sound::plugin,
+        #[cfg(feature = "dev_native")]
         dev_tools::plugin,
     ));
 }

@@ -2,7 +2,18 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use bevy::{
-    app::App, asset::AssetMetaCheck, log, prelude::*, window::PrimaryWindow, winit::WinitWindows,
+    app::App,
+    asset::AssetMetaCheck,
+    log,
+    // render::{
+    pbr::wireframe::{NoWireframe, Wireframe, WireframeColor, WireframeConfig, WireframePlugin},
+    prelude::*,
+    //     RenderPlugin,
+    //     render_resource::WgpuFeatures,
+    //     settings::{RenderCreation, WgpuSettings},
+    // },
+    window::PrimaryWindow,
+    winit::WinitWindows,
 };
 use models::*;
 use std::io::Cursor;
@@ -13,12 +24,7 @@ fn main() {
 
     app.configure_sets(
         Update,
-        (
-            AppSystems::TickTimers,
-            AppSystems::RecordInput,
-            AppSystems::Update,
-        )
-            .chain(),
+        (Set::TickTimers, Set::RecordInput, Set::Update).chain(),
     );
 
     let window = WindowPlugin {
@@ -42,11 +48,24 @@ fn main() {
     };
     let log_level = log::LogPlugin {
         level: log::Level::TRACE,
-        filter: "info,naga=off,wgpu=warn".to_string(),
+        filter: "info,symphonia=off,naga=off,wgpu=warn".to_string(),
         ..Default::default()
     };
 
-    app.add_plugins(DefaultPlugins.set(window).set(assets).set(log_level));
+    let mut default_plugins = DefaultPlugins.set(window).set(assets).set(log_level);
+
+    // #[cfg(feature = "dev_native")]
+    // {
+    //     default_plugins = default_plugins.set(RenderPlugin {
+    //         render_creation: RenderCreation::Automatic(WgpuSettings {
+    //             features: WgpuFeatures::POLYGON_MODE_LINE,
+    //             ..Default::default()
+    //         }),
+    //         ..Default::default()
+    //     });
+    // }
+
+    app.add_plugins(default_plugins);
 
     // custom plugins. the order is important
     // be sure you use resources/types AFTER you add plugins that insert them

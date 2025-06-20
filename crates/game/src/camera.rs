@@ -1,20 +1,25 @@
 use super::*;
 use bevy_third_person_camera::*;
-use leafwing_input_manager::prelude::ActionState;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(Startup, spawn_camera)
-        .add_systems(OnEnter(Screen::Gameplay), add_tpv_cam)
-        .add_systems(OnExit(Screen::Gameplay), rm_tpv_cam)
-        .add_systems(Update, change_fov.run_if(in_state(Screen::Gameplay)))
+        .add_systems(
+            OnEnter(Screen::Gameplay),
+            (
+                add_tpv_cam,
+                add_skybox_to_camera.after(camera::spawn_camera),
+            ),
+        )
+        .add_systems(
+            OnExit(Screen::Gameplay),
+            (rm_tpv_cam, rm_skybox_from_camera),
+        )
         .add_observer(toggle_cam_cursor);
 }
 
-#[derive(Component)]
-pub struct SceneCamera;
-
 pub fn spawn_camera(mut commands: Commands) {
     commands.spawn((
+        SceneCamera,
         Camera3d::default(),
         Msaa::Sample4,
         IsDefaultUiCamera,
@@ -29,7 +34,7 @@ pub fn spawn_camera(mut commands: Commands) {
 fn add_tpv_cam(
     cfg: Res<Config>,
     mut commands: Commands,
-    mut camera: Query<Entity, With<Camera3d>>,
+    mut camera: Query<Entity, With<SceneCamera>>,
     mut scene_cam: Query<Entity, With<ThirdPersonCamera>>,
 ) -> Result {
     let camera = camera.single_mut()?;
@@ -39,7 +44,6 @@ fn add_tpv_cam(
     }
 
     commands.entity(camera).insert((
-        SceneCamera,
         ThirdPersonCamera {
             aim_speed: 3.0,     // default
             aim_zoom: 0.7,      // default
@@ -53,8 +57,6 @@ fn add_tpv_cam(
             // bounds: vec![Bound::NO_FLIP, Bound::ABOVE_FLOOR],
             ..default()
         },
-        RigidBody::Static,
-        Collider::sphere(0.2),
         Projection::from(PerspectiveProjection {
             fov: cfg.player.fov.to_radians(),
             ..Default::default()
@@ -64,30 +66,9 @@ fn add_tpv_cam(
     Ok(())
 }
 
-fn rm_tpv_cam(mut commands: Commands, mut camera: Query<Entity, With<Camera3d>>) {
+fn rm_tpv_cam(mut commands: Commands, mut camera: Query<Entity, With<SceneCamera>>) {
     if let Ok(camera) = camera.single_mut() {
         commands.entity(camera).remove::<ThirdPersonCamera>();
-    }
-}
-
-fn change_fov(
-    state: Query<&ActionState<Action>>,
-    mut settings: ResMut<Settings>,
-    mut world_model_projection: Single<&mut Projection>,
-) {
-    let Ok(state) = state.single() else {
-        return;
-    };
-    let Projection::Perspective(perspective) = world_model_projection.as_mut() else {
-        return;
-    };
-
-    if state.pressed(&Action::FovIncr) {
-        perspective.fov += 1.0_f32.to_radians();
-        if perspective.fov.to_degrees() > 160.0 {
-            perspective.fov = 20.0_f32.to_radians();
-        }
-        settings.fov = perspective.fov.to_degrees();
     }
 }
 

@@ -5,15 +5,10 @@ version.workspace = true
 repository.workspace = true
 edition.workspace = true
 
-[features]
-default = [ "dev_native" ]
-dev_native = [ "dev" ]
-dev = [ ]
-
 [dependencies]
 bevy.workspace = true
 bevy_seedling.workspace = true
-leafwing-input-manager.workspace = true
+bevy_enhanced_input.workspace = true
 ron.workspace = true
 serde.workspace = true
 

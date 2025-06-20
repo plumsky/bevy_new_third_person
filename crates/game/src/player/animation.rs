@@ -1,31 +1,14 @@
 use super::*;
-use bevy::{prelude::*, scene::SceneInstanceReady};
 use bevy_tnua::{
     TnuaAnimatingState, TnuaAnimatingStateDirective,
     builtins::{
         TnuaBuiltinCrouch, TnuaBuiltinCrouchState, TnuaBuiltinDash, TnuaBuiltinJumpState,
         TnuaBuiltinKnockback, TnuaBuiltinKnockbackState,
     },
-    prelude::*,
 };
 
 const BASE_SPEED_SCALE: f32 = 0.01;
 const IDLE_TO_RUN_TRESHOLD: f32 = 0.01;
-
-#[derive(Default, Clone)]
-pub enum AnimationState {
-    #[default]
-    StandIdle,
-    Run(f32),
-    JumpStart,
-    JumpLoop,
-    JumpLand,
-    Fall,
-    CrouchWalk(f32),
-    CrouchIdle,
-    Dash,
-    KnockBack,
-}
 
 // Bevy's animation handling is a bit manual. We'll use this struct to register the animation clips
 // as nodes in the animation graph.
@@ -94,7 +77,7 @@ pub fn prepare_animations(
 }
 
 pub fn animating(
-    mut player: Query<&mut player::Player>,
+    mut player: Query<&mut Player>,
     mut tnua_controller: Query<(&TnuaController, &mut TnuaAnimatingState<AnimationState>)>,
     mut animation_player: Query<&mut AnimationPlayer>,
     animation_nodes: Option<Res<AnimationNodes>>,
@@ -214,10 +197,10 @@ pub fn animating(
             // Specifically for the running animation, even when the state remains the speed can
             // still change. When it does, we simply need to update the speed in the animation
             // player.
-            if let AnimationState::Run(speed) = state {
-                if let Some(animation) = animation_player.animation_mut(animation_nodes.running) {
-                    animation.set_speed(*speed);
-                }
+            if let AnimationState::Run(speed) = state
+                && let Some(animation) = animation_player.animation_mut(animation_nodes.running)
+            {
+                animation.set_speed(*speed);
             }
         }
         TnuaAnimatingStateDirective::Alter {

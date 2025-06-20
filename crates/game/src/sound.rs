@@ -1,18 +1,11 @@
 use super::*;
-use crate::scene::player;
 use bevy_seedling::{pool::Sampler, prelude::*};
-use leafwing_input_manager::prelude::*;
 use rand::prelude::*;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnExit(Screen::Gameplay), stop_soundtrack)
         .add_systems(OnEnter(Screen::Gameplay), start_or_resume_soundtrack)
-        .add_systems(
-            Update,
-            movement_sound
-                .run_if(in_state(Screen::Gameplay))
-                .after(player::spawn_player),
-        );
+        .add_observer(movement_sound);
 }
 
 // TODO: implement different music states
@@ -36,7 +29,12 @@ fn start_or_resume_soundtrack(
         //     .entity(boombox.single()?)
         //     .insert(music(handle.clone(), settings.music());
         // Or just play music
-        cmds.spawn(music(handle.clone(), settings.sfx()));
+        cmds.spawn((
+            Music,
+            SamplePlayer::new(handle.clone())
+                .with_volume(settings.music())
+                .looping(),
+        ));
     }
 
     Ok(())
@@ -52,35 +50,25 @@ fn stop_soundtrack(
 }
 
 fn movement_sound(
-    mut cmds: Commands,
+    _: Trigger<Fired<Navigate>>,
     time: Res<Time>,
     settings: Res<Settings>,
-    mut step_timer: Query<&mut player::StepTimer>,
     sources: ResMut<AudioSources>,
-    state: Query<&ActionState<Action>>,
-    player_pos: Query<&Transform, With<player::Player>>,
+    player_pos: Query<&Transform, With<Player>>,
+    mut cmds: Commands,
+    mut step_timer: Query<&mut StepTimer>,
 ) -> Result {
-    let Ok(player_pos) = player_pos.single() else {
-        return Ok(());
-    };
-    let Ok(mut step_timer) = step_timer.single_mut() else {
-        return Ok(());
-    };
-    let state = state.single()?;
+    let player_pos = player_pos.single()?;
+    let mut step_timer = step_timer.single_mut()?;
 
     // WALK SOUND
     if step_timer.0.tick(time.delta()).just_finished() {
         // TODO: only run animation after tick
-        if (state.pressed(&Action::Forward)
-            | state.pressed(&Action::Backward)
-            | state.pressed(&Action::Left)
-            | state.pressed(&Action::Right))
-            && player_pos.translation.y <= 2.0
-        {
+        if player_pos.translation.y <= 2.0 {
             let mut rng = thread_rng();
             let i = rng.gen_range(0..sources.steps.len());
             let handle = sources.steps[i].clone();
-            cmds.spawn(sfx(handle, settings.sfx()));
+            cmds.spawn(SamplePlayer::new(handle).with_volume(settings.sfx()));
         }
     }
 

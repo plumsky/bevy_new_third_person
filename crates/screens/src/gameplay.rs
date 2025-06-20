@@ -7,44 +7,86 @@ pub(super) fn plugin(app: &mut App) {
     app.add_plugins(game::plugin)
         .add_systems(
             OnEnter(Screen::Gameplay),
-            spawn_gameplay_ui,
-            // spawn_gameplay_ui.after(scene::setup),
+            spawn_gameplay_ui.after(scene::setup),
         )
+        .add_observer(toggle_mute)
+        .add_observer(toggle_pause)
         .add_observer(trigger_menu_toggle_on_esc)
         .add_observer(add_new_modal)
         .add_observer(pop_modal)
         .add_observer(clear_modals);
 }
 
-fn spawn_gameplay_ui(mut cmds: Commands, settings: Res<Settings>) {
+fn spawn_gameplay_ui(mut cmds: Commands, textures: Res<Textures>) {
+    let opts = Opts::default().hidden().width(Vw(5.0)).height(Vw(5.0));
     cmds.spawn((
         StateScoped(Screen::Gameplay),
         GameplayUi,
         ui_root("Gameplay Ui"),
         children![
-            // Demo keys
+            // mute/pause icons
             (
                 Node {
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Start,
+                    justify_content: JustifyContent::Start,
+                    position_type: PositionType::Absolute,
+                    top: Px(0.0),
+                    left: Vw(47.5),
                     ..Default::default()
                 },
                 children![
-                    (label("P - pause"), PauseLabel),
-                    (label("M - mute"), MuteLabel),
-                    label("F - diagnostics"),
-                    label("V - incr fov"),
-                    label("~ - toggle UI debug mode"),
-                    (
-                        label(format!("O - toggle sun cycle: {:?}", settings.sun_cycle)),
-                        SunCycleLabel
-                    ),
-                    TextLayout::new_with_justify(JustifyText::Left)
+                    (icon(opts.clone().image(textures.pause.clone())), PauseIcon),
+                    (icon(opts.clone().image(textures.mute.clone())), MuteIcon),
                 ]
             ),
         ],
     ));
 }
+
+fn toggle_pause(
+    _: Trigger<OnPauseToggle>,
+    mut time: ResMut<Time<Virtual>>,
+    mut settings: ResMut<Settings>,
+    mut pause_label: Query<&mut Node, With<PauseIcon>>,
+) {
+    if let Ok(mut label) = pause_label.single_mut() {
+        if time.is_paused() || settings.paused {
+            time.unpause();
+            label.display = Display::None;
+        } else {
+            time.pause();
+            label.display = Display::Flex;
+        }
+    }
+
+    settings.paused = !settings.paused;
+    info!("paused: {}", settings.paused);
+}
+
+fn toggle_mute(
+    _: Trigger<OnMuteToggle>,
+    mut settings: ResMut<Settings>,
+    mut label: Query<&mut Node, With<MuteIcon>>,
+    mut music: Single<&mut VolumeNode, (With<SamplerPool<Music>>, Without<SamplerPool<Sfx>>)>,
+    mut sfx: Single<&mut VolumeNode, (With<SamplerPool<Sfx>>, Without<SamplerPool<Music>>)>,
+) {
+    if let Ok(mut node) = label.single_mut() {
+        if settings.muted {
+            music.volume = settings.music();
+            sfx.volume = settings.sfx();
+            node.display = Display::None;
+        } else {
+            music.volume = Volume::SILENT;
+            sfx.volume = Volume::SILENT;
+            node.display = Display::Flex;
+        }
+    }
+    settings.muted = !settings.muted;
+    info!("muted: {}", settings.muted);
+}
+
+// ============================ UI ============================
 
 fn click_to_menu(_: Trigger<Pointer<Click>>, mut cmds: Commands) {
     cmds.trigger(OnGoTo(Screen::Title));
@@ -66,6 +108,7 @@ fn trigger_menu_toggle_on_esc(
     if *screen.get() != Screen::Gameplay {
         return;
     }
+    info!("on BACK in gameplay, modals: {:?}", settings.modals);
     if settings.modals.is_empty() {
         cmds.trigger(OnNewModal(Modal::Main));
     } else {
@@ -75,8 +118,8 @@ fn trigger_menu_toggle_on_esc(
 
 fn add_new_modal(
     trig: Trigger<OnNewModal>,
-    mut cmds: Commands,
     screen: Res<State<Screen>>,
+    mut cmds: Commands,
     mut settings: ResMut<Settings>,
 ) {
     if *screen.get() != Screen::Gameplay {
@@ -84,11 +127,14 @@ fn add_new_modal(
     }
 
     if settings.modals.is_empty() {
-        cmds.trigger(OnPauseToggle);
+        cmds.trigger(OnInputCtxSwitch(Context::Modal));
+        if Modal::Main == trig.0 {
+            cmds.trigger(OnPauseToggle);
+        }
         cmds.trigger(OnCamCursorToggle);
     }
 
-    // despawn all previous modals
+    // despawn all previous modal entities to avoid clattering
     cmds.trigger(OnClearModals);
     let OnNewModal(modal) = trig.event();
     match modal {
@@ -101,11 +147,11 @@ fn add_new_modal(
 
 fn pop_modal(
     _: Trigger<OnPopModal>,
-    mut cmds: Commands,
     screen: Res<State<Screen>>,
+    menu_marker: Single<Entity, With<MenuModal>>,
+    settings_marker: Single<Entity, With<SettingsModal>>,
+    mut cmds: Commands,
     mut settings: ResMut<Settings>,
-    menu_marker: Query<Entity, With<MenuModal>>,
-    settings_marker: Query<Entity, With<SettingsModal>>,
 ) {
     if Screen::Gameplay != *screen.get() {
         return;
@@ -114,17 +160,13 @@ fn pop_modal(
     // just a precaution
     assert!(!settings.modals.is_empty());
 
-    let popped = settings.modals.pop().expect("popped modal with empty list");
+    let popped = settings.modals.pop().expect("failed to pop modal");
     match popped {
         Modal::Main => {
-            if let Ok(menu) = menu_marker.single() {
-                cmds.entity(menu).despawn();
-            }
+            cmds.entity(*menu_marker).despawn();
         }
         Modal::Settings => {
-            if let Ok(menu) = settings_marker.single() {
-                cmds.entity(menu).despawn();
-            }
+            cmds.entity(*settings_marker).despawn();
         }
     }
 
@@ -137,6 +179,7 @@ fn pop_modal(
     }
 
     if settings.modals.is_empty() {
+        cmds.trigger(OnInputCtxSwitch(Context::Gameplay));
         cmds.trigger(OnPauseToggle);
         cmds.trigger(OnCamCursorToggle);
     }
@@ -144,10 +187,10 @@ fn pop_modal(
 
 fn clear_modals(
     _: Trigger<OnClearModals>,
-    mut cmds: Commands,
     settings: ResMut<Settings>,
     menu_marker: Query<Entity, With<MenuModal>>,
     settings_marker: Query<Entity, With<SettingsModal>>,
+    mut cmds: Commands,
 ) {
     for m in &settings.modals {
         match m {
@@ -165,12 +208,14 @@ fn clear_modals(
     }
 }
 
+// MODALS
+
 fn settings_modal() -> impl Bundle {
     (
         StateScoped(Screen::Gameplay),
         SettingsModal,
         BackgroundColor(TRANSLUCENT),
-        settings::ui(),
+        settings_ui(),
     )
 }
 
@@ -188,17 +233,22 @@ fn menu_modal() -> impl Bundle {
             Node {
                 border: UiRect::all(Px(2.0)),
                 padding: UiRect::all(Vw(10.0)),
+                left: Px(0.0),
+                bottom: Px(0.0),
                 ..default()
             },
             children![
                 (
                     Node {
                         position_type: PositionType::Absolute,
-                        top: Px(0.0),
                         right: Px(0.0),
+                        bottom: Px(0.0),
                         ..Default::default()
                     },
-                    children![btn_small(Opts::new("x").width(Vw(5.0)), click_pop_modal)]
+                    children![btn_small(
+                        Opts::new("back").width(Vw(5.0)).border(UiRect::DEFAULT),
+                        click_pop_modal
+                    )]
                 ),
                 (
                     Node {

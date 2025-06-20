@@ -1,17 +1,15 @@
 use super::*;
 use avian3d::math::PI;
+use bevy::scene::SceneInstanceReady;
 use bevy_third_person_camera::*;
 use bevy_tnua::{TnuaAnimatingState, control_helpers::TnuaSimpleAirActionsCounter, prelude::*};
 use bevy_tnua_avian3d::*;
 
 mod animation;
 mod control;
+
 pub use animation::*;
 pub use control::*;
-
-use super::skybox;
-
-pub const SPRINT_FACTOR: f32 = 2.0;
 
 /// This plugin handles player related stuff like movement, shooting
 /// Player logic is only active during the State `Screen::Playing`
@@ -20,34 +18,17 @@ pub fn plugin(app: &mut App) {
         ThirdPersonCameraPlugin,
         TnuaControllerPlugin::new(FixedUpdate),
         TnuaAvian3dPlugin::new(FixedUpdate),
+        control::plugin,
     ));
 
     app.configure_sets(PostUpdate, CameraSyncSet.after(PhysicsSet::Sync))
-        .add_systems(
-            OnEnter(Screen::Gameplay),
-            spawn_player.after(skybox::add_skybox_to_camera),
-        )
+        .add_systems(OnEnter(Screen::Gameplay), spawn_player)
         .add_systems(
             Update,
-            (movement, animating)
+            animating
                 .in_set(TnuaUserControlsSystemSet)
                 .run_if(in_state(Screen::Gameplay)),
         );
-}
-
-#[derive(Component)]
-pub struct Player {
-    pub speed: f32,
-    pub animation_state: AnimationState,
-}
-
-impl Default for Player {
-    fn default() -> Self {
-        Self {
-            speed: 1.0,
-            animation_state: AnimationState::StandIdle,
-        }
-    }
 }
 
 pub fn spawn_player(
@@ -57,7 +38,7 @@ pub fn spawn_player(
     gltf_assets: Res<Assets<Gltf>>,
     // mut meshes: ResMut<Assets<Mesh>>,
     // mut materials: ResMut<Assets<StandardMaterial>>,
-    camera: Query<&Transform, With<camera::SceneCamera>>,
+    camera: Query<&Transform, With<SceneCamera>>,
 ) -> Result {
     let Some(gltf) = gltf_assets.get(&models.player) else {
         return Ok(());
@@ -66,11 +47,12 @@ pub fn spawn_player(
     let camera_transform = camera.single()?;
     let mut forward = camera_transform.forward().normalize();
     forward.y = 0.0;
-    let player_rot = Quat::from_rotation_y(PI);
 
+    let player_rot = Quat::from_rotation_y(PI);
     let mesh = SceneRoot(gltf.scenes[0].clone());
     let pos = Transform::from_translation(Vec3::new(0.0, 1.0, 0.0)).with_rotation(player_rot);
     let player = Player {
+        id: 0,
         speed: cfg.player.movement.speed,
         animation_state: AnimationState::StandIdle,
     };
@@ -91,6 +73,8 @@ pub fn spawn_player(
             StateScoped(Screen::Gameplay),
             pos,
             player,
+            GameplayCtx,
+            Actions::<GameplayCtx>::default(),
             ThirdPersonCameraTarget,
             // tnua stuff
             TnuaController::default(),
@@ -108,7 +92,7 @@ pub fn spawn_player(
             StepTimer(Timer::from_seconds(0.39, TimerMode::Repeating)),
         ))
         .with_children(|parent| {
-            // spawn mesh as child
+            // spawn character mesh as child
             let mut e = parent.spawn((Transform::from_xyz(0.0, -1.0, 0.0), mesh));
             // e.with_children(|parent| {
             //     parent.spawn((
@@ -120,6 +104,8 @@ pub fn spawn_player(
             info!("mesh entity: {}", e.id());
             e.observe(prepare_animations);
         });
+
+    commands.trigger(OnInputCtxSwitch(Context::Gameplay));
 
     Ok(())
 }

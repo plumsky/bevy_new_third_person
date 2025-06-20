@@ -1,0 +1,171 @@
+use super::*;
+
+pub fn plugin(app: &mut App) {
+    app.add_plugins(EnhancedInputPlugin)
+        .add_input_context::<GameplayCtx>()
+        .add_input_context::<ModalCtx>()
+        .add_systems(Startup, spawn_ctx)
+        .add_observer(on_ctx_switch)
+        .add_observer(bind_modal)
+        .add_observer(bind_gameplay);
+}
+
+fn spawn_ctx(mut cmds: Commands) {
+    cmds.spawn((InputCtx, Actions::<ModalCtx>::default(), ModalCtx));
+}
+
+fn on_ctx_switch(
+    event: Trigger<OnInputCtxSwitch>,
+    input_ctx: Single<Entity, With<InputCtx>>,
+    players: Query<Entity, With<Player>>,
+    mut cmds: Commands,
+) {
+    for player in players {
+        match event.event().0 {
+            Context::Modal => {
+                cmds.entity(*input_ctx)
+                    .insert(Actions::<ModalCtx>::default());
+                cmds.entity(player).remove::<Actions<GameplayCtx>>();
+            }
+            Context::Gameplay => {
+                cmds.entity(*input_ctx).remove::<Actions<ModalCtx>>();
+                cmds.entity(player)
+                    .insert(Actions::<GameplayCtx>::default());
+            }
+        }
+    }
+}
+
+pub enum Context {
+    Gameplay,
+    Modal,
+}
+
+/// TODO: figure out split screen
+/// Used as both input context and component.
+#[derive(InputContext, Component, Clone, Copy)]
+pub struct GameplayCtx;
+
+#[derive(Debug, InputAction)]
+#[input_action(output = Vec2)]
+pub struct Navigate;
+
+#[derive(Debug, InputAction)]
+#[input_action(output = Vec2, require_reset = true)]
+pub struct Rotate;
+
+#[derive(Debug, InputAction)]
+#[input_action(output = bool)]
+pub struct Attack;
+
+#[derive(Debug, InputAction)]
+#[input_action(output = bool)]
+pub struct Jump;
+
+#[derive(Debug, InputAction)]
+#[input_action(output = bool)]
+pub struct Sprint;
+
+#[derive(Debug, InputAction)]
+#[input_action(output = bool)]
+pub struct Dash;
+
+#[derive(Debug, InputAction)]
+#[input_action(output = bool)]
+pub struct Crouch;
+
+#[derive(Debug, InputAction)]
+#[input_action(output = bool)]
+pub struct Pause;
+
+#[derive(Debug, InputAction)]
+#[input_action(output = bool)]
+pub struct Mute;
+
+#[derive(InputContext, Component, Clone, Copy)]
+#[input_context(priority = 1)]
+pub struct ModalCtx;
+
+#[derive(Debug, InputAction)]
+#[input_action(output = bool, require_reset = true)]
+pub struct Back;
+
+#[derive(Debug, InputAction)]
+#[input_action(output = bool)]
+pub struct Select;
+
+#[derive(Debug, InputAction)]
+#[input_action(output = Vec2, require_reset = true)]
+struct NavigateModal;
+
+fn bind_gameplay(
+    trigger: Trigger<Binding<GameplayCtx>>,
+    mut context: Query<(&GameplayCtx, &mut Actions<GameplayCtx>)>,
+) {
+    let (&_id, mut actions) = context
+        .get_mut(trigger.target())
+        .expect("Failed to query gameplay context actions");
+
+    // let gamepad_entity = gamepads.iter().nth(id as usize);
+    // actions.set_gamepad(gamepad_entity.unwrap_or(Entity::PLACEHOLDER));
+
+    actions
+        .bind::<Navigate>()
+        .to((Cardinal::wasd_keys(), Axial::left_stick()))
+        .with_modifiers((
+            DeadZone::default(), // Apply non-uniform normalization to ensure consistent speed, otherwise diagonal movement will be faster.
+            SmoothNudge::new(1.0), // Make movement smooth and independent of the framerate. To only make it framerate-independent, use `DeltaScale`.
+            Scale::splat(0.3), // Additionally multiply by a constant to achieve the desired speed.
+        ));
+
+    actions.bind::<Rotate>().to((
+        Input::mouse_motion().with_modifiers((Scale::splat(0.1), Negate::all())),
+        Axial::right_stick().with_modifiers_each((Scale::splat(2.0), Negate::x())),
+    ));
+
+    actions.bind::<Pause>().to(KeyCode::KeyP);
+    actions.bind::<Mute>().to(KeyCode::KeyM);
+    actions
+        .bind::<Crouch>()
+        .to((KeyCode::Escape, GamepadButton::East));
+    actions
+        .bind::<Jump>()
+        .to((KeyCode::Space, GamepadButton::South));
+    actions
+        .bind::<Attack>()
+        .to((MouseButton::Left, GamepadButton::RightTrigger2));
+    actions
+        .bind::<Dash>()
+        .to((KeyCode::AltLeft, GamepadButton::LeftTrigger));
+    actions
+        .bind::<Sprint>()
+        .to((KeyCode::ShiftLeft, GamepadButton::LeftThumb));
+    actions
+        .bind::<Back>()
+        .to((KeyCode::Escape, GamepadButton::Select));
+}
+
+fn bind_modal(
+    trigger: Trigger<Binding<ModalCtx>>,
+    mut menus: Query<(&ModalCtx, &mut Actions<ModalCtx>)>,
+) {
+    let (&_id, mut actions) = menus
+        .get_mut(trigger.target())
+        .expect("Failed to get modal context id");
+
+    // let gamepad_entity = gamepads.iter().nth(id as usize);
+    // actions.set_gamepad(gamepad_entity.unwrap_or(Entity::PLACEHOLDER));
+
+    actions.bind::<NavigateModal>().to((
+        Cardinal::wasd_keys(),
+        Input::mouse_motion().with_modifiers((Scale::splat(0.1), Negate::all())),
+        Axial::right_stick().with_modifiers_each((Scale::splat(2.0), Negate::x())),
+    ));
+
+    actions
+        .bind::<Back>()
+        .to((KeyCode::Escape, GamepadButton::East));
+    actions
+        .bind::<Select>()
+        .to((KeyCode::Enter, GamepadButton::South, MouseButton::Left));
+}

@@ -7,8 +7,7 @@ edition = "2024"
 
 [features]
 default = [ "dev_native" ]
-dev_native = [ "dev" ]
-dev = [ ]
+dev_native = [ ]
 
 [dependencies]
 models = { path = "../models" }

@@ -15,14 +15,14 @@ fn setup_menu(
         ui_root("Title"),
         // Crutch until we can use #cfg in children![] macro
         // https://github.com/bevyengine/bevy/issues/18953
-        #[cfg(target_family = "wasm")]
+        #[cfg(target_arch = "wasm32")]
         children![
             BackgroundColor(TRANSLUCENT),
             btn_big("Play", to::gameplay_or_loading),
             btn_big("Credits", to::credits),
             btn_big("Settings", to::settings),
         ],
-        #[cfg(not(target_family = "wasm"))]
+        #[cfg(not(target_arch = "wasm32"))]
         children![
             BackgroundColor(TRANSLUCENT),
             btn_big("Play", to::gameplay_or_loading),
@@ -33,7 +33,7 @@ fn setup_menu(
     ));
 }
 
-#[cfg(not(target_family = "wasm"))]
+#[cfg(not(target_arch = "wasm32"))]
 fn exit_app(_: Trigger<Pointer<Click>>, mut app_exit: EventWriter<AppExit>) {
     app_exit.write(AppExit::Success);
 }

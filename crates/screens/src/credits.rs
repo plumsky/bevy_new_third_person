@@ -2,7 +2,6 @@
 
 use super::*;
 use bevy::{ecs::spawn::SpawnIter, ui::Val::*};
-use bevy_seedling::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
@@ -13,9 +12,9 @@ pub(super) fn plugin(app: &mut App) {
 
 fn spawn_credits_screen(mut commands: Commands, cfg: Res<Config>) {
     commands.spawn((
+        StateScoped(Screen::Credits),
         ui_root("Credits Screen"),
         BackgroundColor(TRANSLUCENT),
-        StateScoped(Screen::Credits),
         children![
             header("Created by"),
             flatten(&cfg.credits.devs),
@@ -34,7 +33,7 @@ fn flatten(devs: &[(String, String)]) -> impl Bundle {
 fn grid(content: Vec<[String; 2]>) -> impl Bundle {
     let content = content.into_iter().flatten().enumerate().map(|(i, text)| {
         (
-            label(text),
+            Text(text),
             Node {
                 justify_self: if i % 2 == 0 {
                     JustifySelf::End
@@ -60,9 +59,6 @@ fn grid(content: Vec<[String; 2]>) -> impl Bundle {
     )
 }
 
-#[derive(Component, Default)]
-struct CreditsMusic;
-
 fn start_credits_music(
     mut commands: Commands,
     settings: Res<Settings>,
@@ -76,6 +72,9 @@ fn start_credits_music(
     commands.spawn((
         StateScoped(Screen::Credits),
         Name::new("Credits Music"),
-        music(handle, settings.music()),
+        Music,
+        SamplePlayer::new(handle)
+            .with_volume(settings.music())
+            .looping(),
     ));
 }

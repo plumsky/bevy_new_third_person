@@ -9,6 +9,7 @@ pub struct Config {
     pub geom: Geometry,
     pub player: PlayerConfig,
     pub credits: Credits,
+    pub settings: SettingsPreloaded,
 }
 
 #[derive(Resource, Debug, Clone, Serialize, Deserialize, Reflect)]
@@ -61,10 +62,21 @@ pub struct Movement {
     pub actions_in_air: u8,
     pub dash_distance: f32,
     pub speed: f32,
+    pub sprint_factor: f32,
+    pub crouch_factor: f32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
 pub struct Credits {
     pub assets: Vec<(String, String)>,
     pub devs: Vec<(String, String)>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
+pub struct SettingsPreloaded {
+    pub min_volume: f32,
+    pub max_volume: f32,
+    pub min_fov: f32,
+    pub max_fov: f32,
+    pub step: f32,
 }

@@ -1,11 +1,10 @@
-use super::*;
-use asset_loading::Models;
+use asset_loading::*;
 use avian3d::prelude::*;
 use bevy::gltf::GltfMesh;
-use models::{Config, Screen};
+use bevy::prelude::*;
+use models::*;
 
-pub mod player;
-pub mod skybox;
+mod skybox;
 
 pub use skybox::*;
 
@@ -15,28 +14,20 @@ pub fn plugin(app: &mut App) {
     app.add_plugins((
         PhysicsPlugins::default(),
         bevy_fix_gltf_coordinate_system::FixGltfCoordinateSystemPlugin,
-        player::plugin,
         skybox::plugin,
     ))
-    // .add_systems(Update, rotate_rock.run_if(in_state(Screen::Gameplay)))
+    .add_systems(Update, rotate_rock.run_if(in_state(Screen::Gameplay)))
     .add_systems(OnEnter(Screen::Gameplay), setup);
 }
 
-// TODO: The idea is to create a boombox with spatial audio
-// <https://github.com/bevyengine/bevy/blob/main/examples/audio/spatial_audio_3d.rs>
-// #[derive(Component)]
-// pub struct Boombox;
-#[derive(Component)]
-pub struct Rock;
-
-pub(crate) fn setup(
+pub fn setup(
     cfg: Res<Config>,
     models: Res<Models>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     gltf_assets: Res<Assets<Gltf>>,
-    gltf_handles: Res<Assets<GltfMesh>>,
+    gltf_meshes: Res<Assets<GltfMesh>>,
 ) {
     let Some(gltf) = gltf_assets.get(&models.rock) else {
         return;
@@ -50,37 +41,36 @@ pub(crate) fn setup(
         StateScoped(Screen::Gameplay),
         mat,
         mesh,
-        Transform::default(),
+        Transform::from_xyz(0.0, -1.0, 0.0),
         RigidBody::Static,
         Collider::half_space(Vec3::Y),
     ));
 
     // Rock
-    let mesh = gltf.named_meshes.get("mt_lp").expect("");
-    if let Some(mesh) = gltf_handles.get(mesh) {
-        info!(" mesh: {}", mesh.name);
-        for primitive in mesh.primitives.clone() {
-            info!("primitive: {}", primitive.name);
+    let mesh = gltf
+        .named_meshes
+        .get("mt_lp")
+        .expect("Could not get rock mesh");
+    if let Some(mesh) = gltf_meshes.get(mesh) {
+        for primitive in &mesh.primitives {
+            let pos = Transform::from_translation(Vec3::new(5.0, 3.0, 5.0));
+            let mesh = primitive.mesh.clone();
+            let mut e = commands.spawn((
+                StateScoped(Screen::Gameplay),
+                Rock,
+                pos,
+                Mesh3d(mesh.clone()),
+                RigidBody::Static,
+            ));
+
+            if let Some(mesh) = meshes.get(&mesh) {
+                e.insert(
+                    Collider::trimesh_from_mesh(mesh)
+                        .expect("failed to create collider from rock mesh"),
+                );
+            }
         }
     }
-    // for mesh_handle in &gltf.meshes {
-    //     if let Some(mesh) = meshes.get(mesh_handle) {
-    //         info!(" vertex count: {:?}", mesh.count_vertices());
-    //         let pos = Transform::from_translation(Vec3::new(5.0, 3.0, 5.0));
-    //         commands.spawn((
-    //             StateScoped(Screen::Gameplay),
-    //             Rock,
-    //             pos,
-    //             Mesh3d(mesh),
-    //             // children![mesh],
-    //             RigidBody::Static,
-    //             Collider::trimesh_from_mesh(mesh)
-    //                 .expect("failed to create collider from rock mesh"),
-    //         ));
-    //         // You could now use `mesh` directly or clone it
-    //         // e.g., commands.spawn(PbrBundle { mesh: mesh_handle.clone(), ..default() });
-    //     }
-    // }
 
     let size = main_plane / 2.0;
     let geom = cfg.geom.clone();

@@ -4,18 +4,9 @@ use bevy::{
     pbr::{Atmosphere, AtmosphereSettings, CascadeShadowConfigBuilder, light_consts::lux},
     render::camera::Exposure,
 };
-use leafwing_input_manager::prelude::*;
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(
-        OnEnter(Screen::Gameplay),
-        add_skybox_to_camera.after(camera::spawn_camera),
-    )
-    .add_systems(OnExit(Screen::Gameplay), rm_skybox_from_camera)
-    .add_systems(
-        Update,
-        (toggle_sun_cycle, sun_cycle).run_if(in_state(Screen::Gameplay)),
-    );
+    app.add_systems(Update, sun_cycle.run_if(in_state(Screen::Gameplay)));
 }
 
 /// Mainly this example:
@@ -23,7 +14,7 @@ pub fn plugin(app: &mut App) {
 pub fn add_skybox_to_camera(
     cfg: Res<Config>,
     mut commands: Commands,
-    mut camera: Query<Entity, With<Camera3d>>,
+    mut camera: Query<Entity, With<SceneCamera>>,
 ) -> Result {
     let camera = camera.single_mut()?;
 
@@ -87,7 +78,7 @@ pub fn add_skybox_to_camera(
 
 pub fn rm_skybox_from_camera(
     mut commands: Commands,
-    mut camera: Query<Entity, With<Camera3d>>,
+    mut camera: Query<Entity, With<SceneCamera>>,
 ) -> Result {
     let camera = camera.single_mut()?;
     commands
@@ -128,26 +119,4 @@ fn sun_cycle(
             .iter_mut()
             .for_each(|mut tf| tf.rotate_y(-time.delta_secs() * std::f32::consts::PI / 50.0)),
     }
-}
-
-fn toggle_sun_cycle(
-    mut settings: ResMut<Settings>,
-    action: Query<&ActionState<Action>>,
-    mut label: Query<&mut Text, With<SunCycleLabel>>,
-) -> Result {
-    let state = action.single()?;
-    if state.just_pressed(&Action::ToggleSunCycle) {
-        let mut text = label.single_mut()?;
-        match settings.sun_cycle {
-            SunCycle::Nimbus => {
-                settings.sun_cycle = SunCycle::DayNight;
-            }
-            SunCycle::DayNight => {
-                settings.sun_cycle = SunCycle::Nimbus;
-            }
-        }
-        *text = format!("O - toggle sun cycle: {:?}", settings.sun_cycle).into();
-    }
-
-    Ok(())
 }
