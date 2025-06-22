@@ -53,6 +53,7 @@ pub fn add_skybox_to_camera(
         cascade_shadow_config,
     ));
 
+    // Lighting
     commands.entity(camera).insert((
         // This is the component that enables atmospheric scattering for a camera
         Atmosphere::EARTH,
@@ -60,8 +61,20 @@ pub fn add_skybox_to_camera(
         // aerial view lut distance and set the scene scale accordingly.
         // Most usages of this feature will not need to adjust this.
         AtmosphereSettings {
-            aerial_view_lut_max_distance: 3.2e4,
-            scene_units_to_m: 1e+4,
+            scene_units_to_m: 1.0,
+            aerial_view_lut_max_distance: 40_000.0, // 40 km for a vast scene
+
+            // Higher resolution LUTs for smoother gradients and details
+            transmittance_lut_size: UVec2::new(512, 256), // Double resolution for smoother light transmission
+            sky_view_lut_size: UVec2::new(800, 400),      // Higher resolution for sky appearance
+            aerial_view_lut_size: UVec3::new(64, 64, 64), // More detailed aerial perspective
+
+            // Increased sample counts for better accuracy and less artifacts
+            transmittance_lut_samples: 60, // More samples for light transmission accuracy
+            multiscattering_lut_dirs: 128, // Double directions for multiscattering
+            multiscattering_lut_samples: 30, // More samples for multiscattering accuracy
+            sky_view_lut_samples: 24,      // More samples for sky appearance
+            aerial_view_lut_samples: 15,   // More samples for aerial view depth
             ..Default::default()
         },
         Tonemapping::BlenderFilmic,

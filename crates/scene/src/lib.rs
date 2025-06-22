@@ -16,7 +16,6 @@ pub fn plugin(app: &mut App) {
         bevy_fix_gltf_coordinate_system::FixGltfCoordinateSystemPlugin,
         skybox::plugin,
     ))
-    .add_systems(Update, rotate_rock.run_if(in_state(Screen::Gameplay)))
     .add_systems(OnEnter(Screen::Gameplay), setup);
 }
 
@@ -35,31 +34,32 @@ pub fn setup(
     let main_plane = cfg.geom.main_plane;
 
     // Plane
-    let mesh = Mesh3d(meshes.add(Cuboid::new(main_plane, 1.0, main_plane)));
+    let mesh_raw = Cuboid::new(main_plane, 1.0, main_plane);
+    let mesh = meshes.add(mesh_raw);
     let mat = MeshMaterial3d(materials.add(SAND_YELLOW));
     commands.spawn((
         StateScoped(Screen::Gameplay),
         mat,
-        mesh,
+        Mesh3d(mesh),
         Transform::from_xyz(0.0, -1.0, 0.0),
         RigidBody::Static,
-        Collider::half_space(Vec3::Y),
+        Collider::trimesh_from_mesh(&Mesh::from(mesh_raw)).unwrap_or(Collider::half_space(Vec3::Y)),
     ));
 
     // Rock
-    let mesh = gltf
-        .named_meshes
-        .get("mt_lp")
-        .expect("Could not get rock mesh");
-    if let Some(mesh) = gltf_meshes.get(mesh) {
+    let mesh = gltf.meshes[0].clone();
+    let material = gltf.materials[0].clone();
+    if let Some(mesh) = gltf_meshes.get(&mesh) {
         for primitive in &mesh.primitives {
-            let pos = Transform::from_translation(Vec3::new(5.0, 3.0, 5.0));
+            let mut transform = Transform::from_translation(Vec3::new(-50.0, 9.0, 5.0));
+            transform.scale = Vec3::splat(3.0);
             let mesh = primitive.mesh.clone();
             let mut e = commands.spawn((
                 StateScoped(Screen::Gameplay),
                 Rock,
-                pos,
+                transform,
                 Mesh3d(mesh.clone()),
+                MeshMaterial3d(material.clone()),
                 RigidBody::Static,
             ));
 
@@ -127,11 +127,4 @@ pub fn setup(
         brightness: 500.0,
         ..Default::default()
     });
-}
-
-fn rotate_rock(time: Res<Time>, mut rock: Query<&mut Transform, With<Rock>>) -> Result {
-    let mut rock_transform = rock.single_mut()?;
-    rock_transform.rotate_y(time.delta_secs());
-
-    Ok(())
 }

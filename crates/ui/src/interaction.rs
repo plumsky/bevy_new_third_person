@@ -1,5 +1,4 @@
 use super::*;
-use bevy_seedling::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<UiInteraction>().add_systems(

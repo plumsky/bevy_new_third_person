@@ -2,18 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use bevy::{
-    app::App,
-    asset::AssetMetaCheck,
-    log,
-    // render::{
-    pbr::wireframe::{NoWireframe, Wireframe, WireframeColor, WireframeConfig, WireframePlugin},
-    prelude::*,
-    //     RenderPlugin,
-    //     render_resource::WgpuFeatures,
-    //     settings::{RenderCreation, WgpuSettings},
-    // },
-    window::PrimaryWindow,
-    winit::WinitWindows,
+    app::App, asset::AssetMetaCheck, log, prelude::*, window::PrimaryWindow, winit::WinitWindows,
 };
 use models::*;
 use std::io::Cursor;
@@ -40,9 +29,6 @@ fn main() {
         ..default()
     };
     let assets = AssetPlugin {
-        // Wasm builds will check for meta files (that don't exist) if this isn't set.
-        // This causes errors and even panics on web build on itch.
-        // See https://github.com/bevyengine/bevy_github_ci_template/issues/48.
         meta_check: AssetMetaCheck::Never,
         ..default()
     };
@@ -52,20 +38,7 @@ fn main() {
         ..Default::default()
     };
 
-    let mut default_plugins = DefaultPlugins.set(window).set(assets).set(log_level);
-
-    // #[cfg(feature = "dev_native")]
-    // {
-    //     default_plugins = default_plugins.set(RenderPlugin {
-    //         render_creation: RenderCreation::Automatic(WgpuSettings {
-    //             features: WgpuFeatures::POLYGON_MODE_LINE,
-    //             ..Default::default()
-    //         }),
-    //         ..Default::default()
-    //     });
-    // }
-
-    app.add_plugins(default_plugins);
+    app.add_plugins(DefaultPlugins.set(window).set(assets).set(log_level));
 
     // custom plugins. the order is important
     // be sure you use resources/types AFTER you add plugins that insert them

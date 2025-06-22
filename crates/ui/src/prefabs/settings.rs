@@ -99,7 +99,7 @@ fn raise_fov(
 
 fn update_fov_label(settings: Res<Settings>, mut label: Single<&mut Text, With<FovLabel>>) {
     let fov = settings.fov.round();
-    let mut text = format!("{fov}°");
+    let mut text = format!("{fov}");
     if text.len() < 4 {
         text.push(' ');
     }
@@ -236,6 +236,7 @@ fn click_toggle_diagnostics(
     }
 }
 
+#[cfg(feature = "dev_native")]
 fn clock_toggle_debug_ui(
     _: Trigger<Pointer<Click>>,
     mut commands: Commands,
@@ -354,7 +355,9 @@ fn video_grid(cycle: &SunCycle) -> impl Bundle {
             // TODO: do checkboxes
             label("diagnostics"),
             btn("toggle", click_toggle_diagnostics),
+            #[cfg(feature = "dev_native")]
             label("debug ui"),
+            #[cfg(feature = "dev_native")]
             btn("toggle", clock_toggle_debug_ui)
         ],
     )

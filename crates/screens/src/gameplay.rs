@@ -27,7 +27,7 @@ fn spawn_gameplay_ui(mut cmds: Commands, textures: Res<Textures>) {
             // mute/pause icons
             (
                 Node {
-                    flex_direction: FlexDirection::Column,
+                    flex_direction: FlexDirection::Row,
                     align_items: AlignItems::Start,
                     justify_content: JustifyContent::Start,
                     position_type: PositionType::Absolute,
@@ -128,7 +128,7 @@ fn add_new_modal(
 
     if settings.modals.is_empty() {
         cmds.trigger(SwitchInputCtx(Context::Modal));
-        if Modal::Main == trig.0 {
+        if Modal::Main == trig.0 && !settings.paused {
             cmds.trigger(OnPauseToggle);
         }
         cmds.trigger(OnCamCursorToggle);
