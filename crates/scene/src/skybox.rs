@@ -62,7 +62,7 @@ pub fn add_skybox_to_camera(
         // Most usages of this feature will not need to adjust this.
         AtmosphereSettings {
             scene_units_to_m: 1.0,
-            aerial_view_lut_max_distance: 40_000.0, // 40 km for a vast scene
+            aerial_view_lut_max_distance: 40_000.0, //  40 km for a vast scene
 
             // Higher resolution LUTs for smoother gradients and details
             transmittance_lut_size: UVec2::new(512, 256), // Double resolution for smoother light transmission
@@ -82,8 +82,8 @@ pub fn add_skybox_to_camera(
         Bloom::NATURAL,
     ));
 
-    if cfg.physics.fog {
-        commands.entity(camera).insert(fog(cfg));
+    if cfg.physics.distance_fog {
+        commands.entity(camera).insert(distance_fog(cfg));
     }
 
     Ok(())
@@ -106,7 +106,7 @@ pub fn rm_skybox_from_camera(
     Ok(())
 }
 
-pub fn fog(cfg: Res<Config>) -> impl Bundle {
+pub fn distance_fog(cfg: Res<Config>) -> impl Bundle {
     DistanceFog {
         color: Color::srgba(0.35, 0.48, 0.66, 1.0),
         directional_light_color: Color::srgba(1.0, 0.95, 0.85, 0.5),
@@ -121,7 +121,7 @@ pub fn fog(cfg: Res<Config>) -> impl Bundle {
 
 fn sun_cycle(
     settings: Res<Settings>,
-    mut sky_lights: Query<&mut Transform, With<DirectionalLight>>,
+    mut sky_lights: Query<&mut Transform, (With<Moon>, With<Sun>)>,
     time: Res<Time>,
 ) {
     match settings.sun_cycle {

@@ -24,7 +24,7 @@
         sfx: 0.5,
     ),
     physics: (
-        fog: true,
+        distance_fog: true,
         fog_directional_light_exponent: 5.0,
         fog_visibility: 500.0,
         shadow_distance: 100,

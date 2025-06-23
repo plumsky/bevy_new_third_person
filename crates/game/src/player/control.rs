@@ -53,9 +53,11 @@ fn handle_sprint_in(
         let new_duration = step_timer.duration() / cfg.player.movement.sprint_factor as u32;
         info!("IN: new sprint timer: {new_duration:?}");
         step_timer.set_duration(new_duration);
-        player.speed *= cfg.player.movement.sprint_factor;
+        if player.speed == cfg.player.movement.speed {
+            player.speed *= cfg.player.movement.sprint_factor;
+        }
         let entity = on.target();
-        info!("Sprint started for entity: {:?}", ctx);
+        info!("Sprint started for entity: {entity}");
     }
 
     Ok(())
@@ -91,7 +93,14 @@ fn handle_jump(
 
     air_counter.update(controller.as_mut()); // Update air counter
     controller.action(TnuaBuiltinJump {
-        height: 2.0,
+        height: 3.5,
+        takeoff_extra_gravity: 50.0, // Increased for a snappier, more immediate lift-off.
+        fall_extra_gravity: 40.0,    // To make falling feel more impactful and less floaty.
+        shorten_extra_gravity: 80.0, // Increased to allow for very short hops when tapping the jump button.
+        peak_prevention_at_upward_velocity: 0.5, // Slightly lower to start applying peak prevention sooner.
+        peak_prevention_extra_gravity: 30.0, // Increased to reduce "floatiness" at the jump's apex.
+        reschedule_cooldown: Some(0.1), // Allows for a slight "jump buffering" if the button is pressed just before landing.
+        disable_force_forward_after_peak: true,
         allow_in_air: true,
         ..Default::default()
     });

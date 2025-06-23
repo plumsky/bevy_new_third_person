@@ -31,7 +31,7 @@ impl Default for Sound {
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
 pub struct Physics {
-    pub fog: bool,
+    pub distance_fog: bool,
     pub fog_directional_light_exponent: f32,
     pub fog_visibility: f32,
     pub shadow_distance: f32,

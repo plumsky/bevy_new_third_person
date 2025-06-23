@@ -59,41 +59,41 @@ pub fn spawn_player(
 
     let collider = Collider::capsule(cfg.player.hitbox.radius, cfg.player.hitbox.height);
 
-    let mut e = commands.spawn((
-        StateScoped(Screen::Gameplay),
-        pos,
-        player,
-        GameplayCtx,
-        Actions::<GameplayCtx>::default(),
-        ThirdPersonCameraTarget,
-        // JumpTimer(Timer::from_seconds(0.5, TimerMode::Repeating)),
-        StepTimer(Timer::from_seconds(0.39, TimerMode::Repeating)),
-        InheritedVisibility::default(), // silence the warning because of adding SceneRoot as a child
-    ));
-    // tnua stuff
-    e.insert((
-        TnuaController::default(),
-        // Tnua can fix the rotation, but the character will still get rotated before it can do so.
-        // By locking the rotation we can prevent this.
-        LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
-        TnuaAnimatingState::<AnimationState>::default(),
-        TnuaSimpleAirActionsCounter::default(),
-        // A sensor shape is not strictly necessary, but without it we'll get weird results.
-        TnuaAvian3dSensorShape(collider.clone()),
-    ));
-
-    // physics
-    e.insert((
-        collider,
-        RigidBody::Dynamic,
-        Friction::new(0.0).with_combine_rule(CoefficientCombine::Multiply),
-    ));
-
-    // spawn character mesh as child to adjust mesh position relative to the player origin
-    e.with_children(|parent| {
-        let mut e = parent.spawn((Transform::from_xyz(0.0, -1.0, 0.0), mesh));
-        e.observe(prepare_animations);
-    });
+    commands
+        .spawn((
+            StateScoped(Screen::Gameplay),
+            pos,
+            player,
+            GameplayCtx,
+            Actions::<GameplayCtx>::default(),
+            ThirdPersonCameraTarget,
+            // tnua stuff
+            (
+                TnuaController::default(),
+                // Tnua can fix the rotation, but the character will still get rotated before it can do so.
+                // By locking the rotation we can prevent this.
+                LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
+                TnuaAnimatingState::<AnimationState>::default(),
+                TnuaSimpleAirActionsCounter::default(),
+                // A sensor shape is not strictly necessary, but without it we'll get weird results.
+                TnuaAvian3dSensorShape(collider.clone()),
+            ),
+            // physics
+            (
+                collider,
+                RigidBody::Dynamic,
+                Friction::ZERO.with_combine_rule(CoefficientCombine::Multiply),
+            ),
+            // JumpTimer(Timer::from_seconds(0.5, TimerMode::Repeating)),
+            StepTimer(Timer::from_seconds(0.39, TimerMode::Repeating)),
+            InheritedVisibility::default(), // silence the warning because of adding SceneRoot as a child
+        ))
+        // spawn character mesh as child to adjust mesh position relative to the player origin
+        .with_children(|parent| {
+            let mut e = parent.spawn((Transform::from_xyz(0.0, -1.0, 0.0), mesh));
+            e.observe(prepare_animations);
+        })
+        .observe(to_gameplay_ctx);
 
     // DEBUG
     // let collider_mesh = Mesh::from(Capsule3d::new(
@@ -112,8 +112,6 @@ pub fn spawn_player(
     //         ));
     //     });
     // });
-
-    e.observe(to_gameplay_ctx);
 
     Ok(())
 }
