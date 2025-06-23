@@ -11,34 +11,72 @@ pub fn plugin(app: &mut App) {
 }
 
 fn spawn_ctx(mut cmds: Commands) {
-    cmds.spawn((InputCtx, Actions::<ModalCtx>::default(), ModalCtx));
+    cmds.spawn((GlobalInputCtx, Actions::<ModalCtx>::default(), ModalCtx));
 }
 
+/// Context switch observer
+/// We need global context to handle input on main menu, when no players spawned yet
+/// but we have to reset it manually
+/// TODO: check when split screen ready
 fn on_ctx_switch(
-    event: Trigger<SwitchInputCtx>,
-    input_ctx: Single<Entity, With<InputCtx>>,
-    players: Query<Entity, With<Player>>,
-    mut cmds: Commands,
+    on: Trigger<SwitchInputCtx>,
+    mut commands: Commands,
+    mut global_ctx: Query<Entity, With<GlobalInputCtx>>,
+    mut players: Query<(Entity, &mut CurrentCtx), With<Player>>,
 ) {
-    for player in players {
-        match event.event().0 {
-            Context::Modal => {
-                cmds.entity(*input_ctx)
-                    .insert(Actions::<ModalCtx>::default());
-                cmds.entity(player).remove::<Actions<GameplayCtx>>();
+    let entity = on.event().entity;
+    let new_ctx = &on.event().ctx;
+
+    if entity == Entity::PLACEHOLDER {
+        // global context reset
+        if let Ok(global_ctx) = global_ctx.single_mut() {
+            match new_ctx {
+                Context::Modal => {
+                    commands
+                        .entity(global_ctx)
+                        .insert(Actions::<ModalCtx>::default());
+                }
+                Context::Gameplay => {
+                    commands.entity(global_ctx).remove::<Actions<ModalCtx>>();
+                }
             }
-            Context::Gameplay => {
-                cmds.entity(*input_ctx).remove::<Actions<ModalCtx>>();
-                cmds.entity(player)
+
+            info!("Switched global context to {:?}", new_ctx);
+        }
+
+        return;
+    }
+
+    if let Ok((entity, mut current_ctx)) = players.get_mut(entity) {
+        match (current_ctx.0.clone(), new_ctx.clone()) {
+            (Context::Modal, Context::Gameplay) => {
+                commands
+                    .entity(entity)
+                    .remove::<Actions<ModalCtx>>()
                     .insert(Actions::<GameplayCtx>::default());
             }
+            (Context::Gameplay, Context::Modal) => {
+                commands
+                    .entity(entity)
+                    .remove::<Actions<GameplayCtx>>()
+                    .insert(Actions::<ModalCtx>::default());
+            }
+            _ => {}
         }
+
+        current_ctx.0 = new_ctx.clone();
+        info!("Switched player {entity:?} context to {:?}", new_ctx);
     }
 }
 
+#[derive(Component, Deref, DerefMut)]
+pub struct CurrentCtx(pub Context);
+
+#[derive(Debug, Clone, Default)]
 pub enum Context {
-    Gameplay,
+    #[default]
     Modal,
+    Gameplay,
 }
 
 /// TODO: figure out split screen

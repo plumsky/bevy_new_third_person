@@ -89,6 +89,7 @@ fn toggle_mute(
 // ============================ UI ============================
 
 fn click_to_menu(_: Trigger<Pointer<Click>>, mut cmds: Commands) {
+    cmds.trigger(SwitchInputCtx::from_context(Context::Modal));
     cmds.trigger(OnGoTo(Screen::Title));
     cmds.trigger(OnPauseToggle); // reset to false
 }
@@ -117,7 +118,7 @@ fn trigger_menu_toggle_on_esc(
 }
 
 fn add_new_modal(
-    trig: Trigger<OnNewModal>,
+    on: Trigger<OnNewModal>,
     screen: Res<State<Screen>>,
     mut cmds: Commands,
     mut settings: ResMut<Settings>,
@@ -127,8 +128,8 @@ fn add_new_modal(
     }
 
     if settings.modals.is_empty() {
-        cmds.trigger(SwitchInputCtx(Context::Modal));
-        if Modal::Main == trig.0 && !settings.paused {
+        cmds.trigger(SwitchInputCtx::new(on.target(), Context::Modal));
+        if Modal::Main == on.0 && !settings.paused {
             cmds.trigger(OnPauseToggle);
         }
         cmds.trigger(OnCamCursorToggle);
@@ -136,7 +137,7 @@ fn add_new_modal(
 
     // despawn all previous modal entities to avoid clattering
     cmds.trigger(OnClearModals);
-    let OnNewModal(modal) = trig.event();
+    let OnNewModal(modal) = on.event();
     match modal {
         Modal::Main => cmds.spawn(menu_modal()),
         Modal::Settings => cmds.spawn(settings_modal()),
@@ -146,7 +147,7 @@ fn add_new_modal(
 }
 
 fn pop_modal(
-    _: Trigger<OnPopModal>,
+    on: Trigger<OnPopModal>,
     screen: Res<State<Screen>>,
     menu_marker: Query<Entity, With<MenuModal>>,
     settings_marker: Query<Entity, With<SettingsModal>>,
@@ -183,7 +184,7 @@ fn pop_modal(
     }
 
     if settings.modals.is_empty() {
-        cmds.trigger(SwitchInputCtx(Context::Gameplay));
+        cmds.trigger(SwitchInputCtx::new(on.target(), Context::Gameplay));
         cmds.trigger(OnPauseToggle);
         cmds.trigger(OnCamCursorToggle);
     }

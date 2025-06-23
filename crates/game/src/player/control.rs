@@ -3,8 +3,7 @@ use bevy_tnua::{
     builtins::{TnuaBuiltinCrouch, TnuaBuiltinDash},
     control_helpers::TnuaSimpleAirActionsCounter,
 };
-
-// const FOLLOW_EPSILON: f32 = 0.01;
+use std::time::Duration;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(Update, movement.in_set(TnuaUserControlsSystemSet))
@@ -14,7 +13,6 @@ pub fn plugin(app: &mut App) {
         .add_observer(handle_dash)
         // .add_observer(handle_attack)
         .add_observer(crouch_in)
-        .add_observer(crouch)
         .add_observer(crouch_out);
 }
 
@@ -33,11 +31,30 @@ fn movement(
         let direction = cam_transform.movement_direction(input_value);
 
         controller.basis(TnuaBuiltinWalk {
+            cling_distance: 1.1,    // Slightly higher than float_height for a bit of "give".
+            spring_strength: 500.0, // Stronger spring for a more grounded feel.
+            spring_dampening: 1.0,  // Slightly reduced dampening for a more responsive spring.
+            acceleration: 80.0, // Increased acceleration for snappier movement starts and stops.
+            air_acceleration: 30.0, // Allow for some air control, but less than ground.
+            free_fall_extra_gravity: 70.0, // Slightly increased for a less floaty fall.
+            tilt_offset_angvel: 7.0, // Increased for a slightly faster righting response.
+            tilt_offset_angacl: 700.0, // Increased acceleration to reach the target righting speed.
+            turning_angvel: 12.0, // Increased for more responsive turning.
             desired_velocity: direction * player_data.speed,
             desired_forward: Dir3::new(direction).ok(),
             float_height: 0.01,
             ..Default::default()
         });
+
+        // Check if crouch is currently active and apply TnuaBuiltinCrouch as an action
+        if actions.value::<Crouch>()?.as_bool() {
+            controller.action(TnuaBuiltinCrouch {
+                float_offset: -0.6,
+                height_change_impulse_for_duration: 0.1,
+                height_change_impulse_limit: 80.0,
+                uncancellable: false,
+            });
+        }
     }
 
     Ok(())
@@ -48,15 +65,15 @@ fn handle_sprint_in(
     cfg: Res<Config>,
     mut player_query: Query<(&mut Player, &mut StepTimer), With<GameplayCtx>>,
 ) -> Result {
-    for (mut player, mut step_timer) in player_query.iter_mut() {
-        info!("IN: new sprint timer: {:?}", step_timer.duration());
-        let new_duration = step_timer.duration() / cfg.player.movement.sprint_factor as u32;
-        info!("IN: new sprint timer: {new_duration:?}");
-        step_timer.set_duration(new_duration);
+    let entity = on.target();
+    if let Ok((mut player, mut step_timer)) = player_query.get_mut(entity) {
         if player.speed == cfg.player.movement.speed {
+            let new_duration =
+                step_timer.duration().as_millis_f32() / cfg.player.movement.sprint_factor;
+            let new_duration = Duration::from_millis(new_duration as u64);
+            step_timer.set_duration(new_duration);
             player.speed *= cfg.player.movement.sprint_factor;
         }
-        let entity = on.target();
         info!("Sprint started for entity: {entity}");
     }
 
@@ -68,29 +85,35 @@ fn handle_sprint_out(
     cfg: Res<Config>,
     mut player_query: Query<(&mut Player, &mut StepTimer), With<GameplayCtx>>,
 ) -> Result {
-    for (mut player, mut step_timer) in player_query.iter_mut() {
-        info!("OUT: sprint timer: {:?}", step_timer.duration());
-        let new_duration = step_timer.duration() * cfg.player.movement.sprint_factor as u32;
-        info!("OUT: new sprint timer: {new_duration:?}");
+    let entity = on.target();
+    if let Ok((mut player, mut step_timer)) = player_query.get_mut(entity)
+        && player.speed != cfg.player.movement.speed
+    {
+        let new_duration = Duration::from_secs_f32(cfg.timers.step);
         step_timer.set_duration(new_duration);
         player.speed = cfg.player.movement.speed;
+        info!("Sprint completed for entity: {:?}", entity);
     }
 
-    let entity = on.target();
-    info!("Sprint completed for entity: {:?}", entity);
     Ok(())
 }
 
 fn handle_jump(
-    on: Trigger<Started<Jump>>,
+    on: Trigger<Fired<Jump>>,
     // cfg: Res<Config>,
+    // time: Res<Time>,
     mut player_query: Query<
-        (&mut TnuaController, &mut TnuaSimpleAirActionsCounter),
-        With<GameplayCtx>,
+        (
+            &mut TnuaController,
+            &mut TnuaSimpleAirActionsCounter,
+            &mut JumpTimer,
+        ),
+        With<Player>,
     >,
 ) -> Result {
-    let (mut controller, mut air_counter) = player_query.get_mut(on.target())?;
+    let (mut controller, mut air_counter, mut _jump_timer) = player_query.get_mut(on.target())?;
 
+    // if jump_timer.tick(time.delta()).just_finished() {
     air_counter.update(controller.as_mut()); // Update air counter
     controller.action(TnuaBuiltinJump {
         height: 3.5,
@@ -104,6 +127,7 @@ fn handle_jump(
         allow_in_air: true,
         ..Default::default()
     });
+    // }
 
     Ok(())
 }
@@ -140,16 +164,16 @@ fn handle_dash(
 pub fn crouch_in(
     on: Trigger<Started<Crouch>>,
     cfg: Res<Config>,
-    mut player: Query<&mut Player>,
-    mut tnua: Query<
-        (&mut TnuaAvian3dSensorShape, &mut Collider),
-        (With<Player>, Without<SceneCamera>),
-    >,
+    mut player: Query<(&mut Player, &mut StepTimer), With<GameplayCtx>>,
+    mut tnua: Query<(&mut TnuaAvian3dSensorShape, &mut Collider), With<Player>>,
 ) -> Result {
     let (mut avian_sensor, mut collider) = tnua.single_mut()?;
-    let mut player = player.get_mut(on.target())?;
+    let (mut player, mut step_timer) = player.get_mut(on.target())?;
 
-    info!("Crouch IN");
+    let new_duration = step_timer.duration().as_millis_f32() * cfg.player.movement.crouch_factor;
+    let new_duration = Duration::from_millis(new_duration as u64);
+    step_timer.set_duration(new_duration);
+    info!("Crouch IN for player: {}", player.id);
     collider.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
     avian_sensor.0.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
     player.speed *= cfg.player.movement.crouch_factor;
@@ -157,28 +181,20 @@ pub fn crouch_in(
     Ok(())
 }
 
-pub fn crouch(on: Trigger<Ongoing<Crouch>>, mut player: Query<&mut TnuaController, With<Player>>) {
-    if let Ok(mut controller) = player.get_mut(on.target()) {
-        info!("Crouch");
-        controller.action(TnuaBuiltinCrouch {
-            float_offset: -0.1,
-            ..Default::default()
-        });
-    }
-}
-
 pub fn crouch_out(
     on: Trigger<Completed<Crouch>>,
     cfg: Res<Config>,
-    mut player: Query<&mut Player>,
+    mut player: Query<(&mut Player, &mut StepTimer), With<GameplayCtx>>,
     mut tnua: Query<
         (&mut TnuaAvian3dSensorShape, &mut Collider),
         (With<Player>, Without<SceneCamera>),
     >,
 ) -> Result {
     let (mut avian_sensor, mut collider) = tnua.get_mut(on.target())?;
-    let mut player = player.get_mut(on.target())?;
+    let (mut player, mut step_timer) = player.get_mut(on.target())?;
 
+    let new_duration = Duration::from_secs_f32(cfg.timers.step);
+    step_timer.set_duration(new_duration);
     info!("Crouch OUT");
     collider.set_scale(Vec3::ONE, 4);
     avian_sensor.0.set_scale(Vec3::ONE, 4);

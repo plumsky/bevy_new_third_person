@@ -1,9 +1,9 @@
 use super::*;
-use avian3d::math::PI;
 use bevy::scene::SceneInstanceReady;
 use bevy_third_person_camera::*;
-use bevy_tnua::{TnuaAnimatingState, control_helpers::TnuaSimpleAirActionsCounter, prelude::*};
+use bevy_tnua::{TnuaAnimatingState, control_helpers::TnuaSimpleAirActionsCounter};
 use bevy_tnua_avian3d::*;
+use std::f32::consts::PI;
 
 mod animation;
 mod control;
@@ -28,7 +28,8 @@ pub fn plugin(app: &mut App) {
             animating
                 .in_set(TnuaUserControlsSystemSet)
                 .run_if(in_state(Screen::Gameplay)),
-        );
+        )
+        .add_observer(player_post_spawn);
 }
 
 pub fn spawn_player(
@@ -52,7 +53,7 @@ pub fn spawn_player(
     let mesh = SceneRoot(gltf.scenes[0].clone());
     let pos = Transform::from_translation(Vec3::new(0.0, 5.0, 0.0)).with_rotation(player_rot);
     let player = Player {
-        id: 0,
+        id: Entity::PLACEHOLDER,
         speed: cfg.player.movement.speed,
         animation_state: AnimationState::StandIdle,
     };
@@ -64,8 +65,12 @@ pub fn spawn_player(
             StateScoped(Screen::Gameplay),
             pos,
             player,
-            GameplayCtx,
-            Actions::<GameplayCtx>::default(),
+            // input context
+            (
+                GameplayCtx,
+                CurrentCtx(Context::Gameplay),
+                Actions::<GameplayCtx>::default(),
+            ),
             ThirdPersonCameraTarget,
             // tnua stuff
             (
@@ -84,8 +89,8 @@ pub fn spawn_player(
                 RigidBody::Dynamic,
                 Friction::ZERO.with_combine_rule(CoefficientCombine::Multiply),
             ),
-            // JumpTimer(Timer::from_seconds(0.5, TimerMode::Repeating)),
-            StepTimer(Timer::from_seconds(0.39, TimerMode::Repeating)),
+            JumpTimer(Timer::from_seconds(cfg.timers.jump, TimerMode::Repeating)),
+            StepTimer(Timer::from_seconds(cfg.timers.step, TimerMode::Repeating)),
             InheritedVisibility::default(), // silence the warning because of adding SceneRoot as a child
         ))
         // spawn character mesh as child to adjust mesh position relative to the player origin
@@ -93,7 +98,7 @@ pub fn spawn_player(
             let mut e = parent.spawn((Transform::from_xyz(0.0, -1.0, 0.0), mesh));
             e.observe(prepare_animations);
         })
-        .observe(to_gameplay_ctx);
+        .observe(player_post_spawn);
 
     // DEBUG
     // let collider_mesh = Mesh::from(Capsule3d::new(
@@ -116,6 +121,16 @@ pub fn spawn_player(
     Ok(())
 }
 
-fn to_gameplay_ctx(_: Trigger<OnAdd, Player>, mut commands: Commands) {
-    commands.trigger(SwitchInputCtx(Context::Gameplay));
+fn player_post_spawn(
+    on: Trigger<OnAdd, Player>,
+    mut players: Query<&mut Player>,
+    mut commands: Commands,
+) {
+    let player = on.target();
+    if let Ok(mut p) = players.get_mut(player) {
+        p.id = player; // update player id with spawned entity
+    }
+    info!("Switch CTX for: {player}");
+    commands.trigger(SwitchInputCtx::new(player, Context::Gameplay));
+    commands.trigger(SwitchInputCtx::from_context(Context::Gameplay));
 }

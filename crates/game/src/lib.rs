@@ -1,8 +1,11 @@
+#![feature(duration_millis_float)]
+
 use asset_loading::*;
 use audio::*;
 use avian3d::prelude::*;
 use bevy::prelude::*;
 use bevy_enhanced_input::prelude::*;
+use bevy_tnua::prelude::*;
 use models::*;
 use scene::*;
 

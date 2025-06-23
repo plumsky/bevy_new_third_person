@@ -49,9 +49,6 @@ impl UiInteraction {
     }
 }
 
-#[derive(Component)]
-pub struct DisabledButton;
-
 fn apply_interaction_palette(
     mut palette_query: Query<
         (

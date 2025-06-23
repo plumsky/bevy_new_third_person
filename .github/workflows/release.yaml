@@ -112,8 +112,6 @@ jobs:
   forward-env:
     runs-on: ubuntu-latest
     steps:
-      - name: Forward inputs to env
-    steps:
       - name: Set workflow_dispatch inputs as outputs
         id: set-outputs
         run: |

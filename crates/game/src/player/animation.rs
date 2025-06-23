@@ -124,6 +124,7 @@ pub fn animating(
 
             // TODO: have transition from/to crouch
             let speed = BASE_SPEED_SCALE * basis_speed * player.speed;
+
             match crouch_state {
                 TnuaBuiltinCrouchState::Maintaining => AnimationState::CrouchWalk(speed),
                 TnuaBuiltinCrouchState::Rising => AnimationState::CrouchIdle,
@@ -137,7 +138,7 @@ pub fn animating(
             // In case of jump, we want to cast it so that we can get the concrete jump state.
             let (_, jump_state) = controller
                 .concrete_action::<TnuaBuiltinJump>()
-                .expect("action name mismatch");
+                .expect("action name mismatch: Jump");
             // Depending on the state of the jump, we need to decide if we want to play the jump
             // animation or the fall animation.
             match jump_state {

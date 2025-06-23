@@ -18,9 +18,14 @@
             height: 1
         ),
     ),
+    // seconds
+    timers: (
+        step: 0.41,
+        jump: 0.3,
+    ),
     sound: (
         general: 1.0,
-        music: 0.5,
+        music: 0.0,
         sfx: 0.5,
     ),
     physics: (

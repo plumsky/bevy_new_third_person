@@ -3,7 +3,7 @@ use super::*;
 #[derive(Component, Reflect, Clone)]
 #[reflect(Component)]
 pub struct Player {
-    pub id: u8,
+    pub id: Entity,
     pub speed: f32,
     pub animation_state: AnimationState,
 }
@@ -11,7 +11,7 @@ pub struct Player {
 impl Default for Player {
     fn default() -> Self {
         Self {
-            id: 0,
+            id: Entity::PLACEHOLDER,
             speed: 1.0,
             animation_state: AnimationState::StandIdle,
         }

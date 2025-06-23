@@ -10,6 +10,7 @@ pub struct Config {
     pub player: PlayerConfig,
     pub credits: Credits,
     pub settings: SettingsPreloaded,
+    pub timers: Timers,
 }
 
 #[derive(Resource, Debug, Clone, Serialize, Deserialize, Reflect)]
@@ -79,4 +80,10 @@ pub struct SettingsPreloaded {
     pub min_fov: f32,
     pub max_fov: f32,
     pub step: f32,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
+pub struct Timers {
+    pub step: f32,
+    pub jump: f32,
 }

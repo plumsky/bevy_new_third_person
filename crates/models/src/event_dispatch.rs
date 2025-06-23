@@ -23,8 +23,6 @@ pub fn plugin(app: &mut App) {
 pub struct OnGoTo(pub Screen);
 #[derive(Event)]
 pub struct Back(pub Screen);
-#[derive(Event)]
-pub struct SwitchInputCtx(pub Context);
 #[derive(Event, Deref)]
 pub struct OnSwitchTab(pub UiTab);
 #[derive(Event, Deref)]
@@ -45,6 +43,22 @@ pub struct OnMuteToggle;
 pub struct OnDiagnosticsToggle;
 #[derive(Event)]
 pub struct OnDebugUiToggle;
+#[derive(Event)]
+pub struct SwitchInputCtx {
+    pub ctx: Context,
+    pub entity: Entity,
+}
+impl SwitchInputCtx {
+    pub fn new(entity: Entity, ctx: Context) -> Self {
+        Self { entity, ctx }
+    }
+    pub fn from_context(ctx: Context) -> Self {
+        Self {
+            entity: Entity::PLACEHOLDER,
+            ctx,
+        }
+    }
+}
 
 fn back(
     _: Trigger<Started<Escape>>,

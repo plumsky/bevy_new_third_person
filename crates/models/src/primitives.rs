@@ -21,8 +21,8 @@ declare_markers!(
     // <https://github.com/bevyengine/bevy/blob/main/examples/audio/spatial_audio_3d.rs>
     Boombox,
     SunCycleLabel,
-    // user input
-    InputCtx,
+    // user input context
+    GlobalInputCtx,
     // UI
     PerfUi,
     GameplayUi,
@@ -33,6 +33,7 @@ declare_markers!(
     TabBar,
     TabContent,
     SettingsModal,
+    DisabledButton,
     GeneralVolumeLabel,
     MusicVolumeLabel,
     SfxVolumeLabel,

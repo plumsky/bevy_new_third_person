@@ -5,7 +5,8 @@ use rand::prelude::*;
 pub fn plugin(app: &mut App) {
     app.add_systems(OnExit(Screen::Gameplay), stop_soundtrack)
         .add_systems(OnEnter(Screen::Gameplay), start_or_resume_soundtrack)
-        .add_observer(movement_sound);
+        .add_observer(movement_sound)
+        .add_observer(jump_sound);
 }
 
 // TODO: implement different music states
@@ -54,29 +55,51 @@ fn movement_sound(
     time: Res<Time>,
     settings: Res<Settings>,
     sources: ResMut<AudioSources>,
-    player_pos: Query<&Transform, With<Player>>,
+    tnua: Query<&TnuaController, With<Player>>,
+    actions: Single<&Actions<GameplayCtx>>,
     mut cmds: Commands,
-    mut step_timer: Query<&mut StepTimer>,
+    mut step_timer: Query<&mut StepTimer, With<Player>>,
 ) -> Result {
-    let player_pos = player_pos.get(on.target())?;
-    let mut step_timer = step_timer.single_mut()?;
+    let controller = tnua.get(on.target())?;
+    let mut step_timer = step_timer.get_mut(on.target())?;
+
+    let Some((_, basis)) = controller.concrete_basis::<TnuaBuiltinWalk>() else {
+        return Ok(());
+    };
 
     // WALK SOUND
-    if step_timer.tick(time.delta()).just_finished() {
-        // TODO: only run animation after tick
-        if player_pos.translation.y <= 2.0 {
-            let mut rng = thread_rng();
-            let i = rng.gen_range(0..sources.steps.len());
-            let handle = sources.steps[i].clone();
-            cmds.spawn(SamplePlayer::new(handle).with_volume(settings.sfx()));
-        }
+    if step_timer.tick(time.delta()).just_finished() && basis.standing_on_entity().is_some() {
+        let mut rng = thread_rng();
+        let i = rng.gen_range(0..sources.steps.len());
+        let handle = if actions.value::<Crouch>()?.as_bool() {
+            // TODO: select crouch steps
+            sources.steps[i].clone()
+        } else {
+            sources.steps[i].clone()
+        };
+        cmds.spawn(SamplePlayer::new(handle).with_volume(settings.sfx()));
     }
-
-    // TODO: JUMP SOUND
-
-    // TODO: DASH SOUND
-
-    // TODO: CROUCH WALK SOUND
 
     Ok(())
 }
+
+fn jump_sound(
+    _: Trigger<Started<Jump>>,
+    settings: Res<Settings>,
+    sources: ResMut<AudioSources>,
+    // jump_timer: Query<&JumpTimer, With<Player>>,
+    mut cmds: Commands,
+) -> Result {
+    // let jump_timer = jump_timer.get(on.target())?;
+
+    // if jump_timer.just_finished() {
+    let mut rng = thread_rng();
+    let i = rng.gen_range(0..sources.steps.len());
+    let handle = sources.steps[i].clone();
+    cmds.spawn(SamplePlayer::new(handle).with_volume(settings.sfx()));
+    // }
+
+    Ok(())
+}
+
+// TODO: DASH SOUND

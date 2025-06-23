@@ -15,8 +15,6 @@ pub struct Opts {
 #[allow(dead_code)]
 impl Opts {
     pub fn new(c: impl Into<WidgetContent>) -> Self {
-        // a bit of a hack IMO - it's weird that text node is not the width of the text by default
-        // let min_width = Px(text.len() as f32 * FONT_SIZE / 1.2);
         Self {
             inner: c.into(),
             node: Node {
@@ -128,7 +126,7 @@ impl Opts {
                     ..Default::default()
                 },
             },
-            _ => unreachable!("Spawning sprite bundle on non sprite content"),
+            _ => unreachable!("Spawning image bundle on non image content"),
         }
     }
     pub fn into_text_bundle(self) -> impl Bundle {

@@ -2,23 +2,16 @@
     fov: 45.0,
     sound: (
         general: 1.0,
-        music: 0.5,
+        music: 0.0,
         sfx: 0.5,
     ),
-    modals: [],
+    modals: [
+        Main,
+        Settings,
+    ],
     sun_cycle: DayNight,
     last_screen: Title,
     keybind: (
-        forward: [
-            Keyboard(
-                key: KeyW,
-                mod_keys: (0),
-            ),
-            Keyboard(
-                key: ArrowUp,
-                mod_keys: (0),
-            ),
-        ],
         left: [
             Keyboard(
                 key: KeyA,
@@ -26,16 +19,6 @@
             ),
             Keyboard(
                 key: ArrowLeft,
-                mod_keys: (0),
-            ),
-        ],
-        backward: [
-            Keyboard(
-                key: KeyS,
-                mod_keys: (0),
-            ),
-            Keyboard(
-                key: ArrowDown,
                 mod_keys: (0),
             ),
         ],
@@ -49,19 +32,51 @@
                 mod_keys: (0),
             ),
         ],
+        forward: [
+            Keyboard(
+                key: KeyW,
+                mod_keys: (0),
+            ),
+            Keyboard(
+                key: ArrowUp,
+                mod_keys: (0),
+            ),
+        ],
+        backward: [
+            Keyboard(
+                key: KeyS,
+                mod_keys: (0),
+            ),
+            Keyboard(
+                key: ArrowDown,
+                mod_keys: (0),
+            ),
+        ],
         jump: [
             Keyboard(
                 key: Space,
                 mod_keys: (0),
             ),
         ],
-        run: [
+        dash: [
+            Keyboard(
+                key: AltLeft,
+                mod_keys: (0),
+            ),
+        ],
+        crouch: [
+            Keyboard(
+                key: ControlLeft,
+                mod_keys: (0),
+            ),
+        ],
+        sprint: [
             Keyboard(
                 key: ShiftLeft,
                 mod_keys: (0),
             ),
         ],
-        fire: [
+        attack: [
             MouseButton(
                 button: Left,
                 mod_keys: (0),
@@ -70,6 +85,6 @@
     ),
     diagnostics: true,
     debug_ui: false,
-    paused: false,
+    paused: true,
     muted: false,
 )
