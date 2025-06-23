@@ -8,12 +8,39 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version - in the form of v1.2.3'
+        description: 'version - in the form of v1.2.3'
         required: true
         type: string
+      build_windows:
+        description: "build for Windows (WARNING: very slow!)"
+        default: true
+        type: boolean
+      build_macos:
+        description: "build for macOS"
+        default: true
+        type: boolean
+      build_linux:
+        description: "build for Linux"
+        default: true
+        type: boolean
+      build_web:
+        description: "build for web"
+        default: true
+        type: boolean
+      upload_to_github:
+        description: "upload to GitHub releases"
+        default: true
+        type: boolean
+      itch:
+        description: "itch.io project (user/project)"
+        type: string
+      deny_warnings:
+        description: "deny warnings"
+        default: false
+        type: boolean
 
 {% raw -%}
-# cancel the pending release if the new one is started
+# Cancel the release workflow when a more recent workflow begins.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
@@ -26,29 +53,25 @@ env:
   pkg_name: {{project-name}}
 
   build_web: true
-  build_linux: false
-  build_windows: false
-  build_macos: false
+  build_linux: true
+  build_windows: true
+  build_macos: true
 
   # The itch.io project to upload to in the format `user-name/project-name`.
   # There will be no upload to itch.io if this is commented out.
   {%- if itch_username != "" %}
   {%- if itch_project != "" %}
-  upload_itch: {{itch_username}}/{{itch_project}}
+  itch: {{itch_username}}/{{itch_project}}
   {%- else %}
-  upload_itch: {{itch_username}}/{{project-name}}
+  itch: {{itch_username}}/{{project-name}}
   {%- endif %}
   {%- else %}
-  #upload_itch: your-itch-username/{{project-name}}
+  #itch: your-itch-username/{{project-name}}
   {%- endif %}
   upload_github: true
 
   # The path to the assets directory.
   assets_path: assets
-
-  ############
-  # ADVANCED #
-  ############
 
   # The ID of the app produced by this workflow.
   # Applies to macOS releases.
@@ -99,14 +122,31 @@ jobs:
   # Forward some environment variables as outputs of this job.
   # This is needed because the `env` context can't be used in the `if:` condition of a job:
   # https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
+  # Also unify inputs from workflow and tag pushes
   forward-env:
     runs-on: ubuntu-latest
     steps:
-      - name: Do nothing
-        run: "true"
+      - name: Forward inputs to env
+    steps:
+      - name: Set workflow_dispatch inputs as outputs
+        id: set-outputs
+        run: |
+          echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          echo "build_windows=${{ github.event.inputs.build_windows }}" >> $GITHUB_OUTPUT
+          echo "build_macos=${{ github.event.inputs.build_macos }}" >> $GITHUB_OUTPUT
+          echo "build_linux=${{ github.event.inputs.build_linux }}" >> $GITHUB_OUTPUT
+          echo "build_web=${{ github.event.inputs.build_web }}" >> $GITHUB_OUTPUT
+          echo "itch=${{ github.event.inputs.itch || env.itch }}" >> $GITHUB_OUTPUT
+          echo "upload_to_github=${{ github.event.inputs.upload_to_github }}" >> $GITHUB_OUTPUT
+          echo "deny_warnings=${{ github.event.inputs.deny_warnings }}" >> $GITHUB_OUTPUT
     outputs:
-      build: ${{ env.build }}
-      upload: ${{ env.upload }}
+      build_windows: ${{ steps.set-outputs.outputs.build_windows }}
+      build_macos: ${{ steps.set-outputs.outputs.build_macos }}
+      build_linux: ${{ steps.set-outputs.outputs.build_linux }}
+      build_web: ${{ steps.set-outputs.outputs.build_web }}
+      itch: ${{ steps.set-outputs.outputs.itch }}
+      upload_to_github: ${{ steps.set-outputs.outputs.upload_to_github }}
+      deny_warnings: ${{ steps.set-outputs.outputs.deny_warnings }}
 
 # Build and package a release for each platform.
   build:
@@ -157,6 +197,16 @@ jobs:
           echo "app=tmp/app/${app_package_name}"'${{ matrix.app_suffix }}' >> "${GITHUB_ENV}"
           echo "package=${app_package_name}-"'${{ matrix.platform }}${{ matrix.package_ext }}' >> "${GITHUB_ENV}"
 
+          # Rustflags:
+          RUSTFLAGS='-Zthreads=0'
+          if [ '${{ matrix.platform }}' != 'windows' ]; then
+            RUSTFLAGS="${RUSTFLAGS:+$RUSTFLAGS }"'-Zshare-generics=y'
+          fi
+          if [ '${{ inputs.deny_warnings }}' = 'true' ]; then
+            RUSTFLAGS="${RUSTFLAGS:+$RUSTFLAGS }"'-Dwarnings'
+          fi
+          echo "RUSTFLAGS=${RUSTFLAGS}" >> "${GITHUB_ENV}"
+
           # Web environment:
           if [ '${{ matrix.platform }}' = 'web' ]; then
             echo "RUSTFLAGS=${RUSTFLAGS:+$RUSTFLAGS }"'--cfg getrandom_backend="wasm_js"' >> "${GITHUB_ENV}"
@@ -170,10 +220,10 @@ jobs:
 
       - name: Should continue
         if: |
-          (matrix.platform == 'web' && env.build_web == 'true') ||
-          (matrix.platform == 'linux' && env.build_linux == 'true') ||
-          (matrix.platform == 'windows' && env.build_windows == 'true') ||
-          (matrix.platform == 'macos' && env.build_macos == 'true')
+          (matrix.platform == 'web' && env.build_web) ||
+          (matrix.platform == 'linux' && env.build_linux) ||
+          (matrix.platform == 'windows' && env.build_windows) ||
+          (matrix.platform == 'macos' && env.build_macos)
         run: echo 'is_platform_enabled=true' >> "${GITHUB_ENV}"
 
       - name: Checkout repository
@@ -312,7 +362,7 @@ jobs:
       - forward-env
       - get-version
       - build
-    if: ${{ needs.forward-env.outputs.upload_itch != '' }}
+    if: ${{ needs.forward-env.outputs.itch != '' }}
 
     steps:
       - name: Download all packages
@@ -337,6 +387,6 @@ jobs:
               --fix-permissions \
               --userversion='${{ needs.get-version.outputs.version }}' \
               tmp/"${channel}"/* \
-              '${{ env.upload_itch }}':"${channel#package-}"
+              '${{ env.itch }}':"${channel#package-}"
           done
 {%- endraw %}

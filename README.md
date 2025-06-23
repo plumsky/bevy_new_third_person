@@ -17,7 +17,7 @@ You can [try this template in your browser!](https://olekspickle.itch.io/bevy-th
 
 ## Best way to start
 
-Install [cargo-generate] and run:
+Install [cargo-generate] or [`bevy_cli`] and run:
 ```bash
 cargo generate olekspickle/bevy_new_third_person
 # or with bevy_cli
@@ -30,18 +30,18 @@ The best way to get started is to play around with the code you find in [`src/ga
 This template comes with a basic project structure that you may find useful:
 
 ### Project structure
-| Path                                               | Description                                                        |
-| -------------------------------------------------- | ------------------------------------------------------------------ |
-| workspace                                          |                                                                    |
-| |-[`src/main.rs`](./src/main.rs)                   | App entrypoint where system plugins and window set up              |
-| |-[`assets`](./assets)                             | Asset directory                                                    |
-| |-[`crates`](./crates)                             | A set of crates to separate logic in a contained ordered way       |
-| |-|-[`asset_loading`](./crates/asset_loading)      | A high-level way to load collections of asset handles as resources |
-| |-|-[`models`](./crates/models)                    | Data source for the game, all pre defined structs and states       |
-| |-|-[`game`](./crates/game)                        | Game mechanics & content(inputs, scene, player control & animation)|
-| |-|-[`audio`](./crates/audio)                      | Marker components for sound effects and music                      |
-| |-|-[`screens`](./crates/screens)                  | Splash screen, title screen, gameplay screen, etc.                 |
-| |-|-[`ui`](./crates/ui)                            | Reusable UI widgets & game color pallet control                    |
+| Path                                              | Description                                                           |
+| ------------------------------------------------- | --------------------------------------------------------------------- |
+| [`src/main.rs`](./src/main.rs)                    | App entrypoint where system plugins and window set up                 |
+| [`assets`](./assets)                              | Asset directory                                                       |
+| [`crates`](./crates)                              | A set of crates to separate logic in a contained ordered way          |
+| [`crates/asset_loading`](./crates/asset_loading)  | A high-level way to load collections of asset handles as resources    |
+| [`crates/models`](./crates/models)                | Data source for the game: inputs, markers, timers                     |
+| [`crates/audio`](./crates/audio)                  | Marker components for sound effects and music                         |
+| [`crates/screens`](./crates/screens)              | Splash/title/gameplay and other screen related systems and ui         |
+| [`crates/scene`](./crates/scene)                  | Scene setup, skybox                                                   |
+| [`crates/game`](./crates/game)                    | Game mechanics & content(player control & animation)                  |
+| [`crates/ui`](./crates/ui)                        | Reusable UI widgets & game color pallet control                       |
 
 Feel free to move things around however you want, though.
 
@@ -128,9 +128,7 @@ There are some known issues in Bevy that can require arcane workarounds.
 
 ### My audio is stuttering on web
 
-Audio in web-builds can have issues in some browsers.
-This seems to be a general performance issue with wasm builds in all engines, the best solution is just to artificially extend loading phase(seems to be a solution people go for in other engines)
-
+This template uses firewheel experimental audio runnign in the separate worker thread, so it should not be happening, but if you experience it nevertheless, here are a few tips:
 - If you're using materials, you should force your render pipelines to [load at the start of the game]
 - Optimize your game as much as you can to keep its FPS high.
 - Apply the suggestions from the blog post [Workaround for the Choppy Music in Bevy Web Builds].
@@ -172,10 +170,11 @@ The [assets](./assets) in this repository are all 3rd-party. See the see [credit
 [bevy atmosphere example]: https://bevyengine.org/examples/3d-rendering/atmosphere/
 [bevy-discord]: https://discord.gg/bevy
 [bevy_asset_loader]: https://github.com/NiklasEi/bevy_asset_loader
+[bevy_cli]: https://github.com/TheBevyFlock/bevy_cli
 [bevy-learn]: https://bevyengine.org/learn/
+[bevy_seedling]: https://github.com/CorvusPrudens/bevy_seedling
 [bevy_third_person_camera]: https://github.com/The-DevBlog/bevy_third_person_camera
 [bevy_tnua]: https://github.com/idanarye/bevy-tnua
-[bevy_seedling]: https://github.com/CorvusPrudens/bevy_seedling
 [Bevy Cheat Book]: https://bevy-cheatbook.github.io/introduction.html
 [BevyFlock]: https://github.com/TheBevyFlock/bevy_new_2d
 [cargo-generate]: https://github.com/cargo-generate/cargo-generate
@@ -185,7 +184,6 @@ The [assets](./assets) in this repository are all 3rd-party. See the see [credit
 [Universal Animation Library]: https://quaternius.itch.io/universal-animation-library
 [GitHub workflows]: https://docs.github.com/en/actions/using-workflows
 
-[Workaround for the Choppy Music in Bevy Web Builds]: https://necrashter.github.io/bevy-choppy-music-workaround
 [spawn the Window hidden]: https://github.com/bevyengine/bevy/blob/release-0.14.0/examples/window/window_settings.rs#L29-L32
 [make it visible a few frames later]: https://github.com/bevyengine/bevy/blob/release-0.14.0/examples/window/window_settings.rs#L56-L64
 [`physics_in_fixed_timestep`]: https://github.com/bevyengine/bevy/blob/main/examples/movement/physics_in_fixed_timestep.rs
