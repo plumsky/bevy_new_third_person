@@ -1,9 +1,9 @@
 
 # Third Person Bevy game template (WIP)
-[![1](https://github.com/user-attachments/assets/18b3a90e-07a0-417d-ba41-69f8717a1ba1)](https://github.com/user-attachments/assets/778dd6c0-3722-42c3-ad4a-f3424ac588e2)
-[![2](https://github.com/user-attachments/assets/5b2ce515-2ea8-4c38-8611-c7b41b019f20)](https://github.com/user-attachments/assets/0bbc555b-53ce-4e2a-bdab-d1219f857b6d)
-[![3](https://github.com/user-attachments/assets/a19f42a7-fdb2-4302-83e8-f7d531dba166)](https://github.com/user-attachments/assets/8692a08e-73c6-411a-b060-a971470e623a)
-[![4](https://github.com/user-attachments/assets/90bda2e8-4b29-4b03-b8d0-1a65094717e6)](https://github.com/user-attachments/assets/72a324f8-195c-4608-aaf2-b88a1ba03896)
+<video src="https://github.com/user-attachments/assets/778dd6c0-3722-42c3-ad4a-f3424ac588e2" controls="controls" style="max-width: 400px;"> </video>
+<video src="https://github.com/user-attachments/assets/0bbc555b-53ce-4e2a-bdab-d1219f857b6d" controls="controls" style="max-width: 400px;"> </video>
+<video src="https://github.com/user-attachments/assets/8692a08e-73c6-411a-b060-a971470e623a" controls="controls" style="max-width: 400px;"> </video>
+<video src="https://github.com/user-attachments/assets/72a324f8-195c-4608-aaf2-b88a1ba03896" controls="controls" style="max-width: 400px;"> </video>
 
 This template is based on the awesome [BevyFlock 2D template][BevyFlock] featuring out of the box builds for:
 - Windows
@@ -57,11 +57,11 @@ Feel free to move things around however you want, though.
 - [x] featuring rig and animations using [Universal Animation Library] from quaternius
 - [x] experimental sound with [bevy_seedling] based on Firewheel audio engine (which will probably replace bevy_audio), with **highly** experimental audio stutter fix for web
 - [x] consistent Esc back navigation in gameplay and menu via stacked modals (kudos for the idea to skyemakesgames)
+- [x] serialize and save settings
+- [x] auidio, video and keys rebind tabs in settings
 
 ### TODOs (prioritized)
-- [ ] fix sound timing for sprint
-- [ ] figure out rock spawn
-- [ ] Crouch walk, fix bug when unable to move after crouch
+- [ ] Crouch walk, ~~fix bug when unable to move after crouch~~
 - [ ] Jump with timer(tricky with tnua jump in air counter)
 - [ ] fix music not starting on re-enter gameplay
 - [ ] fix sound difference on spawn and unmute
@@ -69,11 +69,10 @@ Feel free to move things around however you want, though.
 - [ ] custom font replace example using pre-loaded font
 - [ ] sky background instead of just void lol
 - [ ] Movement sfx: jump, dash, sprint
-- [ ] serialize and save settings
-- [ ] keys rebind in settings
 - [ ] implement different music states(idle, battle, movement)
+- [ ] add basic mood change per zone
 - [ ] spatial audio demo: boombox emitting background music
-- [ ] split screen
+- [ ] split screen for coop
 - [ ] vault on objects if they are reachable
 - [ ] climbing
 - [ ] small door/portal demo
