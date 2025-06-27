@@ -1,99 +1,61 @@
 use super::*;
-use bevy_tnua::{
-    TnuaAnimatingState, TnuaAnimatingStateDirective,
-    builtins::{
-        TnuaBuiltinCrouch, TnuaBuiltinCrouchState, TnuaBuiltinDash, TnuaBuiltinJumpState,
-        TnuaBuiltinKnockback, TnuaBuiltinKnockbackState,
-    },
-};
+use bevy_tnua::{TnuaAnimatingState, TnuaAnimatingStateDirective, builtins::*};
 
-const BASE_SPEED_SCALE: f32 = 0.01;
-const IDLE_TO_RUN_TRESHOLD: f32 = 0.01;
-
-// Bevy's animation handling is a bit manual. We'll use this struct to register the animation clips
-// as nodes in the animation graph.
-#[derive(Resource)]
-pub struct AnimationNodes {
-    standing: AnimationNodeIndex,
-    running: AnimationNodeIndex,
-    jump_start: AnimationNodeIndex,
-    jump_loop: AnimationNodeIndex,
-    jump_land: AnimationNodeIndex,
-    falling: AnimationNodeIndex,
-    crouch_walk: AnimationNodeIndex,
-    crouch: AnimationNodeIndex,
-    dashing: AnimationNodeIndex,
-    knockback: AnimationNodeIndex,
-}
+const ANIMATION_FACTOR: f32 = 0.1;
 
 pub fn prepare_animations(
-    _trigger: Trigger<SceneInstanceReady>,
+    _: Trigger<SceneInstanceReady>,
     models: Res<Models>,
     gltf_assets: Res<Assets<Gltf>>,
-    mut commands: Commands,
     animation_player: Query<Entity, With<AnimationPlayer>>,
+    mut player: Query<&mut Player>,
+    mut commands: Commands,
     mut animation_graphs: ResMut<Assets<AnimationGraph>>,
 ) {
     let Some(gltf) = gltf_assets.get(&models.player) else {
         return;
     };
 
-    let Ok(animation_player_entity) = animation_player.single() else {
-        return;
-    };
-
-    let mut graph = AnimationGraph::new();
-    let root_node = graph.root;
-    let nodes = AnimationNodes {
-        standing: graph.add_clip(gltf.named_animations["Idle_Loop"].clone(), 1.0, root_node),
-        jump_start: graph.add_clip(gltf.named_animations["Jump_Start"].clone(), 1.0, root_node),
-        jump_loop: graph.add_clip(gltf.named_animations["Jump_Loop"].clone(), 1.0, root_node),
-        jump_land: graph.add_clip(gltf.named_animations["Jump_Land"].clone(), 1.0, root_node),
-        falling: graph.add_clip(gltf.named_animations["Jump_Loop"].clone(), 1.0, root_node),
-        dashing: graph.add_clip(gltf.named_animations["Roll"].clone(), 1.0, root_node),
-        knockback: graph.add_clip(gltf.named_animations["Hit_Chest"].clone(), 1.0, root_node),
-        running: graph.add_clip(
-            gltf.named_animations["Jog_Fwd_Loop"].clone(),
-            // gltf.named_animations["Walk_Loop"].clone(),
-            1.0,
-            root_node,
-        ),
-        crouch_walk: graph.add_clip(
-            gltf.named_animations["Crouch_Fwd_Loop"].clone(),
-            1.0,
-            root_node,
-        ),
-        crouch: graph.add_clip(
-            gltf.named_animations["Crouch_Idle_Loop"].clone(),
-            1.0,
-            root_node,
-        ),
-    };
-
-    commands.insert_resource(nodes);
-    commands
-        .entity(animation_player_entity)
-        .insert(AnimationGraphHandle(animation_graphs.add(graph)));
-}
-
-pub fn animating(
-    mut player: Query<&mut Player>,
-    mut tnua_controller: Query<(&TnuaController, &mut TnuaAnimatingState<AnimationState>)>,
-    mut animation_player: Query<&mut AnimationPlayer>,
-    animation_nodes: Option<Res<AnimationNodes>>,
-) {
-    // An actual game should match the animation player and the controller. Here we cheat for
-    // simplicity and use the only controller and only player.
-    let Ok((controller, mut animating_state)) = tnua_controller.single_mut() else {
-        return;
-    };
-    let Ok(mut animation_player) = animation_player.single_mut() else {
+    let Ok(animation_player) = animation_player.single() else {
         return;
     };
     let Ok(mut player) = player.single_mut() else {
         return;
     };
-    let Some(animation_nodes) = animation_nodes else {
+
+    let mut graph = AnimationGraph::new();
+    let root_node = graph.root;
+
+    for (name, clip) in gltf.named_animations.iter() {
+        let node_index = graph.add_clip(clip.clone(), 1.0, root_node);
+        player.animations.insert(name.to_string(), node_index);
+    }
+
+    // TODO: check if it still works on the second gamepad
+    commands
+        .entity(animation_player)
+        .insert(AnimationGraphHandle(animation_graphs.add(graph)));
+}
+
+/// Tnua takes the heavy lifting with blending animations, but it leads to most of the animation
+/// being hidden behind tnua systems. Not for everyone, but definittely worth it as tnua implements
+/// more actions
+/// <https://github.com/idanarye/bevy-tnua/blob/main/demos/src/character_animating_systems/platformer_animating_systems.rs>
+pub fn animating(
+    cfg: Res<Config>,
+    mut player_q: Query<(
+        &TnuaController,
+        &mut Player,
+        &mut TnuaAnimatingState<AnimationState>,
+    )>,
+    mut animation_player: Query<&mut AnimationPlayer>,
+) {
+    // An actual game should match the animation player and the controller. Here we cheat for
+    // simplicity and use the only controller and only player.
+    let Ok((controller, mut player, mut animating_state)) = player_q.single_mut() else {
+        return;
+    };
+    let Ok(mut animation_player) = animation_player.single_mut() else {
         return;
     };
 
@@ -102,7 +64,7 @@ pub fn animating(
 
     // First we look at the `action_name` to determine which action (if at all) the character is
     // currently performing:
-    let current_status_for_animating = match controller.action_name() {
+    let current_animation = match controller.action_name() {
         Some(TnuaBuiltinKnockback::NAME) => {
             let (_, knockback_state) = controller
                 .concrete_action::<TnuaBuiltinKnockback>()
@@ -116,21 +78,52 @@ pub fn animating(
             let (_, crouch_state) = controller
                 .concrete_action::<TnuaBuiltinCrouch>()
                 .expect("action name mismatch: Crouch");
-
+            // In case of crouch, we need the state of the basis to determine - based on
+            // the speed - if the charcter is just crouching or also crawling.
             let Some((_, basis_state)) = controller.concrete_basis::<TnuaBuiltinWalk>() else {
                 return;
             };
             let basis_speed = basis_state.running_velocity.length();
-
-            // TODO: have transition from/to crouch
-            let speed = BASE_SPEED_SCALE * basis_speed * player.speed;
-
-            match crouch_state {
-                TnuaBuiltinCrouchState::Maintaining => AnimationState::CrouchWalk(speed),
-                TnuaBuiltinCrouchState::Rising => AnimationState::CrouchIdle,
-                TnuaBuiltinCrouchState::Sinking => AnimationState::CrouchIdle,
+            let speed = Some(basis_speed)
+                .filter(|speed| cfg.player.movement.idle_to_run_threshold < *speed);
+            let is_crouching = basis_state.standing_offset.y < 0.1;
+            // info!(
+            //     "CROUCH: {is_crouching} speed: {basis_speed}, state:{crouch_state:?}, standing_offset: {}",
+            //     basis_state.standing_offset.y
+            // );
+            match (speed, is_crouching) {
+                (None, false) => AnimationState::StandIdle,
+                (None, true) => match crouch_state {
+                    TnuaBuiltinCrouchState::Maintaining => AnimationState::Crouch,
+                    // TODO: have rise animation
+                    TnuaBuiltinCrouchState::Rising => AnimationState::Crouch,
+                    // TODO: sink animation
+                    TnuaBuiltinCrouchState::Sinking => AnimationState::Crouch,
+                },
+                (Some(speed), false) => AnimationState::Run(ANIMATION_FACTOR * speed),
+                // TODO: place to handle slide here
+                (Some(speed), true) => AnimationState::Crawl(ANIMATION_FACTOR * speed * 2.0),
             }
         }
+        // Some(TnuaBuiltinCrouch::NAME) => {
+        //     let (_, crouch_state) = controller
+        //         .concrete_action::<TnuaBuiltinCrouch>()
+        //         .expect("action name mismatch: Crouch");
+        //
+        //     let Some((_, basis_state)) = controller.concrete_basis::<TnuaBuiltinWalk>() else {
+        //         return;
+        //     };
+        //     let basis_speed = basis_state.running_velocity.length();
+        //     let speed = ANIMATION_FACTOR * basis_speed;
+        //
+        //
+        //     match crouch_state {
+        //         TnuaBuiltinCrouchState::Maintaining => AnimationState::CrouchWalk(speed),
+        //         // TODO: have transition from/to crouch
+        //         TnuaBuiltinCrouchState::Rising => AnimationState::CrouchIdle,
+        //         TnuaBuiltinCrouchState::Sinking => AnimationState::CrouchIdle,
+        //     }
+        // }
         // Unless you provide the action names yourself, prefer matching against the `NAME` const
         // of the `TnuaAction` trait. Once `type_name` is stabilized as `const` Tnua will use it to
         // generate these names automatically, which may result in a change to the name.
@@ -150,35 +143,36 @@ pub fn animating(
                 TnuaBuiltinJumpState::FallSection => AnimationState::Fall,
             }
         }
-        Some(TnuaBuiltinDash::NAME) => {
-            let (_, _dash_state) = controller
-                .concrete_action::<TnuaBuiltinDash>()
-                .expect("action name mismatch: Dash");
-            // TODO: replace roll with actual dash
-            AnimationState::Dash
+        Some(TnuaBuiltinClimb::NAME) => {
+            let Some((_, action_state)) = controller.concrete_action::<TnuaBuiltinClimb>() else {
+                return;
+            };
+            let TnuaBuiltinClimbState::Climbing { climbing_velocity } = action_state else {
+                return;
+            };
+            AnimationState::Climb(0.3 * climbing_velocity.dot(Vec3::Y))
         }
+        // TODO: replace roll with actual dash
+        Some(TnuaBuiltinDash::NAME) => AnimationState::Dash,
+        Some(TnuaBuiltinWallSlide::NAME) => AnimationState::WallSlide,
+        Some("walljump") => AnimationState::WallJump,
         Some(other) => panic!("Unknown action {other}"),
-        // No action name means that no action is currently being performed - which means the
-        // animation should be decided by the basis.
         None => {
-            // If there is no action going on, we'll base the animation on the state of the
-            // basis.
+            // If there is no action going on, we'll base the animation on the state of the basis.
             let Some((_, basis_state)) = controller.concrete_basis::<TnuaBuiltinWalk>() else {
-                // Since we only use the walk basis in this example, if we can't get get this
-                // basis' state it probably means the system ran before any basis was set, so we
-                // just stkip this frame.
                 return;
             };
             if basis_state.standing_on_entity().is_none() {
-                // The walk basis keeps track of what the character is standing on. If it doesn't
-                // stand on anything, `standing_on_entity` will be empty - which means the
-                // character has walked off a cliff and needs to fall.
                 AnimationState::Fall
             } else {
                 let basis_speed = basis_state.running_velocity.length();
-                if basis_speed > IDLE_TO_RUN_TRESHOLD {
-                    let speed = BASE_SPEED_SCALE * basis_speed * player.speed;
-                    AnimationState::Run(speed)
+                if basis_speed > cfg.player.movement.idle_to_run_threshold {
+                    let speed = ANIMATION_FACTOR * basis_speed;
+                    if basis_speed > cfg.player.movement.speed {
+                        AnimationState::Sprint(speed)
+                    } else {
+                        AnimationState::Run(speed)
+                    }
                 } else {
                     AnimationState::StandIdle
                 }
@@ -187,93 +181,108 @@ pub fn animating(
     };
 
     // Update player animation state, it could be useful in some systems
-    player.animation_state = current_status_for_animating.clone();
-    let animating_directive = animating_state.update_by_discriminant(current_status_for_animating);
+    player.animation_state = current_animation.clone();
+    let animating_directive = animating_state.update_by_discriminant(current_animation);
 
     match animating_directive {
-        TnuaAnimatingStateDirective::Maintain { state } => {
-            // `Maintain` means that we did not switch to a different variant, so there is no need
-            // to change animations.
-
-            // Specifically for the running animation, even when the state remains the speed can
-            // still change. When it does, we simply need to update the speed in the animation
-            // player.
-            if let AnimationState::Run(speed) = state
-                && let Some(animation) = animation_player.animation_mut(animation_nodes.running)
-            {
-                animation.set_speed(*speed);
+        // `Maintain` means that we did not switch to a different variant, so there is no need to change animations.
+        TnuaAnimatingStateDirective::Maintain { state } => match state {
+            // Some animation states have parameters, that we may want to use to control the
+            // animation (without necessarily replacing it). In this case - control the speed
+            // of the animation based on the speed of the movement.
+            AnimationState::Run(speed)
+            | AnimationState::Sprint(speed)
+            | AnimationState::Crawl(speed)
+            | AnimationState::Climb(speed) => {
+                for (_, active_animation) in animation_player.playing_animations_mut() {
+                    active_animation.set_speed(*speed);
+                }
             }
-        }
+            // Jumping and dashing can be chained, we want to start a new jump/dash animation
+            // when one jump/dash is chained to another.
+            AnimationState::JumpStart | AnimationState::Dash => {
+                if controller.action_flow_status().just_starting().is_some() {
+                    animation_player.seek_all_by(0.0);
+                }
+            }
+            // For other animations we don't have anything special to do - so we just let them continue.
+            _ => {}
+        },
         TnuaAnimatingStateDirective::Alter {
             old_state: _,
             state,
         } => {
-            // `Alter` means that we have switched to a different variant and need to play a
-            // different animation.
-
-            // First - stop the currently running animation. We don't check which one is running
-            // here because we just assume it belongs to the old state, but more sophisticated code
-            // can try to phase from the old animation to the new one.
             animation_player.stop_all();
-
-            // Depending on the new state, we choose the animation to run and its parameters (here
-            // they are the speed and whether or not to repeat)
             match state {
                 AnimationState::StandIdle => {
-                    animation_player
-                        .start(animation_nodes.standing)
-                        .set_speed(1.0)
-                        .repeat();
+                    if let Some(index) = player.animations.get("Idle_Loop") {
+                        animation_player.start(*index).set_speed(1.0).repeat();
+                    }
                 }
                 AnimationState::Run(speed) => {
-                    animation_player
-                        .start(animation_nodes.running)
-                        // The running animation, in particular, has a speed that depends on how
-                        // fast the character is running. Note that if the speed changes while the
-                        // character is still running we won't get `Alter` again - so it's
-                        // important to also update the speed in `Maintain { State: Running }`.
-                        .set_speed(*speed)
-                        .repeat();
+                    if let Some(index) = player.animations.get("Jog_Fwd_Loop") {
+                        animation_player.start(*index).set_speed(*speed).repeat();
+                    }
+                }
+                AnimationState::Sprint(speed) => {
+                    if let Some(index) = player.animations.get("Sprint_Loop") {
+                        animation_player.start(*index).set_speed(*speed).repeat();
+                    }
                 }
                 AnimationState::JumpStart => {
-                    animation_player
-                        .start(animation_nodes.jump_start)
-                        .set_speed(0.01);
+                    if let Some(index) = player.animations.get("Jump_Start") {
+                        animation_player.start(*index).set_speed(0.01).repeat();
+                    }
                 }
                 AnimationState::JumpLand => {
-                    animation_player
-                        .start(animation_nodes.jump_land)
-                        .set_speed(0.01);
+                    if let Some(index) = player.animations.get("Jump_Land") {
+                        animation_player.start(*index).set_speed(0.01).repeat();
+                    }
                 }
                 AnimationState::JumpLoop => {
-                    animation_player
-                        .start(animation_nodes.jump_loop)
-                        .set_speed(0.5);
+                    if let Some(index) = player.animations.get("Jump_Loop") {
+                        animation_player.start(*index).set_speed(0.5).repeat();
+                    }
+                }
+                AnimationState::WallJump => {
+                    if let Some(index) = player.animations.get("Jump_Start") {
+                        animation_player.start(*index).set_speed(2.0).repeat();
+                    }
+                }
+                AnimationState::WallSlide => {
+                    if let Some(index) = player.animations.get("Jump_Loop") {
+                        animation_player.start(*index).set_speed(1.0).repeat();
+                    }
                 }
                 AnimationState::Fall => {
-                    animation_player
-                        .start(animation_nodes.falling)
-                        .set_speed(1.0);
+                    if let Some(index) = player.animations.get("Jump_Loop") {
+                        animation_player.start(*index).set_speed(1.0).repeat();
+                    }
                 }
-                AnimationState::CrouchWalk(speed) => {
-                    animation_player
-                        .start(animation_nodes.crouch_walk)
-                        .set_speed(*speed);
+                AnimationState::Crawl(speed) => {
+                    if let Some(index) = player.animations.get("Crouch_Fwd_Loop") {
+                        animation_player.start(*index).set_speed(*speed).repeat();
+                    }
                 }
-                AnimationState::CrouchIdle => {
-                    animation_player
-                        .start(animation_nodes.crouch)
-                        .set_speed(1.0);
+                AnimationState::Crouch => {
+                    if let Some(index) = player.animations.get("Crouch_Idle_Loop") {
+                        animation_player.start(*index).set_speed(1.0).repeat();
+                    }
                 }
                 AnimationState::Dash => {
-                    animation_player
-                        .start(animation_nodes.dashing)
-                        .set_speed(3.0);
+                    if let Some(index) = player.animations.get("Roll") {
+                        animation_player.start(*index).set_speed(3.0).repeat();
+                    }
                 }
                 AnimationState::KnockBack => {
-                    animation_player
-                        .start(animation_nodes.knockback)
-                        .set_speed(1.0);
+                    if let Some(index) = player.animations.get("Hit_Chest") {
+                        animation_player.start(*index).set_speed(1.0).repeat();
+                    }
+                }
+                AnimationState::Climb(speed) => {
+                    if let Some(index) = player.animations.get("Jump_Loop") {
+                        animation_player.start(*index).set_speed(*speed).repeat();
+                    }
                 }
             }
         }

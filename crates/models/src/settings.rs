@@ -5,40 +5,45 @@ use std::{error::Error, fs};
 pub fn plugin(app: &mut App) {
     app.init_resource::<Settings>().init_resource::<ActiveTab>();
     app.add_systems(
-        OnEnter(Screen::Gameplay),
-        inject_settings_from_cfg.run_if(resource_exists::<Config>),
+        OnEnter(Screen::Title),
+        inject_settings_from_cfg.run_if(resource_exists::<Config>.and(run_once)),
     );
 }
 
 pub const SETTINGS_PATH: &str = "assets/settings.ron";
 
-#[derive(Resource, Reflect, Deserialize, Serialize)]
+#[derive(Resource, Reflect, Deserialize, Serialize, Debug, Clone)]
 #[reflect(Resource)]
 pub struct Settings {
-    pub fov: f32,
-    pub sound: Sound,
-
     // game state things
     /// Modal stack. kudo for the idea to @skyemakesgames
     /// Only relevant in [`Screen::Gameplay`]
     pub modals: Vec<Modal>,
-    pub sun_cycle: SunCycle,
     pub last_screen: Screen,
-    pub keybind: Keybind,
 
     pub diagnostics: bool,
     pub debug_ui: bool,
     pub paused: bool,
     pub muted: bool,
+
+    // audio
+    pub sound: Sound,
+    // video
+    pub fov: f32,
+    pub sun_cycle: SunCycle,
+    // keybindings
+    pub keybind: Keybind,
 }
 
 impl Settings {
     pub fn music(&self) -> Volume {
         Volume::Linear(self.sound.general * self.sound.music)
     }
+
     pub fn sfx(&self) -> Volume {
         Volume::Linear(self.sound.general * self.sound.sfx)
     }
+
     pub fn read() -> Result<Self, Box<dyn Error>> {
         let content = fs::read_to_string(SETTINGS_PATH)?;
         let settings = ron::from_str(&content).unwrap_or_default();
@@ -46,9 +51,17 @@ impl Settings {
     }
 
     pub fn save(&self) -> Result<(), Box<dyn Error>> {
-        let content = ron::ser::to_string_pretty(self, Default::default())?;
+        let mut to_save = self.clone();
+        to_save.reset();
+        let content = ron::ser::to_string_pretty(&to_save, Default::default())?;
         fs::write(SETTINGS_PATH, content)?;
         Ok(())
+    }
+
+    pub fn reset(&mut self) {
+        self.modals.clear();
+        self.paused = false;
+        self.muted = false;
     }
 }
 

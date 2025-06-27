@@ -28,6 +28,7 @@ bevy-tnua-avian3d.workspace = true
 bevy_third_person_camera.workspace = true
 bevy_fix_gltf_coordinate_system.workspace = true
 bevy_enhanced_input.workspace = true
+itertools.workspace = true
 rand.workspace = true
 
 [lints]

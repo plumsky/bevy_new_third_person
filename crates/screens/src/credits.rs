@@ -1,7 +1,7 @@
-//! A credits screen that can be accessed from the title screen.
+//! A credits screen that can be accessed from the main menu
 
 use super::*;
-use bevy::{ecs::spawn::SpawnIter, ui::Val::*};
+use bevy::ecs::spawn::SpawnIter;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(

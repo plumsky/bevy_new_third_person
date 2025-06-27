@@ -1,44 +1,37 @@
 use super::*;
-use bevy_seedling::{pool::Sampler, prelude::*};
 use rand::prelude::*;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnExit(Screen::Gameplay), stop_soundtrack)
-        .add_systems(OnEnter(Screen::Gameplay), start_or_resume_soundtrack)
+        .add_systems(OnEnter(Screen::Gameplay), start_soundtrack)
         .add_observer(movement_sound)
+        .add_observer(dash_sound)
         .add_observer(jump_sound);
 }
 
 // TODO: implement different music states
+// TODO: basic track/mood change per zone
 // good structure in this example: <https://github.com/bevyengine/bevy/blob/main/examples/audio/soundtrack.rs#L29>
-fn start_or_resume_soundtrack(
+fn start_soundtrack(
     mut cmds: Commands,
     settings: Res<Settings>,
     sources: ResMut<AudioSources>,
     // boombox: Query<Entity, With<Boombox>>,
-    mut music_query: Query<(&Sampler, &mut PlaybackSettings), With<Music>>,
-) -> Result {
-    if let Ok((player, mut instance)) = music_query.single_mut() {
-        if !player.is_playing() {
-            info!("player is not playing");
-            instance.play();
-        }
-    } else {
-        let handle = *[&sources.bg_music].choose(&mut thread_rng()).unwrap();
-        // // Play music from boombox entity
-        // cmds
-        //     .entity(boombox.single()?)
-        //     .insert(music(handle.clone(), settings.music());
-        // Or just play music
-        cmds.spawn((
-            Music,
-            SamplePlayer::new(handle.clone())
-                .with_volume(settings.music())
-                .looping(),
-        ));
-    }
+) {
+    let mut rng = thread_rng();
+    let handle = *[&sources.bg_music].choose(&mut rng).unwrap();
 
-    Ok(())
+    // // Play music from boombox entity
+    // cmds
+    //     .entity(boombox.single()?)
+    //     .insert(music(handle.clone(), settings.music());
+    // Or just play music
+    cmds.spawn((
+        Music,
+        SamplePlayer::new(handle.clone())
+            .with_volume(settings.music())
+            .looping(),
+    ));
 }
 
 fn stop_soundtrack(
@@ -60,6 +53,10 @@ fn movement_sound(
     mut cmds: Commands,
     mut step_timer: Query<&mut StepTimer, With<Player>>,
 ) -> Result {
+    if settings.muted || settings.paused {
+        return Ok(());
+    }
+
     let controller = tnua.get(on.target())?;
     let mut step_timer = step_timer.get_mut(on.target())?;
 
@@ -90,8 +87,11 @@ fn jump_sound(
     // jump_timer: Query<&JumpTimer, With<Player>>,
     mut cmds: Commands,
 ) -> Result {
-    // let jump_timer = jump_timer.get(on.target())?;
+    if settings.muted || settings.paused {
+        return Ok(());
+    }
 
+    // let jump_timer = jump_timer.get(on.target())?;
     // if jump_timer.just_finished() {
     let mut rng = thread_rng();
     let i = rng.gen_range(0..sources.steps.len());
@@ -102,4 +102,24 @@ fn jump_sound(
     Ok(())
 }
 
-// TODO: DASH SOUND
+fn dash_sound(
+    _: Trigger<Started<Dash>>,
+    settings: Res<Settings>,
+    sources: ResMut<AudioSources>,
+    // jump_timer: Query<&JumpTimer, With<Player>>,
+    mut cmds: Commands,
+) -> Result {
+    if settings.muted || settings.paused {
+        return Ok(());
+    }
+
+    // let jump_timer = jump_timer.get(on.target())?;
+    // if jump_timer.just_finished() {
+    let mut rng = thread_rng();
+    let i = rng.gen_range(0..sources.steps.len());
+    let handle = sources.steps[i].clone();
+    cmds.spawn(SamplePlayer::new(handle).with_volume(settings.sfx()));
+    // }
+
+    Ok(())
+}

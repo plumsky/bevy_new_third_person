@@ -44,7 +44,7 @@ pub fn label(opts: impl Into<Opts>) -> impl Bundle {
         Name::new("Label"),
         opts.node.clone(),
         opts.border_radius,
-        children![opts.into_text_bundle()],
+        opts.into_text_bundle(),
         Pickable::IGNORE,
     )
 }
@@ -52,11 +52,7 @@ pub fn label(opts: impl Into<Opts>) -> impl Bundle {
 /// A simple header label. Bigger than [`label`].
 pub fn header(opts: impl Into<Opts>) -> impl Bundle {
     let opts = opts.into();
-    (
-        Label,
-        Name::new("Header"),
-        children![opts.into_text_bundle()],
-    )
+    (Label, Name::new("Header"), opts.into_text_bundle())
 }
 
 // A regular wide button with text and an action defined as an [`Observer`].
@@ -88,6 +84,7 @@ where
 {
     let opts: Opts = opts.into();
     let new_node = Node {
+        margin: UiRect::ZERO,
         padding: UiRect::ZERO,
         align_items: AlignItems::Center,
         justify_content: JustifyContent::Center,

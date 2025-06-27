@@ -9,7 +9,7 @@ pub const DIM_BLUE: Color = Color::srgb(0.186, 0.328, 0.573);
 pub const LIGHT_BLUE: Color = Color::srgb(0.286, 0.478, 0.773);
 
 pub const TRANSPARENT: Color = Color::srgba(0.0, 0.0, 0.0, 0.0);
-pub const TRANSLUCENT: Color = Color::srgba(0.0, 0.0, 0.0, 0.5);
+pub const TRANSLUCENT: Color = Color::srgba(0.2, 0.15, 0.4, 0.7);
 
 pub const SUN: Color = Color::srgb(248.0 / 255.0, 176.0 / 255.0, 14.0 / 255.0);
 pub const MOON: Color = Color::srgb(80.0 / 255.0, 104.0 / 255.0, 134.0 / 255.0);

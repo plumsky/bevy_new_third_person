@@ -13,6 +13,7 @@ macro_rules! declare_markers {
 
 declare_markers!(
     SceneCamera,
+    BgMusic,
     // scene
     Sun,
     Moon,
@@ -23,27 +24,30 @@ declare_markers!(
     SunCycleLabel,
     // user input context
     GlobalInputCtx,
-    // UI
+    // UI: mostly for nodes or labels that have to change visibility or content at some point
     PerfUi,
     GameplayUi,
     PauseIcon,
     MuteIcon,
     MenuModal,
     // settings
+    SettingsModal,
     TabBar,
     TabContent,
-    SettingsModal,
     DisabledButton,
     GeneralVolumeLabel,
     MusicVolumeLabel,
     SfxVolumeLabel,
+    DiagnosticsLabel,
+    DebugUiLabel,
+    SaveSettingsLabel,
     FovLabel
 );
 
 macro_rules! timers {
   ( $( $name:ident ),* ) => {
         $(
-            #[derive(Component, Reflect, Deref, DerefMut)]
+            #[derive(Component, Reflect, Deref, DerefMut, Debug)]
             #[reflect(Component)]
             pub struct $name(pub Timer);
         )*

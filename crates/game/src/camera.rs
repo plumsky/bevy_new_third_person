@@ -3,17 +3,9 @@ use bevy_third_person_camera::*;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(Startup, spawn_camera)
-        .add_systems(
-            OnEnter(Screen::Gameplay),
-            (
-                add_tpv_cam,
-                add_skybox_to_camera.after(camera::spawn_camera),
-            ),
-        )
-        .add_systems(
-            OnExit(Screen::Gameplay),
-            (rm_tpv_cam, rm_skybox_from_camera),
-        )
+        .add_systems(OnEnter(Screen::Title), add_skybox_to_camera)
+        .add_systems(OnEnter(Screen::Gameplay), add_tpv_cam)
+        .add_systems(OnExit(Screen::Gameplay), rm_tpv_cam)
         .add_observer(toggle_cam_cursor);
 }
 
@@ -57,6 +49,8 @@ fn add_tpv_cam(
             // bounds: vec![Bound::NO_FLIP, Bound::ABOVE_FLOOR],
             ..default()
         },
+        RigidBody::Kinematic,
+        Collider::sphere(1.0),
         Projection::from(PerspectiveProjection {
             fov: cfg.player.fov.to_radians(),
             ..Default::default()
@@ -68,7 +62,10 @@ fn add_tpv_cam(
 
 fn rm_tpv_cam(mut commands: Commands, mut camera: Query<Entity, With<SceneCamera>>) {
     if let Ok(camera) = camera.single_mut() {
-        commands.entity(camera).remove::<ThirdPersonCamera>();
+        commands
+            .entity(camera)
+            .remove::<RigidBody>()
+            .remove::<ThirdPersonCamera>();
     }
 }
 
@@ -79,7 +76,7 @@ fn toggle_cam_cursor(_: Trigger<OnCamCursorToggle>, mut cam: Query<&mut ThirdPer
     cam.cursor_lock_active = !cam.cursor_lock_active;
 }
 
-/// Helper trait to get direction of movement
+/// Helper trait to get direction of movement based on camera transform
 pub trait MovementDirection {
     fn movement_direction(&self, input: Vec2) -> Vec3;
 }

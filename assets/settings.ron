@@ -1,16 +1,17 @@
 (
-    fov: 45.0,
+    modals: [],
+    last_screen: Title,
+    diagnostics: true,
+    debug_ui: false,
+    paused: false,
+    muted: false,
     sound: (
         general: 1.0,
         music: 0.0,
         sfx: 0.5,
     ),
-    modals: [
-        Main,
-        Settings,
-    ],
+    fov: 45.0,
     sun_cycle: DayNight,
-    last_screen: Title,
     keybind: (
         left: [
             Keyboard(
@@ -83,8 +84,4 @@
             ),
         ],
     ),
-    diagnostics: true,
-    debug_ui: false,
-    paused: true,
-    muted: false,
 )

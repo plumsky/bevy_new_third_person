@@ -3,13 +3,15 @@ use bevy::scene::SceneInstanceReady;
 use bevy_third_person_camera::*;
 use bevy_tnua::{TnuaAnimatingState, control_helpers::TnuaSimpleAirActionsCounter};
 use bevy_tnua_avian3d::*;
-use std::f32::consts::PI;
+use std::{f32::consts::PI, time::Duration};
 
 mod animation;
 mod control;
 
 pub use animation::*;
 pub use control::*;
+
+pub const IDLE_TO_RUN_TRESHOLD: f32 = 0.01;
 
 /// This plugin handles player related stuff like movement, shooting
 /// Player logic is only active during the State `Screen::Playing`
@@ -37,8 +39,8 @@ pub fn spawn_player(
     models: Res<Models>,
     mut commands: Commands,
     gltf_assets: Res<Assets<Gltf>>,
-    // mut meshes: ResMut<Assets<Mesh>>,
-    // mut materials: ResMut<Assets<StandardMaterial>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
     camera: Query<&Transform, With<SceneCamera>>,
 ) -> Result {
     let Some(gltf) = gltf_assets.get(&models.player) else {
@@ -56,6 +58,7 @@ pub fn spawn_player(
         id: Entity::PLACEHOLDER,
         speed: cfg.player.movement.speed,
         animation_state: AnimationState::StandIdle,
+        ..default()
     };
 
     let collider = Collider::capsule(cfg.player.hitbox.radius, cfg.player.hitbox.height);
@@ -87,7 +90,7 @@ pub fn spawn_player(
             (
                 collider,
                 RigidBody::Dynamic,
-                Friction::ZERO.with_combine_rule(CoefficientCombine::Multiply),
+                // Friction::ZERO.with_combine_rule(CoefficientCombine::Multiply),
             ),
             JumpTimer(Timer::from_seconds(cfg.timers.jump, TimerMode::Repeating)),
             StepTimer(Timer::from_seconds(cfg.timers.step, TimerMode::Repeating)),
@@ -97,26 +100,23 @@ pub fn spawn_player(
         .with_children(|parent| {
             let mut e = parent.spawn((Transform::from_xyz(0.0, -1.0, 0.0), mesh));
             e.observe(prepare_animations);
+
+            // DEBUG
+            let collider_mesh = Mesh::from(Capsule3d::new(
+                cfg.player.hitbox.radius,
+                cfg.player.hitbox.height,
+            ));
+            let debug_collider_mesh = Mesh3d(meshes.add(collider_mesh.clone()));
+            let debug_collider_color: MeshMaterial3d<StandardMaterial> =
+                MeshMaterial3d(materials.add(Color::srgba(0.9, 0.9, 0.9, 0.1)));
+            parent.spawn((
+                debug_collider_mesh,
+                debug_collider_color,
+                Transform::from_xyz(0.0, -0.1, 0.0),
+            ));
+            // DEBUG
         })
         .observe(player_post_spawn);
-
-    // DEBUG
-    // let collider_mesh = Mesh::from(Capsule3d::new(
-    //     cfg.player.hitbox.radius,
-    //     cfg.player.hitbox.height,
-    // ));
-    // let debug_collider_mesh = Mesh3d(meshes.add(collider_mesh.clone()));
-    // let debug_collider_color: MeshMaterial3d<StandardMaterial> =
-    //     MeshMaterial3d(materials.add(Color::srgba(0.9, 0.9, 0.9, 0.1)));
-    // e.with_children(|parent| {
-    //     e.with_children(|parent| {
-    //         parent.spawn((
-    //             debug_collider_mesh,
-    //             debug_collider_color,
-    //             Transform::from_xyz(0.0, 0.9, 0.0),
-    //         ));
-    //     });
-    // });
 
     Ok(())
 }
@@ -130,7 +130,6 @@ fn player_post_spawn(
     if let Ok(mut p) = players.get_mut(player) {
         p.id = player; // update player id with spawned entity
     }
-    info!("Switch CTX for: {player}");
     commands.trigger(SwitchInputCtx::new(player, Context::Gameplay));
     commands.trigger(SwitchInputCtx::from_context(Context::Gameplay));
 }

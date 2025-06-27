@@ -45,7 +45,7 @@ pub fn add_skybox_to_camera(
         DirectionalLight {
             color: MOON,
             shadows_enabled: true,
-            illuminance: lux::FULL_MOON_NIGHT,
+            illuminance: 10000.0,
             ..Default::default()
         },
         Moon,
@@ -121,7 +121,7 @@ pub fn distance_fog(cfg: Res<Config>) -> impl Bundle {
 
 fn sun_cycle(
     settings: Res<Settings>,
-    mut sky_lights: Query<&mut Transform, (With<Moon>, With<Sun>)>,
+    mut sky_lights: Query<&mut Transform, Or<(With<Moon>, With<Sun>)>>,
     time: Res<Time>,
 ) {
     match settings.sun_cycle {

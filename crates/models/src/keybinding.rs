@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// If you want to assign a specific part of the axis, such as the positive part of [`GamepadAxis::LeftStickX`],
 /// you need to create your own input enum. However, this approach is mostly used in emulators rather than games.
-#[derive(Resource, Reflect, Clone, Deserialize, Serialize)]
+#[derive(Resource, Reflect, Deserialize, Serialize, Debug, Clone)]
 #[serde(default)]
 pub struct Keybind {
     pub left: Vec<Input>,

@@ -2,8 +2,7 @@
 use super::*;
 
 pub(super) fn plugin(app: &mut App) {
-    app.register_type::<GeneralVolumeLabel>()
-        .add_systems(OnEnter(Screen::Settings), spawn_settings_screen);
+    app.add_systems(OnEnter(Screen::Settings), spawn_settings_screen);
 }
 
 fn spawn_settings_screen(mut commands: Commands) {

@@ -65,6 +65,7 @@ pub struct Movement {
     pub speed: f32,
     pub sprint_factor: f32,
     pub crouch_factor: f32,
+    pub idle_to_run_threshold: f32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect)]

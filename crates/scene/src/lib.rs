@@ -16,7 +16,7 @@ pub fn plugin(app: &mut App) {
         bevy_fix_gltf_coordinate_system::FixGltfCoordinateSystemPlugin,
         skybox::plugin,
     ))
-    .add_systems(OnEnter(Screen::Gameplay), setup);
+    .add_systems(OnEnter(Screen::Title), setup);
 }
 
 pub fn setup(
@@ -31,11 +31,11 @@ pub fn setup(
     let Some(gltf) = gltf_assets.get(&models.rock) else {
         return;
     };
-    let main_plane = cfg.geom.main_plane;
+    let plane = cfg.geom.main_plane;
 
     // Plane
-    let mesh_raw = Cuboid::new(main_plane, 1.0, main_plane);
-    let mesh = meshes.add(mesh_raw);
+    let shape = Cuboid::new(plane, 1.0, plane);
+    let mesh = meshes.add(shape);
     let mat = MeshMaterial3d(materials.add(SAND_YELLOW));
     commands.spawn((
         StateScoped(Screen::Gameplay),
@@ -43,7 +43,7 @@ pub fn setup(
         Mesh3d(mesh),
         Transform::from_xyz(0.0, -1.0, 0.0),
         RigidBody::Static,
-        Collider::trimesh_from_mesh(&Mesh::from(mesh_raw)).unwrap_or(Collider::half_space(Vec3::Y)),
+        Collider::trimesh_from_mesh(&Mesh::from(shape)).unwrap_or(Collider::half_space(Vec3::Y)),
     ));
 
     // Rock
@@ -72,11 +72,11 @@ pub fn setup(
         }
     }
 
-    let size = main_plane / 2.0;
+    let size = plane / 2.0;
     let geom = cfg.geom.clone();
     for i in 0..geom.quantity {
         let i = i as f32;
-        let (low, upper) = (main_plane / 100.0, main_plane / 40.0);
+        let (low, upper) = (plane / 100.0, plane / 40.0);
         let step = (upper - low) / geom.quantity as f32;
 
         let y_size = low + step * i;

@@ -1,7 +1,6 @@
 //! The screen state for the main gameplay.
 
 use super::*;
-use bevy::ui::Val::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins(game::plugin)
@@ -17,7 +16,8 @@ pub(super) fn plugin(app: &mut App) {
         .add_observer(clear_modals);
 }
 
-fn spawn_gameplay_ui(mut cmds: Commands, textures: Res<Textures>) {
+fn spawn_gameplay_ui(mut cmds: Commands, textures: Res<Textures>, settings: Res<Settings>) {
+    info!("settings on gameplay enter:{settings:?}");
     let opts = Opts::default().hidden().width(Vw(5.0)).height(Vw(5.0));
     cmds.spawn((
         StateScoped(Screen::Gameplay),
@@ -88,10 +88,10 @@ fn toggle_mute(
 
 // ============================ UI ============================
 
-fn click_to_menu(_: Trigger<Pointer<Click>>, mut cmds: Commands) {
+fn click_to_menu(_: Trigger<Pointer<Click>>, mut cmds: Commands, mut settings: ResMut<Settings>) {
     cmds.trigger(SwitchInputCtx::from_context(Context::Modal));
     cmds.trigger(OnGoTo(Screen::Title));
-    cmds.trigger(OnPauseToggle); // reset to false
+    settings.reset();
 }
 fn click_pop_modal(_: Trigger<Pointer<Click>>, mut cmds: Commands) {
     cmds.trigger(OnPopModal);
@@ -111,6 +111,7 @@ fn trigger_menu_toggle_on_esc(
     }
 
     if settings.modals.is_empty() {
+        info!("trigger main modal on esc");
         cmds.trigger(OnNewModal(Modal::Main));
     } else {
         cmds.trigger(OnPopModal);
@@ -127,12 +128,13 @@ fn add_new_modal(
         return;
     }
 
+    info!("new modal:{:?}, settings.paused:{}", on.0, settings.paused);
     if settings.modals.is_empty() {
         cmds.trigger(SwitchInputCtx::new(on.target(), Context::Modal));
         if Modal::Main == on.0 && !settings.paused {
             cmds.trigger(OnPauseToggle);
+            cmds.trigger(OnCamCursorToggle);
         }
-        cmds.trigger(OnCamCursorToggle);
     }
 
     // despawn all previous modal entities to avoid clattering
@@ -158,6 +160,7 @@ fn pop_modal(
         return;
     }
 
+    info!("Chat are we popping? {:?}", settings.modals);
     // just a precaution
     assert!(!settings.modals.is_empty());
 
@@ -216,12 +219,7 @@ fn clear_modals(
 // MODALS
 
 fn settings_modal() -> impl Bundle {
-    (
-        StateScoped(Screen::Gameplay),
-        SettingsModal,
-        BackgroundColor(TRANSLUCENT),
-        settings_ui(),
-    )
+    (StateScoped(Screen::Gameplay), SettingsModal, settings_ui())
 }
 
 fn menu_modal() -> impl Bundle {

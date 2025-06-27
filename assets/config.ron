@@ -7,11 +7,12 @@
         fov: 60,
         zoom: (1.5, 30.0),
         movement: (
-            speed: 11,
+            speed: 10,
             sprint_factor: 1.5,
-            crouch_factor: 0.8,
+            crouch_factor: 0.5,
             actions_in_air: 3,
             dash_distance: 10,
+            idle_to_run_threshold: 0.01,
         ),
         hitbox:(
             radius: 0.5,
@@ -20,8 +21,8 @@
     ),
     // seconds
     timers: (
-        step: 0.41,
-        jump: 0.3,
+        step: 0.475, // for this specific animation: twice per cycle
+        jump: 0.45,
     ),
     sound: (
         general: 1.0,

@@ -19,9 +19,9 @@ You can [try this template in your browser!](https://olekspickle.itch.io/bevy-th
 
 Install [cargo-generate] or [`bevy_cli`] and run:
 ```bash
-cargo generate olekspickle/bevy_new_third_person
+cargo generate olekspickle/bevy_new_third_person -n my-rpg
 # or with bevy_cli
-bevy new -t=https://github.com/olekspickle/bevy_new_third_person my_bevy_app
+bevy new -t=olekspickle/bevy_new_third_person my-rpg
 ```
 
 ## Write your game
@@ -61,10 +61,7 @@ Feel free to move things around however you want, though.
 - [x] auidio, video and keys rebind tabs in settings
 
 ### TODOs (prioritized)
-- [ ] Crouch walk, ~~fix bug when unable to move after crouch~~
 - [ ] Jump with timer(tricky with tnua jump in air counter)
-- [ ] fix music not starting on re-enter gameplay
-- [ ] fix sound difference on spawn and unmute
 - [ ] better scene: I'm thinking woods, campfire, a target practice dummies and a big rock to ~~climb~~
 - [ ] custom font replace example using pre-loaded font
 - [ ] sky background instead of just void lol

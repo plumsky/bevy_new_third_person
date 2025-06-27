@@ -5,6 +5,7 @@ use audio::*;
 use avian3d::prelude::*;
 use bevy::prelude::*;
 use bevy_enhanced_input::prelude::*;
+use bevy_seedling::prelude::*;
 use bevy_tnua::prelude::*;
 use models::*;
 use scene::*;

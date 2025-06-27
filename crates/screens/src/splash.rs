@@ -3,7 +3,6 @@ use super::*;
 use bevy::{
     image::{ImageLoaderSettings, ImageSampler},
     input::common_conditions::input_just_pressed,
-    ui::Val::*,
 };
 
 const SPLASH_DURATION_SECS: f32 = 3.0;
