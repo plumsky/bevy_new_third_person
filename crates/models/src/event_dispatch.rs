@@ -63,13 +63,13 @@ impl SwitchInputCtx {
 fn back(
     _: Trigger<Started<Escape>>,
     screen: Res<State<Screen>>,
-    settings: Res<Settings>,
+    states: Res<GameState>,
     mut commands: Commands,
 ) {
     match screen.get() {
         Screen::Splash | Screen::Title | Screen::Loading => {}
         _ => {
-            let last = settings.last_screen.clone();
+            let last = states.last_screen.clone();
             commands.trigger(Back(last));
         }
     }

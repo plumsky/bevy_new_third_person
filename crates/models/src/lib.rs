@@ -11,6 +11,7 @@ pub mod player;
 pub mod pre_load;
 pub mod primitives;
 pub mod settings;
+pub mod states;
 
 pub use event_dispatch::*;
 pub use input::*;
@@ -20,6 +21,7 @@ pub use player::*;
 pub use pre_load::*;
 pub use primitives::*;
 pub use settings::*;
+pub use states::*;
 
 pub fn plugin(app: &mut App) {
     app.add_plugins((settings::plugin, input::plugin, event_dispatch::plugin));

@@ -15,17 +15,6 @@ pub const SETTINGS_PATH: &str = "assets/settings.ron";
 #[derive(Resource, Reflect, Deserialize, Serialize, Debug, Clone)]
 #[reflect(Resource)]
 pub struct Settings {
-    // game state things
-    /// Modal stack. kudo for the idea to @skyemakesgames
-    /// Only relevant in [`Screen::Gameplay`]
-    pub modals: Vec<Modal>,
-    pub last_screen: Screen,
-
-    pub diagnostics: bool,
-    pub debug_ui: bool,
-    pub paused: bool,
-    pub muted: bool,
-
     // audio
     pub sound: Sound,
     // video
@@ -51,31 +40,17 @@ impl Settings {
     }
 
     pub fn save(&self) -> Result<(), Box<dyn Error>> {
-        let mut to_save = self.clone();
-        to_save.reset();
-        let content = ron::ser::to_string_pretty(&to_save, Default::default())?;
+        let content = ron::ser::to_string_pretty(self, Default::default())?;
         fs::write(SETTINGS_PATH, content)?;
         Ok(())
-    }
-
-    pub fn reset(&mut self) {
-        self.modals.clear();
-        self.paused = false;
-        self.muted = false;
     }
 }
 
 impl Default for Settings {
     fn default() -> Self {
         Self {
-            last_screen: Screen::Title,
             sun_cycle: SunCycle::DayNight,
             sound: Sound::default(),
-            modals: vec![],
-            diagnostics: true,
-            debug_ui: false,
-            paused: false,
-            muted: false,
             fov: 45.0, // bevy default
             keybind: Keybind::default(),
         }

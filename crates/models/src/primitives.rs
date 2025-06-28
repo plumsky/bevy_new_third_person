@@ -35,6 +35,9 @@ declare_markers!(
     TabBar,
     TabContent,
     DisabledButton,
+    Slider,
+    SliderThumb,
+    Checkbox,
     GeneralVolumeLabel,
     MusicVolumeLabel,
     SfxVolumeLabel,
@@ -53,5 +56,18 @@ macro_rules! timers {
         )*
     };
 }
-
 timers!(JumpTimer, StepTimer);
+
+macro_rules! sliders {
+  ( $( $name:ident ),* ) => {
+        $(
+            #[derive(Component, Reflect, Debug)]
+            #[reflect(Component)]
+            pub struct $name{
+                pub current: f32
+            }
+        )*
+    };
+}
+
+sliders!(SliderGeneral, SliderMusic, SliderSfx);
