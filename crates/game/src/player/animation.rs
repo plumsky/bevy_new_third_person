@@ -61,9 +61,7 @@ pub fn animating(
 
     // Here we use the data from TnuaController to determine what the character is currently doing,
     // so that we can later use that information to decide which animation to play.
-
-    // First we look at the `action_name` to determine which action (if at all) the character is
-    // currently performing:
+    // First we look at the `action_name` to determine which action (if at all) the character is currently performing:
     let current_animation = match controller.action_name() {
         Some(TnuaBuiltinKnockback::NAME) => {
             let (_, knockback_state) = controller
@@ -86,7 +84,7 @@ pub fn animating(
             let basis_speed = basis_state.running_velocity.length();
             let speed = Some(basis_speed)
                 .filter(|speed| cfg.player.movement.idle_to_run_threshold < *speed);
-            let is_crouching = basis_state.standing_offset.y < 0.1;
+            let is_crouching = basis_state.standing_offset.y < 0.05;
             // info!(
             //     "CROUCH: {is_crouching} speed: {basis_speed}, state:{crouch_state:?}, standing_offset: {}",
             //     basis_state.standing_offset.y
@@ -102,28 +100,9 @@ pub fn animating(
                 },
                 (Some(speed), false) => AnimationState::Run(ANIMATION_FACTOR * speed),
                 // TODO: place to handle slide here
-                (Some(speed), true) => AnimationState::Crawl(ANIMATION_FACTOR * speed * 2.0),
+                (Some(speed), true) => AnimationState::Crawl(ANIMATION_FACTOR * speed * 4.0),
             }
         }
-        // Some(TnuaBuiltinCrouch::NAME) => {
-        //     let (_, crouch_state) = controller
-        //         .concrete_action::<TnuaBuiltinCrouch>()
-        //         .expect("action name mismatch: Crouch");
-        //
-        //     let Some((_, basis_state)) = controller.concrete_basis::<TnuaBuiltinWalk>() else {
-        //         return;
-        //     };
-        //     let basis_speed = basis_state.running_velocity.length();
-        //     let speed = ANIMATION_FACTOR * basis_speed;
-        //
-        //
-        //     match crouch_state {
-        //         TnuaBuiltinCrouchState::Maintaining => AnimationState::CrouchWalk(speed),
-        //         // TODO: have transition from/to crouch
-        //         TnuaBuiltinCrouchState::Rising => AnimationState::CrouchIdle,
-        //         TnuaBuiltinCrouchState::Sinking => AnimationState::CrouchIdle,
-        //     }
-        // }
         // Unless you provide the action names yourself, prefer matching against the `NAME` const
         // of the `TnuaAction` trait. Once `type_name` is stabilized as `const` Tnua will use it to
         // generate these names automatically, which may result in a change to the name.
@@ -226,17 +205,20 @@ pub fn animating(
                 }
                 AnimationState::Sprint(speed) => {
                     if let Some(index) = player.animations.get("Sprint_Loop") {
-                        animation_player.start(*index).set_speed(*speed).repeat();
+                        animation_player
+                            .start(*index)
+                            .set_speed(*speed * 3.0) // sprint animation to sprint factor ratio
+                            .repeat();
                     }
                 }
                 AnimationState::JumpStart => {
                     if let Some(index) = player.animations.get("Jump_Start") {
-                        animation_player.start(*index).set_speed(0.01).repeat();
+                        animation_player.start(*index).set_speed(0.01);
                     }
                 }
                 AnimationState::JumpLand => {
                     if let Some(index) = player.animations.get("Jump_Land") {
-                        animation_player.start(*index).set_speed(0.01).repeat();
+                        animation_player.start(*index).set_speed(0.01);
                     }
                 }
                 AnimationState::JumpLoop => {
@@ -246,7 +228,7 @@ pub fn animating(
                 }
                 AnimationState::WallJump => {
                     if let Some(index) = player.animations.get("Jump_Start") {
-                        animation_player.start(*index).set_speed(2.0).repeat();
+                        animation_player.start(*index).set_speed(2.0);
                     }
                 }
                 AnimationState::WallSlide => {
@@ -271,12 +253,12 @@ pub fn animating(
                 }
                 AnimationState::Dash => {
                     if let Some(index) = player.animations.get("Roll") {
-                        animation_player.start(*index).set_speed(3.0).repeat();
+                        animation_player.start(*index).set_speed(3.0);
                     }
                 }
                 AnimationState::KnockBack => {
                     if let Some(index) = player.animations.get("Hit_Chest") {
-                        animation_player.start(*index).set_speed(1.0).repeat();
+                        animation_player.start(*index).set_speed(1.0);
                     }
                 }
                 AnimationState::Climb(speed) => {

@@ -13,7 +13,18 @@ pub(super) fn plugin(app: &mut App) {
 fn spawn_credits_screen(mut commands: Commands, cfg: Res<Config>) {
     commands.spawn((
         StateScoped(Screen::Credits),
-        ui_root("Credits Screen"),
+        Name::new("Credits Screen"),
+        Node {
+            width: Percent(100.0),
+            height: Percent(100.0),
+            position_type: PositionType::Absolute,
+            flex_direction: FlexDirection::Column,
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            overflow: Overflow::scroll_y(),
+            row_gap: Vh(5.0),
+            ..default()
+        },
         BackgroundColor(TRANSLUCENT),
         children![
             header("Created by"),
@@ -49,10 +60,9 @@ fn grid(content: Vec<[String; 2]>) -> impl Bundle {
         Name::new("Credits Grid"),
         Node {
             display: Display::Grid,
-            row_gap: Px(10.0),
-            column_gap: Px(30.0),
-            grid_template_columns: RepeatedGridTrack::px(2, 400.0),
-            overflow: Overflow::scroll_y(),
+            row_gap: Vh(1.0),
+            column_gap: Vw(5.0),
+            grid_template_columns: RepeatedGridTrack::vw(2, 35.0),
             ..default()
         },
         Children::spawn(SpawnIter(content)),

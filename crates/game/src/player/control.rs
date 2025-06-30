@@ -54,7 +54,7 @@ fn movement(
         // Check if crouch is currently active and apply TnuaBuiltinCrouch as an action
         if actions.value::<Crouch>()?.as_bool() {
             controller.action(TnuaBuiltinCrouch {
-                float_offset: -0.2,
+                float_offset: 0.0,
                 height_change_impulse_for_duration: 0.1,
                 height_change_impulse_limit: 80.0,
                 uncancellable: false,
@@ -62,6 +62,9 @@ fn movement(
         }
 
         // update step timer dynamically based on actual speed
+        // normal step: 0.475
+        // sprint step (x1.5): 0.354
+        // step on sprint timer: 0.317
         let Some((_, basis_state)) = controller.concrete_basis::<TnuaBuiltinWalk>() else {
             return Ok(());
         };
@@ -70,7 +73,7 @@ fn movement(
             let ratio = cfg.player.movement.speed / current_actual_speed;
             let adjusted_step_time_f32 = cfg.timers.step * ratio;
             let adjusted_step_time = Duration::from_secs_f32(adjusted_step_time_f32);
-            info!("step timer:{adjusted_step_time_f32}s");
+            // info!("step timer:{adjusted_step_time_f32}s");
             step_timer.set_duration(adjusted_step_time);
         }
     }

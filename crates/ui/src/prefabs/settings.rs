@@ -229,7 +229,7 @@ fn switch_to_tab(tab: UiTab) -> impl Fn(Trigger<Pointer<Click>>, ResMut<ActiveTa
 fn click_toggle_diagnostics(
     _: Trigger<Pointer<Click>>,
     mut commands: Commands,
-    mut settings: ResMut<Settings>,
+    mut state: ResMut<GameState>,
     mut perf_ui: Query<&mut Node, With<PerfUi>>,
     mut label: Query<&mut Text, With<DiagnosticsLabel>>,
 ) {
@@ -249,7 +249,7 @@ fn click_toggle_diagnostics(
         if let Ok(label) = label.single_mut() {
             info!("new label: {}", label.0);
         }
-        settings.diagnostics = !settings.diagnostics;
+        state.diagnostics = !state.diagnostics;
         commands.trigger(OnDiagnosticsToggle);
     }
 }
@@ -258,13 +258,13 @@ fn click_toggle_diagnostics(
 fn clock_toggle_debug_ui(
     _: Trigger<Pointer<Click>>,
     mut commands: Commands,
-    mut settings: ResMut<Settings>,
+    mut state: ResMut<GameState>,
     mut label: Query<&mut Text, With<DiagnosticsLabel>>,
 ) {
-    settings.debug_ui = !settings.debug_ui;
+    state.debug_ui = !state.debug_ui;
 
     if let Ok(mut label) = label.single_mut() {
-        if settings.debug_ui {
+        if state.debug_ui {
             label.0 = "on".to_owned();
         } else {
             label.0 = "off".to_owned();
@@ -401,7 +401,7 @@ fn video_grid(cycle: &SunCycle) -> impl Bundle {
             row_gap: Px(10.0),
             column_gap: Px(30.0),
             display: Display::Grid,
-            grid_template_columns: RepeatedGridTrack::px(2, 400.0),
+            grid_template_columns: RepeatedGridTrack::vw(4, 20.0),
             justify_items: JustifyItems::Center,
             align_items: AlignItems::Center,
             ..default()

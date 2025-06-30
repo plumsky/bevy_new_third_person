@@ -37,12 +37,12 @@ pub fn plugin(app: &mut App) {
 // mut transitions: Trigger<StateTransitionEvent<Screen>>,
 fn track_last_screen(
     mut transitions: EventReader<StateTransitionEvent<Screen>>,
-    mut settings: ResMut<Settings>,
+    mut state: ResMut<GameState>,
 ) {
     let Some(transition) = transitions.read().last() else {
         return;
     };
-    settings.last_screen = transition.clone().exited.unwrap_or(Screen::Title);
+    state.last_screen = transition.clone().exited.unwrap_or(Screen::Title);
 }
 
 fn on_back(

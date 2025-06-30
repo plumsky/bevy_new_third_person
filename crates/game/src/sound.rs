@@ -46,6 +46,7 @@ fn stop_soundtrack(
 fn movement_sound(
     on: Trigger<Fired<Navigate>>,
     time: Res<Time>,
+    state: Res<GameState>,
     settings: Res<Settings>,
     sources: ResMut<AudioSources>,
     tnua: Query<&TnuaController, With<Player>>,
@@ -53,7 +54,7 @@ fn movement_sound(
     mut cmds: Commands,
     mut step_timer: Query<&mut StepTimer, With<Player>>,
 ) -> Result {
-    if settings.muted || settings.paused {
+    if state.muted || state.paused {
         return Ok(());
     }
 
@@ -82,12 +83,13 @@ fn movement_sound(
 
 fn jump_sound(
     _: Trigger<Started<Jump>>,
+    state: Res<GameState>,
     settings: Res<Settings>,
     sources: ResMut<AudioSources>,
     // jump_timer: Query<&JumpTimer, With<Player>>,
     mut cmds: Commands,
 ) -> Result {
-    if settings.muted || settings.paused {
+    if state.muted || state.paused {
         return Ok(());
     }
 
@@ -104,12 +106,13 @@ fn jump_sound(
 
 fn dash_sound(
     _: Trigger<Started<Dash>>,
+    state: Res<GameState>,
     settings: Res<Settings>,
     sources: ResMut<AudioSources>,
     // jump_timer: Query<&JumpTimer, With<Player>>,
     mut cmds: Commands,
 ) -> Result {
-    if settings.muted || settings.paused {
+    if state.muted || state.paused {
         return Ok(());
     }
 

@@ -24,7 +24,12 @@ pub use settings::*;
 pub use states::*;
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((settings::plugin, input::plugin, event_dispatch::plugin));
+    app.add_plugins((
+        settings::plugin,
+        states::plugin,
+        input::plugin,
+        event_dispatch::plugin,
+    ));
 }
 
 /// The game's main screen states.

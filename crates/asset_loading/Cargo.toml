@@ -11,6 +11,8 @@ dev_native = [ ]
 
 [dependencies]
 models = { path = "../models" }
+# bevy_shuffle_bag = "0.2.0"
+
 bevy.workspace = true
 bevy_seedling.workspace = true
 ron.workspace = true

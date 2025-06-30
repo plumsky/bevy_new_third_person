@@ -8,10 +8,11 @@ authors = ["{{authors}}"]
 edition = "2024"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/{{authors}}/{{project-name}}"
-keywords = ["bevy", "game", "template", "devkit", "third person", "gamedev"]
+keywords = ["bevy", "game", "third person"]
 
 [workspace]
 members = [ "crates/*" ]
+resolver = "3"
 
 [features]
 default = [ "dev_native" ]
@@ -21,17 +22,18 @@ dev = [
     "bevy/dynamic_linking",         # Improve compile times for dev builds by linking Bevy as a dynamic library.
     "bevy/track_location",          # Improve error messages coming from Bevy
 ]
-# wasm_audio = [ "firewheel-web-audio" ]
+web = []
 dev_native = [
     "dev",
     "enhanced",
     "bevy/embedded_watcher",        # Enable embedded asset hot reloading for native dev builds.
     "bevy/file_watcher",            # Enable asset hot reloading for native dev builds.
+    "asset_loading/dev_native", "game/dev_native", "scene/dev_native"
 ]
 enhanced = [
     "bevy/bevy_pbr",                # PBR
     "bevy/pbr_specular_textures",   # PBR specular maps
-    "bevy/meshlet"                  # new nanite-like rendering system
+    "bevy/meshlet",                 # new nanite-like rendering system
 ]
 
 [dependencies]
@@ -39,12 +41,15 @@ audio = { path = "crates/audio" }
 asset_loading = { path = "crates/asset_loading" }
 game = { path = "crates/game" }
 models = { path = "crates/models" }
-ui = { path = "crates/ui" }
+scene = { path = "crates/scene" }
 screens = { path = "crates/screens" }
-# experimental web audio fix
-firewheel-web-audio = { git = "https://github.com/CorvusPrudens/firewheel-web-audio", optional = true }
+ui = { path = "crates/ui" }
+
 bevy = { workspace = true }
 bevy_seedling = { workspace = true }
+itertools.workspace = true
+image = { workspace = true }
+winit = { workspace = true }
 
 [workspace.dependencies]
 # everything except bevy_audio
@@ -82,7 +87,8 @@ bevy = { version = "^0.16", default-features = false, features = [
     "wayland"
 ] }
 # stupid gltf 180 rotation fix
-bevy_fix_gltf_coordinate_system = "0.1.0"
+bevy_fix_gltf_coordinate_system = "0.1"
+bevy_fix_cursor_unlock_web = "0.1"
 
 # plugins
 # wireframes
@@ -92,30 +98,26 @@ bevy_fix_gltf_coordinate_system = "0.1.0"
 # physics
 avian3d = { version = "0.3", features = ["3d", "parallel", "collider-from-mesh"] }
 
-# audio engine
-bevy_seedling = "0.4"
+bevy_seedling = "0.4"                   # audio engine
+bevy_third_person_camera = "0.2"        # 3rd person camera
 
-# camera
-bevy_third_person_camera = "0.2"
-
-# floating character control
-bevy-tnua = "0.24"
+bevy-tnua = "0.24"                      # floating character control
 bevy-tnua-avian3d = "0.5"
+bevy_enhanced_input = "0.12"            # keyboard/gamepad bindings
 
-# diagnostics overlay
-iyes_perf_ui = "0.5"
-
-# key bindings
-leafwing-input-manager = "0.17"
+iyes_perf_ui = "0.5"                    # diagnostics overlay
 
 # misc
+itertools = "0.14.0"
+image = "0.25.6"
 ron = "0.10"
 rand = { version = "0.8" }
 serde = "1"
 thiserror = "2.0.12"
-image = "0.25.6"
-## This greatly improves WGPU's performance due to its heavy use of trace! calls
+# Leave only high-severity logs in native build
 log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"] }
+# Leave only high-severity logs in web build
+tracing = { version = "0.1", features = ["max_level_debug", "release_max_level_warn"] }
 # keep the following in sync with Bevy's dependencies
 winit = { version = "0.30", default-features = false }
 

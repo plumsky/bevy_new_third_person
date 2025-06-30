@@ -22,6 +22,8 @@
     // seconds
     timers: (
         step: 0.475, // for this specific animation: twice per cycle
+        // sprint anim: 0.354
+        // step on sprint timer: 0.317
         jump: 0.45,
     ),
     sound: (
@@ -51,7 +53,7 @@
         ("icons", "khusmeen, CC4" ),
         ],
         devs: [
-        ( "olekspickle", "compiled different bevy crates to have a consistent template covering stuff average third person RPG game need")
+        ( "olekspickle", "compiled different bevy crates to have a consistent template covering stuff average third person RPG game need"),
         ]
     )
 )

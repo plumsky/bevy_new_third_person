@@ -47,11 +47,11 @@ fn spawn_gameplay_ui(mut cmds: Commands, textures: Res<Textures>, settings: Res<
 fn toggle_pause(
     _: Trigger<OnPauseToggle>,
     mut time: ResMut<Time<Virtual>>,
-    mut settings: ResMut<Settings>,
+    mut state: ResMut<GameState>,
     mut pause_label: Query<&mut Node, With<PauseIcon>>,
 ) {
     if let Ok(mut label) = pause_label.single_mut() {
-        if time.is_paused() || settings.paused {
+        if time.is_paused() || state.paused {
             time.unpause();
             label.display = Display::None;
         } else {
@@ -60,19 +60,20 @@ fn toggle_pause(
         }
     }
 
-    settings.paused = !settings.paused;
-    info!("paused: {}", settings.paused);
+    state.paused = !state.paused;
+    info!("paused: {}", state.paused);
 }
 
 fn toggle_mute(
     _: Trigger<OnMuteToggle>,
-    mut settings: ResMut<Settings>,
+    settings: ResMut<Settings>,
+    mut state: ResMut<GameState>,
     mut label: Query<&mut Node, With<MuteIcon>>,
     mut music: Single<&mut VolumeNode, (With<SamplerPool<Music>>, Without<SamplerPool<Sfx>>)>,
     mut sfx: Single<&mut VolumeNode, (With<SamplerPool<Sfx>>, Without<SamplerPool<Music>>)>,
 ) {
     if let Ok(mut node) = label.single_mut() {
-        if settings.muted {
+        if state.muted {
             music.volume = settings.music();
             sfx.volume = settings.sfx();
             node.display = Display::None;
@@ -82,16 +83,16 @@ fn toggle_mute(
             node.display = Display::Flex;
         }
     }
-    settings.muted = !settings.muted;
-    info!("muted: {}", settings.muted);
+    state.muted = !state.muted;
+    info!("muted: {}", state.muted);
 }
 
 // ============================ UI ============================
 
-fn click_to_menu(_: Trigger<Pointer<Click>>, mut cmds: Commands, mut settings: ResMut<Settings>) {
+fn click_to_menu(_: Trigger<Pointer<Click>>, mut cmds: Commands, mut state: ResMut<GameState>) {
     cmds.trigger(SwitchInputCtx::from_context(Context::Modal));
     cmds.trigger(OnGoTo(Screen::Title));
-    settings.reset();
+    state.reset();
 }
 fn click_pop_modal(_: Trigger<Pointer<Click>>, mut cmds: Commands) {
     cmds.trigger(OnPopModal);
@@ -104,13 +105,13 @@ fn trigger_menu_toggle_on_esc(
     _: Trigger<Back>,
     mut cmds: Commands,
     screen: Res<State<Screen>>,
-    settings: ResMut<Settings>,
+    state: ResMut<GameState>,
 ) {
     if *screen.get() != Screen::Gameplay {
         return;
     }
 
-    if settings.modals.is_empty() {
+    if state.modals.is_empty() {
         info!("trigger main modal on esc");
         cmds.trigger(OnNewModal(Modal::Main));
     } else {
@@ -122,16 +123,16 @@ fn add_new_modal(
     on: Trigger<OnNewModal>,
     screen: Res<State<Screen>>,
     mut cmds: Commands,
-    mut settings: ResMut<Settings>,
+    mut state: ResMut<GameState>,
 ) {
     if *screen.get() != Screen::Gameplay {
         return;
     }
 
-    info!("new modal:{:?}, settings.paused:{}", on.0, settings.paused);
-    if settings.modals.is_empty() {
+    info!("new modal:{:?}, settings.paused:{}", on.0, state.paused);
+    if state.modals.is_empty() {
         cmds.trigger(SwitchInputCtx::new(on.target(), Context::Modal));
-        if Modal::Main == on.0 && !settings.paused {
+        if Modal::Main == on.0 && !state.paused {
             cmds.trigger(OnPauseToggle);
             cmds.trigger(OnCamCursorToggle);
         }
@@ -145,7 +146,7 @@ fn add_new_modal(
         Modal::Settings => cmds.spawn(settings_modal()),
     };
 
-    settings.modals.push(modal.clone());
+    state.modals.push(modal.clone());
 }
 
 fn pop_modal(
@@ -154,17 +155,17 @@ fn pop_modal(
     menu_marker: Query<Entity, With<MenuModal>>,
     settings_marker: Query<Entity, With<SettingsModal>>,
     mut cmds: Commands,
-    mut settings: ResMut<Settings>,
+    mut state: ResMut<GameState>,
 ) {
     if Screen::Gameplay != *screen.get() {
         return;
     }
 
-    info!("Chat are we popping? {:?}", settings.modals);
+    info!("Chat are we popping? {:?}", state.modals);
     // just a precaution
-    assert!(!settings.modals.is_empty());
+    assert!(!state.modals.is_empty());
 
-    let popped = settings.modals.pop().expect("failed to pop modal");
+    let popped = state.modals.pop().expect("failed to pop modal");
     match popped {
         Modal::Main => {
             if let Ok(menu) = menu_marker.single() {
@@ -179,14 +180,14 @@ fn pop_modal(
     }
 
     // respawn next in the modal stack
-    if let Some(modal) = settings.modals.last() {
+    if let Some(modal) = state.modals.last() {
         match modal {
             Modal::Main => cmds.spawn(menu_modal()),
             Modal::Settings => cmds.spawn(settings_modal()),
         };
     }
 
-    if settings.modals.is_empty() {
+    if state.modals.is_empty() {
         cmds.trigger(SwitchInputCtx::new(on.target(), Context::Gameplay));
         cmds.trigger(OnPauseToggle);
         cmds.trigger(OnCamCursorToggle);
@@ -195,12 +196,12 @@ fn pop_modal(
 
 fn clear_modals(
     _: Trigger<OnClearModals>,
-    settings: ResMut<Settings>,
+    state: ResMut<GameState>,
     menu_marker: Query<Entity, With<MenuModal>>,
     settings_marker: Query<Entity, With<SettingsModal>>,
     mut cmds: Commands,
 ) {
-    for m in &settings.modals {
+    for m in &state.modals {
         match m {
             Modal::Main => {
                 if let Ok(modal) = menu_marker.single() {
