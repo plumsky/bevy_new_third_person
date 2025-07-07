@@ -4,6 +4,7 @@
 use bevy::{
     app::App, asset::AssetMetaCheck, log, prelude::*, window::PrimaryWindow, winit::WinitWindows,
 };
+use bevy_simple_subsecond_system::SimpleSubsecondPlugin;
 use models::*;
 use std::io::Cursor;
 use winit::window::Icon;
@@ -43,6 +44,7 @@ fn main() {
     // custom plugins. the order is important
     // be sure you use resources/types AFTER you add plugins that insert them
     app.add_plugins((
+        SimpleSubsecondPlugin::default(),
         audio::plugin,
         asset_loading::plugin,
         ui::plugin,

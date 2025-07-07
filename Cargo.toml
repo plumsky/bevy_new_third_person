@@ -30,7 +30,7 @@ dev_native = [
     "enhanced",
     "bevy/embedded_watcher",        # Enable embedded asset hot reloading for native dev builds.
     "bevy/file_watcher",            # Enable asset hot reloading for native dev builds.
-    "asset_loading/dev_native", "game/dev_native", "scene/dev_native"
+    "asset_loading/dev_native"      # hot reload asset if they change
 ]
 enhanced = [
     "bevy/bevy_pbr",                # PBR
@@ -41,17 +41,16 @@ enhanced = [
 [dependencies]
 audio = { path = "crates/audio" }
 asset_loading = { path = "crates/asset_loading" }
-game = { path = "crates/game" }
 models = { path = "crates/models" }
-scene = { path = "crates/scene" }
 screens = { path = "crates/screens" }
 ui = { path = "crates/ui" }
 
-bevy = { workspace = true }
-bevy_seedling = { workspace = true }
-itertools.workspace = true
-image = { workspace = true }
-winit = { workspace = true }
+bevy.workspace = true
+bevy_seedling.workspace = true
+bevy_simple_subsecond_system.workspace = true
+# itertools.workspace = true
+image.workspace = true
+winit.workspace = true
 
 [workspace.dependencies.bevy]
 # version = "0.17.0-dev"
@@ -100,6 +99,9 @@ features = [
 bevy_fix_gltf_coordinate_system = "0.1"
 bevy_fix_cursor_unlock_web = "0.1"
 
+# hot reloading stuff
+bevy_simple_subsecond_system = "0.2.0"
+
 # plugins
 avian3d = { version = "0.3", features = ["3d", "parallel", "collider-from-mesh"] } # physics
 
@@ -113,7 +115,7 @@ bevy_enhanced_input = "0.12"            # keyboard/gamepad bindings
 iyes_perf_ui = "0.5"                    # diagnostics overlay
 
 # misc
-itertools = "0.14.0"
+# itertools = "0.14.0"
 image = "0.25.6"
 ron = "0.10"
 rand = { version = "0.8" }
@@ -173,6 +175,3 @@ strip = true
 [profile.wasm-release]              # Optimize for size in the wasm-release profile to reduce load times and bandwidth usage on web.
 inherits = "release"
 strip = "debuginfo"                 # Strip all debugging information from the binary to slightly reduce file size.
-
-[build-dependencies]
-embed-resource = "1"

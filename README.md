@@ -16,13 +16,20 @@ Start with a [basic project](#write-your-game) and [CI / CD](#release-your-game)
 You can [try this template in your browser!](https://olekspickle.itch.io/bevy-third-person)
 
 ## Best way to start
-
 Install [cargo-generate] or [`bevy_cli`] and run:
 ```bash
 cargo generate olekspickle/bevy_new_third_person -n my-rpg
 # or with bevy_cli
 bevy new -t=olekspickle/bevy_new_third_person my-rpg
 ```
+
+### Hotpatched
+If you want to use serving with hotpatching, you can use dioxus-cli:
+Linux: `bash BEVY_ASSET_ROOT="." dx serve --hot-patch`
+Windows PS:`$env:BEVY_ASSET_ROOT="." ; dx serve --hot-patch`
+
+### Makefile
+There are also some helpful commands in [Makefile](./Makefile)
 
 ## Write your game
 

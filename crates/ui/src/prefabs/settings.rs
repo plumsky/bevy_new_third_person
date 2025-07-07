@@ -43,6 +43,7 @@ pub fn save_settings(
 }
 
 // TAB CHANGING
+#[hot]
 fn update_tab_content(
     settings: Res<Settings>,
     active_tab: Res<ActiveTab>,

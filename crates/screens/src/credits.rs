@@ -10,6 +10,7 @@ pub(super) fn plugin(app: &mut App) {
     );
 }
 
+#[hot]
 fn spawn_credits_screen(mut commands: Commands, cfg: Res<Config>) {
     commands.spawn((
         StateScoped(Screen::Credits),
@@ -27,7 +28,7 @@ fn spawn_credits_screen(mut commands: Commands, cfg: Res<Config>) {
         },
         BackgroundColor(TRANSLUCENT),
         children![
-            header("Created by"),
+            header("Breated by"),
             flatten(&cfg.credits.devs),
             header("Assets"),
             flatten(&cfg.credits.assets),
@@ -46,7 +47,7 @@ fn grid(content: Vec<[String; 2]>) -> impl Bundle {
         (
             Text(text),
             Node {
-                justify_self: if i % 2 == 0 {
+                justify_self: if i.is_multiple_of(2) {
                     JustifySelf::End
                 } else {
                     JustifySelf::Start
