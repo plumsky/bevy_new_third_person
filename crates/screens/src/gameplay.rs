@@ -132,8 +132,10 @@ fn add_new_modal(
     info!("new modal:{:?}, settings.paused:{}", on.0, state.paused);
     if state.modals.is_empty() {
         cmds.trigger(SwitchInputCtx::new(on.target(), Context::Modal));
-        if Modal::Main == on.0 && !state.paused {
-            cmds.trigger(OnPauseToggle);
+        if Modal::Main == on.0 {
+            if !state.paused {
+                cmds.trigger(OnPauseToggle);
+            }
             cmds.trigger(OnCamCursorToggle);
         }
     }
