@@ -3,17 +3,19 @@ use bevy_enhanced_input::prelude::*;
 use bevy_seedling::prelude::*;
 use serde::{Deserialize, Serialize};
 
-pub mod event_dispatch;
-pub mod input;
-pub mod keybinding;
-pub mod palette;
-pub mod player;
-pub mod pre_load;
-pub mod primitives;
-pub mod settings;
-pub mod states;
+mod event_dispatch;
+mod ext_traits;
+mod input;
+mod keybinding;
+mod palette;
+mod player;
+mod pre_load;
+mod primitives;
+mod settings;
+mod states;
 
 pub use event_dispatch::*;
+pub use ext_traits::*;
 pub use input::*;
 pub use keybinding::*;
 pub use palette::*;

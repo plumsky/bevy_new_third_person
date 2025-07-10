@@ -2,7 +2,7 @@
 use bevy::{asset::Asset, prelude::*};
 use bevy_seedling::sample::Sample;
 // use bevy_shuffle_bag::ShuffleBag;
-use models::pre_load::Config;
+use models::Config;
 
 mod ron;
 mod tracking;
@@ -57,14 +57,23 @@ pub struct Models {
     pub player: Handle<Gltf>,
     #[dependency]
     pub rock: Handle<Gltf>,
+    #[dependency]
+    pub caged_matter: Handle<Gltf>,
+    #[dependency]
+    pub comb_sphere: Handle<Gltf>,
+    #[dependency]
+    pub scene: Handle<Gltf>,
 }
 
 impl FromWorld for Models {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
         Self {
+            caged_matter: assets.load("models/caged_matter.glb"),
+            comb_sphere: assets.load("models/comb_sphere.glb"),
             player: assets.load("models/player.glb"),
             rock: assets.load("models/rock.glb"),
+            scene: assets.load("models/scene.glb"),
         }
     }
 }
