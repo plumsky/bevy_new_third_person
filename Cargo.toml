@@ -46,7 +46,6 @@ screens = { path = "crates/screens" }
 ui = { path = "crates/ui" }
 
 bevy.workspace = true
-bevy_skein.workspace = true
 bevy_seedling.workspace = true
 bevy_simple_subsecond_system.workspace = true
 # itertools.workspace = true
@@ -102,8 +101,6 @@ bevy_fix_cursor_unlock_web = "0.1"
 
 # hot reloading stuff
 bevy_simple_subsecond_system = "0.2.0"
-# blender integration
-bevy_skein = "0.2.1"
 
 # plugins
 avian3d = { version = "0.3", features = ["3d", "parallel", "collider-from-mesh"] } # physics

@@ -50,6 +50,7 @@ pub struct PlayerConfig {
     pub hitbox: Hitbox,
     pub zoom: (f32, f32),
     pub fov: f32,
+    pub spawn_pos: (f32, f32, f32),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect)]

@@ -2,6 +2,31 @@ use super::*;
 use avian3d::prelude::*;
 use bevy::gltf::GltfMesh;
 
+/// Helper trait to spawn mesh with minimum effort
+///
+/// # Example system of spawning 3D object
+/// ```rust,no_run
+///
+/// pub fn spawn(
+///     models: Res<Models>,
+///     gltf_assets: Res<Assets<Gltf>>,
+///     mut meshes: ResMut<Assets<Mesh>>,
+///     mut commands: Commands,
+/// ) {
+///     let Some(obj) = gltf_assets.get(&models.scene) else {
+///         return;
+///     };
+///
+///     commands.spawn_colliding_mesh(
+///         obj,
+///         &meshes,
+///         &gltf_meshes,
+///         (
+///             StateScoped(Screen::Gameplay),
+///             Transform::from_scale(Vec3::splat(3.0)),
+///         ));
+///     }
+/// ```
 pub trait SpawnCollidingMesh {
     fn spawn_colliding_mesh(
         &mut self,
@@ -20,11 +45,6 @@ impl SpawnCollidingMesh for Commands<'_, '_> {
         gltf_meshes: &Res<Assets<GltfMesh>>,
         bundle: impl Bundle + Clone,
     ) {
-        info!(
-            "meshes: {}, materials: {}",
-            gltf.meshes.len(),
-            gltf.materials.len()
-        );
         let mesh = gltf.meshes[0].clone();
         let material = gltf.materials[0].clone();
         if let Some(mesh) = gltf_meshes.get(&mesh) {

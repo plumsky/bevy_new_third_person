@@ -4,7 +4,7 @@ use super::*;
 macro_rules! declare_markers {
   ( $( $name:ident ),* ) => {
         $(
-            #[derive(Component, Reflect)]
+            #[derive(Component, Reflect, Clone)]
             #[reflect(Component)]
             pub struct $name;
         )*
@@ -17,7 +17,6 @@ declare_markers!(
     // scene
     Sun,
     Moon,
-    Rock,
     // TODO: The idea is to create a boombox with spatial audio
     // <https://github.com/bevyengine/bevy/blob/main/examples/audio/spatial_audio_3d.rs>
     Boombox,
@@ -58,16 +57,16 @@ macro_rules! timers {
 }
 timers!(JumpTimer, StepTimer);
 
-macro_rules! sliders {
-  ( $( $name:ident ),* ) => {
-        $(
-            #[derive(Component, Reflect, Debug)]
-            #[reflect(Component)]
-            pub struct $name{
-                pub current: f32
-            }
-        )*
-    };
-}
-
-sliders!(SliderGeneral, SliderMusic, SliderSfx);
+// macro_rules! sliders {
+//   ( $( $name:ident ),* ) => {
+//         $(
+//             #[derive(Component, Reflect, Debug)]
+//             #[reflect(Component)]
+//             pub struct $name{
+//                 pub current: f32
+//             }
+//         )*
+//     };
+// }
+//
+// sliders!(SliderGeneral, SliderMusic, SliderSfx);

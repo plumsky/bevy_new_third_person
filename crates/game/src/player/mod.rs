@@ -53,14 +53,14 @@ pub fn spawn_player(
 
     let player_rot = Quat::from_rotation_y(PI);
     let mesh = SceneRoot(gltf.scenes[0].clone());
-    let pos = Transform::from_translation(Vec3::new(0.0, 5.0, 0.0)).with_rotation(player_rot);
+    let pos = Vec3::from(cfg.player.spawn_pos);
+    let pos = Transform::from_translation(pos).with_rotation(player_rot);
     let player = Player {
         id: Entity::PLACEHOLDER,
         speed: cfg.player.movement.speed,
         animation_state: AnimationState::StandIdle,
         ..default()
     };
-
     let collider = Collider::capsule(cfg.player.hitbox.radius, cfg.player.hitbox.height);
 
     commands
@@ -68,13 +68,13 @@ pub fn spawn_player(
             StateScoped(Screen::Gameplay),
             pos,
             player,
+            ThirdPersonCameraTarget,
             // input context
             (
                 GameplayCtx,
                 CurrentCtx(Context::Gameplay),
                 Actions::<GameplayCtx>::default(),
             ),
-            ThirdPersonCameraTarget,
             // tnua stuff
             (
                 TnuaController::default(),
@@ -90,11 +90,14 @@ pub fn spawn_player(
             (
                 collider,
                 RigidBody::Dynamic,
-                // Friction::ZERO.with_combine_rule(CoefficientCombine::Multiply),
+                Friction::ZERO.with_combine_rule(CoefficientCombine::Multiply),
             ),
-            JumpTimer(Timer::from_seconds(cfg.timers.jump, TimerMode::Repeating)),
-            StepTimer(Timer::from_seconds(cfg.timers.step, TimerMode::Repeating)),
-            InheritedVisibility::default(), // silence the warning because of adding SceneRoot as a child
+            // other player related components
+            (
+                JumpTimer(Timer::from_seconds(cfg.timers.jump, TimerMode::Repeating)),
+                StepTimer(Timer::from_seconds(cfg.timers.step, TimerMode::Repeating)),
+                InheritedVisibility::default(), // silence the warning because of adding SceneRoot as a child
+            ),
         ))
         // spawn character mesh as child to adjust mesh position relative to the player origin
         .with_children(|parent| {

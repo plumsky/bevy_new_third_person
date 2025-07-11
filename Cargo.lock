@@ -1245,7 +1245,6 @@ dependencies = [
  "bevy",
  "bevy_seedling",
  "bevy_simple_subsecond_system",
- "bevy_skein",
  "image",
  "models",
  "screens",
