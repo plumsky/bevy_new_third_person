@@ -253,6 +253,7 @@ jobs:
           cargo binstall --locked -y --force wasm-bindgen-cli
           cargo binstall --locked -y --force wasm-opt
           bevy build --locked --release --features='${{ matrix.features }}' --yes web --bundle
+          tree target/bevy_web || sudo apt-get install tree && tree target/bevy_web
           mv 'target/bevy_web/web-release/${{ env.pkg_name }}' '${{ env.app }}'
 
       - name: Build binaries and add them to app (non-Web)
