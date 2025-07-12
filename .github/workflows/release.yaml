@@ -261,6 +261,7 @@ jobs:
         run: |
           for target in ${{ matrix.targets }}; do
             bevy build --locked --release --target="${target}" --features='${{ matrix.features }}'
+            ls "target/${target}" && ls "target/${target}/release"
             mv target/"${target}"/release/'${{ env.pkg_name }}${{ matrix.binary_ext }}' tmp/binary/"${target}"'${{ matrix.binary_ext }}'
           done
           if [ '${{ matrix.platform }}' == 'macos' ]; then
