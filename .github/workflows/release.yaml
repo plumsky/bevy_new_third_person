@@ -48,7 +48,8 @@ permissions:
   contents: write
 
 env:
-  pkg_name: bevy_third_person
+  # Must be the same as the main crate name for platform dependent builds
+  pkg_name: bevy_new_third_person
 
   build_web: true
   build_linux: true

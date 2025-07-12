@@ -37,11 +37,11 @@ fn add_tpv_cam(
 
     commands.entity(camera).insert((
         ThirdPersonCamera {
-            aim_speed: 3.0,     // default
-            aim_zoom: 0.7,      // default
-            zoom_enabled: true, // default
+            // aim_speed: 3.0,
+            // aim_zoom: 0.7,
+            // aim_enabled: true,
+            zoom_enabled: true,
             zoom: Zoom::new(cfg.player.zoom.0, cfg.player.zoom.1),
-            aim_enabled: true,
             offset_enabled: true,
             offset_toggle_enabled: true,
             cursor_lock_key: KeyCode::KeyL,

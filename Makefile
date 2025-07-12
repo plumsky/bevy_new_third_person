@@ -17,7 +17,7 @@ lint:
 	cargo machete
 
 build:
-	bevy build --locked --release  --features=dev_native
+	bevy build --locked --release
 
 build-web:
 	cargo binstall --locked -y --force wasm-bindgen-cli
