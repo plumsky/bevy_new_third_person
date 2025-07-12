@@ -33,9 +33,9 @@ dev_native = [
     "asset_loading/dev_native"      # hot reload asset if they change
 ]
 enhanced = [
+    "bevy/meshlet",                 # new nanite-like rendering system
     "bevy/bevy_pbr",                # PBR
     "bevy/pbr_specular_textures",   # PBR specular maps
-    "bevy/meshlet",                 # new nanite-like rendering system
 ]
 
 [dependencies]

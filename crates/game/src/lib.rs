@@ -10,11 +10,11 @@ use bevy_tnua::prelude::*;
 use models::*;
 use scene::*;
 
-pub mod camera;
+mod camera;
 #[cfg(feature = "dev_native")]
-pub mod dev_tools;
-pub mod player;
-pub mod sound;
+mod dev_tools;
+mod player;
+mod sound;
 
 pub use camera::*;
 

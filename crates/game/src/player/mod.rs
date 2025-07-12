@@ -9,7 +9,6 @@ mod animation;
 mod control;
 
 pub use animation::*;
-pub use control::*;
 
 pub const IDLE_TO_RUN_TRESHOLD: f32 = 0.01;
 
@@ -38,18 +37,14 @@ pub fn spawn_player(
     cfg: Res<Config>,
     models: Res<Models>,
     gltf_assets: Res<Assets<Gltf>>,
-    camera: Query<&Transform, With<SceneCamera>>,
     mut commands: Commands,
+    // DEBUG
     // mut meshes: ResMut<Assets<Mesh>>,
     // mut materials: ResMut<Assets<StandardMaterial>>,
 ) -> Result {
     let Some(gltf) = gltf_assets.get(&models.player) else {
         return Ok(());
     };
-
-    let camera_transform = camera.single()?;
-    let mut forward = camera_transform.forward().normalize();
-    forward.y = 0.0;
 
     let player_rot = Quat::from_rotation_y(PI);
     let mesh = SceneRoot(gltf.scenes[0].clone());

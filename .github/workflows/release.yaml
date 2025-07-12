@@ -146,7 +146,7 @@ jobs:
           - platform: web
             targets: wasm32-unknown-unknown
             package_ext: .zip
-            features: dev,web
+            features: web
             runner: ubuntu-latest
 
           - platform: linux
