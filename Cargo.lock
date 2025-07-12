@@ -1245,6 +1245,7 @@ dependencies = [
  "bevy",
  "bevy_seedling",
  "bevy_simple_subsecond_system",
+ "game",
  "image",
  "models",
  "screens",

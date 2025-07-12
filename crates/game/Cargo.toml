@@ -6,7 +6,7 @@ repository.workspace = true
 edition.workspace = true
 
 [features]
-default = [ "dev_native" ]
+default = []
 dev_native = [
     "bevy-inspector-egui",          # Entity inspector
 ]
