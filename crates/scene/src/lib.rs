@@ -26,7 +26,7 @@ pub fn setup(models: Res<Models>, gltf_assets: Res<Assets<Gltf>>, mut commands: 
     };
     commands.spawn((
         SceneRoot(scene.scenes[0].clone()),
-        Transform::from_scale(Vec3::splat(15.0)),
+        Transform::from_scale(Vec3::splat(1.0)),
     ));
 
     // to see something when suns go away

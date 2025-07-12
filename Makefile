@@ -1,11 +1,11 @@
-.PHONY: clean docs lint build build-web run run-web hot
+.PHONY: clean-build docs lint build build-web hot run run-web
 
 .ONESHELL: # Use one shell per target
 	SHELL := /bin/bash
 	# Stop excecution on any error
 	.SHELLFLAGS = -ec
 
-clean:
+clean-build:
 	cargo clean && make build && make lint
 
 docs:
