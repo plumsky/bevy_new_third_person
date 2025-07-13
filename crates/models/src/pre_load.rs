@@ -6,7 +6,6 @@ use serde::{Deserialize, Serialize};
 pub struct Config {
     pub sound: Sound,
     pub physics: Physics,
-    pub geom: Geometry,
     pub player: PlayerConfig,
     pub credits: Credits,
     pub settings: SettingsPreloaded,
@@ -36,12 +35,6 @@ pub struct Physics {
     pub fog_directional_light_exponent: f32,
     pub fog_visibility: f32,
     pub shadow_distance: f32,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
-pub struct Geometry {
-    pub main_plane: f32,
-    pub quantity: u32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect)]

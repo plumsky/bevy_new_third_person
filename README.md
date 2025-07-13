@@ -65,11 +65,11 @@ Feel free to move things around however you want, though.
 - [x] experimental sound with [bevy_seedling] based on Firewheel audio engine (which will probably replace bevy_audio), with **highly** experimental audio stutter fix for web
 - [x] consistent Esc back navigation in gameplay and menu via stacked modals (kudos for the idea to skyemakesgames)
 - [x] serialize and save settings
-- [x] auidio, video and keys rebind tabs in settings
+- [x] audio, video and keys rebind tabs in settings
+- [x] easy drop in scene integration using awesome [skein] with a simple scene
 
 ### TODOs (prioritized)
 - [ ] Jump with timer(tricky with tnua jump in air counter)
-- [ ] better scene: I'm thinking woods, campfire, a target practice dummies and a big rock to ~~climb~~
 - [ ] custom font replace example using pre-loaded font
 - [ ] sky background instead of just void lol
 - [ ] Movement sfx: jump, dash, sprint
@@ -180,12 +180,13 @@ The [assets](./assets) in this repository are all 3rd-party. See the see [credit
 [bevy_tnua]: https://github.com/idanarye/bevy-tnua
 [Bevy Cheat Book]: https://bevy-cheatbook.github.io/introduction.html
 [BevyFlock]: https://github.com/TheBevyFlock/bevy_new_2d
-[cargo-generate]: https://github.com/cargo-generate/cargo-generate
 [bevy_enhanced_input]: https://github.com/projectharmonia/bevy_enhanced_input
+[cargo-generate]: https://github.com/cargo-generate/cargo-generate
+[GitHub workflows]: https://docs.github.com/en/actions/using-workflows
 [Linux dependencies]: https://github.com/bevyengine/bevy/blob/main/docs/linux_dependencies.md
+[skein]: https://bevyskein.dev
 [trunk]: https://trunkrs.dev/
 [Universal Animation Library]: https://quaternius.itch.io/universal-animation-library
-[GitHub workflows]: https://docs.github.com/en/actions/using-workflows
 
 [spawn the Window hidden]: https://github.com/bevyengine/bevy/blob/release-0.14.0/examples/window/window_settings.rs#L29-L32
 [make it visible a few frames later]: https://github.com/bevyengine/bevy/blob/release-0.14.0/examples/window/window_settings.rs#L56-L64

@@ -35,7 +35,7 @@ pub fn add_skybox_to_camera(
             ..Default::default()
         },
         Sun,
-        Transform::from_translation(Vec3::new(0.0, 0.0, cfg.geom.main_plane)),
+        Transform::from_translation(Vec3::new(0.0, 0.0, 200.0)),
         cascade_shadow_config.clone(),
     ));
 
@@ -45,17 +45,18 @@ pub fn add_skybox_to_camera(
         DirectionalLight {
             color: MOON,
             shadows_enabled: true,
-            illuminance: 10000.0,
+            illuminance: lux::FULL_MOON_NIGHT,
             ..Default::default()
         },
         Moon,
-        Transform::from_translation(Vec3::new(0.0, 0.0, -cfg.geom.main_plane)),
+        Transform::from_translation(Vec3::new(0.0, 0.0, -200.0)),
         cascade_shadow_config,
     ));
 
     // Lighting
     commands.entity(camera).insert((
         // This is the component that enables atmospheric scattering for a camera
+        // TODO: manipulate ground_albedo depending on the angle of the sun
         Atmosphere::EARTH,
         // The scene is in units of 10km, so we need to scale up the
         // aerial view lut distance and set the scene scale accordingly.

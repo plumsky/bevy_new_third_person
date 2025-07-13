@@ -1,12 +1,8 @@
 (
-    geom: (
-        main_plane: 200,
-        quantity: 20,
-    ),
     player:(
-        spawn_pos: (1.5, 60.0, 0.5),
+        spawn_pos: (1.5, 60, 0.5),
         fov: 60,
-        zoom: (1.5, 30.0),
+        zoom: (1.5, 30),
         movement: (
             speed: 10,
             sprint_factor: 1.5,
@@ -34,9 +30,9 @@
     ),
     physics: (
         distance_fog: true,
-        fog_directional_light_exponent: 5.0,
-        fog_visibility: 500.0,
-        shadow_distance: 100,
+        fog_directional_light_exponent: 5,
+        fog_visibility: 500,
+        shadow_distance: 300,
     ),
     settings: (
         min_volume: 0.0,
@@ -51,6 +47,8 @@
         ("Bevy Logo", "All rights reserved by the Bevy Foundation, permission granted for splash screen use when unmodified" ),
         ("Background Music", "smnbl-time-for-fun\ngifted to rust community, CC0" ),
         ("Button hover/press sounds, step sounds", "smnbl records\ngifted to rust community, CC0" ),
+        ("Scene assets", "olekspickle\ngifted to rust community, CC0" ),
+        ("Textures", "https://www.texturecan.com/details/290, https://www.texturecan.com/details/283, CC0" ),
         ("icons", "khusmeen, CC4" ),
         ],
         devs: [

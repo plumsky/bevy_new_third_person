@@ -1,13 +1,7 @@
 (
-    modals: [],
-    last_screen: Title,
-    diagnostics: true,
-    debug_ui: false,
-    paused: false,
-    muted: false,
     sound: (
         general: 1.0,
-        music: 0.0,
+        music: 0.000000014901161,
         sfx: 0.5,
     ),
     fov: 45.0,
