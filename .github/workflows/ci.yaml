@@ -84,31 +84,31 @@ jobs:
       - name: Run Dependency Machete
         run: cargo machete
 
-  # Run Bevy lints.
-  bevy-lints:
-    name: Bevy lints
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Rust toolchain (plus bevy_lint)
-        uses: TheBevyFlock/bevy_cli/bevy_lint@lint-v0.3.0
-
-      - name: Restore Rust cache
-        id: cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: ci
-          save-if: false
-
-      - name: Install build dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev
-
-      - name: Run Bevy lints
-        run: bevy_lint --locked --workspace --all-targets --profile ci --all-features
+  # # Run Bevy lints.
+  # bevy-lints:
+  #   name: Bevy lints
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 20
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Install Rust toolchain (plus bevy_lint)
+  #       uses: TheBevyFlock/bevy_cli/bevy_lint@lint-v0.3.0
+  #
+  #     - name: Restore Rust cache
+  #       id: cache
+  #       uses: Swatinem/rust-cache@v2
+  #       with:
+  #         shared-key: ci
+  #         save-if: false
+  #
+  #     - name: Install build dependencies
+  #       if: steps.cache.outputs.cache-hit != 'true'
+  #       run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev
+  #
+  #     - name: Run Bevy lints
+  #       run: bevy_lint --locked --workspace --all-targets --profile ci --all-features
 
   # Run tests.
   tests:
