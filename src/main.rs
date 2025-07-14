@@ -14,7 +14,12 @@ fn main() {
 
     app.configure_sets(
         Update,
-        (Set::TickTimers, Set::RecordInput, Set::Update).chain(),
+        (
+            AppSystems::TickTimers,
+            AppSystems::RecordInput,
+            AppSystems::Update,
+        )
+            .chain(),
     );
 
     let window = WindowPlugin {

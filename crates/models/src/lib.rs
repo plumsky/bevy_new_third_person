@@ -57,7 +57,7 @@ pub enum Screen {
 /// When adding a new variant, make sure to order it in the `configure_sets`
 /// call above.
 #[derive(SystemSet, Debug, Clone, Copy, Eq, PartialEq, Hash, PartialOrd, Ord)]
-pub enum Set {
+pub enum AppSystems {
     TickTimers,
     RecordInput,
     Update,

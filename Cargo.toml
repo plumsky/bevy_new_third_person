@@ -1,6 +1,27 @@
 [package]
 name = "bevy_new_third_person"
-edition = "2024"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+exclude.workspace = true
+repository.workspace = true
+description.workspace = true
+keywords.workspace = true
+
+[dependencies]
+audio = { path = "crates/audio" }
+asset_loading = { path = "crates/asset_loading" }
+models = { path = "crates/models" }
+screens = { path = "crates/screens" }
+ui = { path = "crates/ui" }
+
+bevy_simple_subsecond_system.workspace = true
+bevy.workspace = true
+image.workspace = true
+winit.workspace = true
+
+
 
 [workspace.package]
 edition = "2024"
@@ -38,20 +59,6 @@ enhanced = [
     "bevy/bevy_pbr",                # PBR
     "bevy/pbr_specular_textures",   # PBR specular maps
 ]
-
-[dependencies]
-audio = { path = "crates/audio" }
-asset_loading = { path = "crates/asset_loading" }
-# game = { path = "crates/game" }
-models = { path = "crates/models" }
-screens = { path = "crates/screens" }
-ui = { path = "crates/ui" }
-
-bevy.workspace = true
-bevy_simple_subsecond_system.workspace = true
-# itertools.workspace = true
-image.workspace = true
-winit.workspace = true
 
 [workspace.dependencies.bevy]
 # version = "0.17.0-dev"
