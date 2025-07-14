@@ -1,9 +1,9 @@
 
 # Third Person Bevy game template (WIP)
-<video src="https://github.com/user-attachments/assets/778dd6c0-3722-42c3-ad4a-f3424ac588e2" controls="controls" style="max-width: 400px;"> </video>
-<video src="https://github.com/user-attachments/assets/0bbc555b-53ce-4e2a-bdab-d1219f857b6d" controls="controls" style="max-width: 400px;"> </video>
-<video src="https://github.com/user-attachments/assets/8692a08e-73c6-411a-b060-a971470e623a" controls="controls" style="max-width: 400px;"> </video>
-<video src="https://github.com/user-attachments/assets/72a324f8-195c-4608-aaf2-b88a1ba03896" controls="controls" style="max-width: 400px;"> </video>
+<video width="320" height="240" src="https://github.com/user-attachments/assets/778dd6c0-3722-42c3-ad4a-f3424ac588e2" controls="controls"> </video>
+<video width="320" height="240" src="https://github.com/user-attachments/assets/0bbc555b-53ce-4e2a-bdab-d1219f857b6d" controls="controls"> </video>
+<video width="320" height="240" src="https://github.com/user-attachments/assets/8692a08e-73c6-411a-b060-a971470e623a" controls="controls"> </video>
+<video width="320" height="240" src="https://github.com/user-attachments/assets/72a324f8-195c-4608-aaf2-b88a1ba03896" controls="controls"> </video>
 
 This template is based on the awesome [BevyFlock 2D template][BevyFlock] featuring out of the box builds for:
 - Windows

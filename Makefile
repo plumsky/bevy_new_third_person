@@ -9,7 +9,7 @@ clean-build:
 	cargo clean && make build && make lint
 
 docs:
-	cargo docs --open
+	cargo doc --open --no-deps --workspace
 
 lint:
 	cargo clippy -- -D warnings

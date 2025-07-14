@@ -31,7 +31,7 @@ dev_native = [
     "bevy/embedded_watcher",        # Enable embedded asset hot reloading for native dev builds.
     "bevy/file_watcher",            # Enable asset hot reloading for native dev builds.
     "asset_loading/dev_native",     # hot reload asset if they change
-    "game/dev_native"               # dev tools like UI debug, screen transition logging and entity inspector
+    # "game/dev_native"               # dev tools like UI debug, screen transition logging and entity inspector
 ]
 enhanced = [
     "bevy/meshlet",                 # new nanite-like rendering system
@@ -42,13 +42,12 @@ enhanced = [
 [dependencies]
 audio = { path = "crates/audio" }
 asset_loading = { path = "crates/asset_loading" }
-game = { path = "crates/game" }
+# game = { path = "crates/game" }
 models = { path = "crates/models" }
 screens = { path = "crates/screens" }
 ui = { path = "crates/ui" }
 
 bevy.workspace = true
-bevy_seedling.workspace = true
 bevy_simple_subsecond_system.workspace = true
 # itertools.workspace = true
 image.workspace = true

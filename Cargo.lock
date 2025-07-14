@@ -1243,9 +1243,7 @@ dependencies = [
  "asset_loading",
  "audio",
  "bevy",
- "bevy_seedling",
  "bevy_simple_subsecond_system",
- "game",
  "image",
  "models",
  "screens",
@@ -3191,12 +3189,10 @@ dependencies = [
  "avian3d",
  "bevy",
  "bevy-inspector-egui",
- "bevy-tnua",
- "bevy-tnua-avian3d",
- "bevy_enhanced_input",
  "bevy_seedling",
  "bevy_third_person_camera",
  "models",
+ "player",
  "rand 0.8.5",
  "scene",
  "ui",
@@ -4967,6 +4963,23 @@ name = "pkg-config"
 version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7edddbd0b52d732b21ad9a5fab5c704c14cd949e5e9a1ec5929a24fded1b904c"
+
+[[package]]
+name = "player"
+version = "0.1.4"
+dependencies = [
+ "asset_loading",
+ "audio",
+ "avian3d",
+ "bevy",
+ "bevy-tnua",
+ "bevy-tnua-avian3d",
+ "bevy_enhanced_input",
+ "bevy_seedling",
+ "bevy_third_person_camera",
+ "models",
+ "rand 0.8.5",
+]
 
 [[package]]
 name = "png"
