@@ -75,18 +75,3 @@ fn toggle_cam_cursor(_: Trigger<OnCamCursorToggle>, mut cam: Query<&mut ThirdPer
     };
     cam.cursor_lock_active = !cam.cursor_lock_active;
 }
-
-/// Helper trait to get direction of movement based on camera transform
-pub trait MovementDirection {
-    fn movement_direction(&self, input: Vec2) -> Vec3;
-}
-
-impl MovementDirection for Transform {
-    fn movement_direction(&self, input: Vec2) -> Vec3 {
-        let forward = self.forward();
-        let forward_flat = Vec3::new(forward.x, 0.0, forward.z);
-        let right = forward_flat.cross(Vec3::Y).normalize();
-        let direction = (right * input.x) + (forward_flat * input.y);
-        direction.normalize_or_zero()
-    }
-}

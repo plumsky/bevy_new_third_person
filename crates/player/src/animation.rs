@@ -15,7 +15,6 @@ pub fn prepare_animations(
     let Some(gltf) = gltf_assets.get(&models.player) else {
         return;
     };
-
     let Ok(animation_player) = animation_player.single() else {
         return;
     };
@@ -26,6 +25,7 @@ pub fn prepare_animations(
     let mut graph = AnimationGraph::new();
     let root_node = graph.root;
 
+    // Create flat animation graph
     for (name, clip) in gltf.named_animations.iter() {
         let node_index = graph.add_clip(clip.clone(), 1.0, root_node);
         player.animations.insert(name.to_string(), node_index);
@@ -41,6 +41,9 @@ pub fn prepare_animations(
 /// being hidden behind tnua systems. Not for everyone, but definittely worth it as tnua implements
 /// more actions
 /// <https://github.com/idanarye/bevy-tnua/blob/main/demos/src/character_animating_systems/platformer_animating_systems.rs>
+///
+/// Note: if you are not interested in using tnua you can just delete
+/// all tnua related stuff and it should still work
 pub fn animating(
     cfg: Res<Config>,
     mut player_q: Query<(
@@ -59,6 +62,7 @@ pub fn animating(
         return;
     };
 
+    // First check Tnua animation directive
     // Here we use the data from TnuaController to determine what the character is currently doing,
     // so that we can later use that information to decide which animation to play.
     // First we look at the `action_name` to determine which action (if at all) the character is currently performing:
@@ -191,6 +195,7 @@ pub fn animating(
             old_state: _,
             state,
         } => {
+            // Here the animations are actually being ran with their respective speed
             animation_player.stop_all();
             match state {
                 AnimationState::StandIdle => {

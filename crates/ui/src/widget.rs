@@ -97,7 +97,7 @@ where
 }
 
 /// A simple button with text and an action defined as an [`Observer`]. The button's layout is provided by `button_bundle`.
-/// Background color is set by [`InteractionPalette`]
+/// Background color is set by [`UiInteraction`]
 pub fn btn<E, B, M, I>(opts: impl Into<Opts>, action: I) -> impl Bundle
 where
     E: Event,

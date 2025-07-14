@@ -62,6 +62,7 @@ fn movement(
         }
 
         // update step timer dynamically based on actual speed
+        // Note: this is specific to the animation provided
         // normal step: 0.475
         // sprint step (x1.5): 0.354
         // step on sprint timer: 0.317

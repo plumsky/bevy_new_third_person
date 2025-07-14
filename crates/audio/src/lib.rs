@@ -77,10 +77,11 @@ fn spawn_pools(mut master: Single<&mut VolumeNode, With<MainBus>>, mut cmds: Com
     ));
 }
 
-/// An organizational marker component that should be added to a spawned [`SamplePlayer`] if it's in the
-/// general "music" category (e.g. global background music, soundtrack).
+/// An organizational marker component that indicates that [`SamplePlayer`] should be routed to the music sampler pool.
 ///
-/// This can then be used to query for and operate on sounds in that category.
+/// Suitable for anything in "music" category (e.g. global background music, soundtrack)
+///
+/// This can then be used to query for and operate on sounds in that category
 /// ```rust,no_run
 /// commands.spawn(
 ///        Music,
@@ -98,10 +99,11 @@ fn spawn_pools(mut master: Single<&mut VolumeNode, With<MainBus>>, mut cmds: Com
 #[reflect(Component)]
 pub struct Music;
 
-/// An organizational marker component that should be added to a spawned [`SamplePlayer`] if it's in the
-/// general "sound effect" category (e.g. footsteps, the sound of a magic spell, a door opening).
+/// An organizational marker component that indicates that [`SamplePlayer`] should be routed to the SFX sampler pool.
 ///
-/// This can then be used to query for and operate on sounds in that category.
+/// Suitable for anything in "sound effect" category (e.g. footsteps, the sound of a magic spell, a door opening)
+///
+/// This can then be used to query for and operate on sounds in that category
 /// ```rust,no_run
 /// commands.spawn(
 ///        Sfx,

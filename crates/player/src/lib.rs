@@ -1,12 +1,18 @@
-use super::*;
+use asset_loading::*;
+use avian3d::prelude::*;
+use bevy::prelude::*;
 use bevy::scene::SceneInstanceReady;
+use bevy_enhanced_input::prelude::*;
 use bevy_third_person_camera::*;
+use bevy_tnua::prelude::*;
 use bevy_tnua::{TnuaAnimatingState, control_helpers::TnuaSimpleAirActionsCounter};
 use bevy_tnua_avian3d::*;
+use models::*;
 use std::{f32::consts::PI, time::Duration};
 
 mod animation;
 mod control;
+mod sound;
 
 pub use animation::*;
 
@@ -20,6 +26,7 @@ pub fn plugin(app: &mut App) {
         TnuaControllerPlugin::new(FixedUpdate),
         TnuaAvian3dPlugin::new(FixedUpdate),
         control::plugin,
+        sound::plugin,
     ));
 
     app.configure_sets(PostUpdate, CameraSyncSet.after(PhysicsSet::Sync))
