@@ -16,16 +16,18 @@ Start with a [basic project](#write-your-game) and [CI / CD](#release-your-game)
 You can [try this template in your browser!](https://olekspickle.itch.io/bevy-third-person)
 
 ## Best way to start
-Install [cargo-generate] or [`bevy_cli`] and run:
+Install [cargo-generate] or [bevy_cli] and run:
 ```bash
 cargo generate olekspickle/bevy_new_third_person -n my-rpg
 # or with bevy_cli
 bevy new -t=olekspickle/bevy_new_third_person my-rpg
 ```
 
-### Hotpatched
+### Hotpatching
 If you want to use serving with hotpatching, you can use dioxus-cli:
+
 Linux: `bash BEVY_ASSET_ROOT="." dx serve --hot-patch`
+
 Windows PS:`$env:BEVY_ASSET_ROOT="." ; dx serve --hot-patch`
 
 ### Makefile
@@ -41,13 +43,14 @@ This template comes with a basic project structure that you may find useful:
 | ------------------------------------------------- | --------------------------------------------------------------------- |
 | [`src/main.rs`](./src/main.rs)                    | App entrypoint where system plugins and window set up                 |
 | [`assets`](./assets)                              | Asset directory                                                       |
-| [`crates`](./crates)                              | A set of crates to separate logic in a contained ordered way          |
+| [`crates`](./crates)                              | A contained ordered way to improve compile times                      |
 | [`crates/asset_loading`](./crates/asset_loading)  | A high-level way to load collections of asset handles as resources    |
 | [`crates/models`](./crates/models)                | Data source for the game: inputs, markers, timers                     |
 | [`crates/audio`](./crates/audio)                  | Marker components for sound effects and music                         |
 | [`crates/screens`](./crates/screens)              | Splash/title/gameplay and other screen related systems and ui         |
 | [`crates/scene`](./crates/scene)                  | Scene setup, skybox                                                   |
-| [`crates/game`](./crates/game)                    | Game mechanics & content(player control & animation)                  |
+| [`crates/game`](./crates/game)                    | Game mechanics & content                                              |
+| [`crates/player`](./crates/player)                | Player control & animation                                            |
 | [`crates/ui`](./crates/ui)                        | Reusable UI widgets & game color pallet control                       |
 
 Feel free to move things around however you want, though.
@@ -65,23 +68,24 @@ Feel free to move things around however you want, though.
 - [x] experimental sound with [bevy_seedling] based on Firewheel audio engine (which will probably replace bevy_audio), with **highly** experimental audio stutter fix for web
 - [x] consistent Esc back navigation in gameplay and menu via stacked modals (kudos for the idea to skyemakesgames)
 - [x] serialize and save settings
-- [x] audio, video and keys rebind tabs in settings
+- [x] audio, video and keys rebind tabs in settings (currently not really working)
 - [x] easy drop in scene integration using awesome [skein] with a simple scene
 
 ### TODOs (prioritized)
-- [ ] Jump with timer(tricky with tnua jump in air counter)
 - [ ] custom font replace example using pre-loaded font
 - [ ] sky background instead of just void lol
 - [ ] Movement sfx: jump, dash, sprint
-- [ ] implement different music states(idle, battle, movement)
 - [ ] add basic mood change per zone
+- [ ] implement different music states(exploration, combat, dramatic)
 - [ ] spatial audio demo: boombox emitting background music
+- [ ] Jump with timer(tricky with tnua jump in air counter)
+- [ ] small door/portal demo
 - [ ] split screen for coop
 - [ ] vault on objects if they are reachable
 - [ ] climbing
-- [ ] small door/portal demo
 - [ ] do not rotate player on aim(silly bug, check it out - release aim looking to the floor)
 - [ ] basic fighting: punch, kick, take weapon
+- [ ] weapon select wheel
 - [ ] bow
 - [ ] rifle
 
