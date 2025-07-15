@@ -104,10 +104,11 @@ fn handle_sprint_out(
     mut player_query: Query<&mut Player, With<GameplayCtx>>,
 ) {
     let entity = on.target();
-    if let Ok(mut player) = player_query.get_mut(entity)
-        && player.speed > cfg.player.movement.speed
-    {
-        player.speed = cfg.player.movement.speed;
+    match player_query.get_mut(entity) {
+        Ok(mut player) if player.speed > cfg.player.movement.speed => {
+            player.speed = cfg.player.movement.speed;
+        }
+        _ => {}
     }
 }
 
