@@ -14,6 +14,9 @@ pub(super) fn plugin(app: &mut App) {
     );
 }
 
+#[derive(Component)]
+struct TabButtonActive;
+
 // ============================ CONTROL KNOBS OBSERVERS ============================
 
 pub fn save_settings(
@@ -49,13 +52,16 @@ fn update_tab_content(
     active_tab: Res<ActiveTab>,
     tab_bar: Query<&Children, With<TabBar>>,
     mut tab_content: Query<(Entity, &Children), With<TabContent>>,
-    mut buttons: Query<(&UiTab, &mut Node)>,
+    mut buttons: Query<(&UiTab, &mut Node, &mut BackgroundColor)>,
     mut commands: Commands,
 ) -> Result {
     for children in &tab_bar {
         for &child in children {
-            if let Ok((tab, mut node)) = buttons.get_mut(child) {
+            if let Ok((tab, mut node, mut bg_color)) = buttons.get_mut(child) {
                 if *tab == active_tab.0 {
+                    *bg_color = BackgroundColor(Srgba::new(81./255., 111./255., 183./255., 1.0).into());
+                    commands.entity(child).insert(TabButtonActive);
+
                     node.border.bottom = Px(0.0);
 
                     let (e, content) = tab_content.single_mut()?;
@@ -78,6 +84,9 @@ fn update_tab_content(
                         }
                     }
                 } else {
+                    *bg_color = BackgroundColor(Color::NONE);
+                    commands.entity(child).remove::<TabButtonActive>();
+
                     node.border.bottom = Px(10.0);
                 }
             }
